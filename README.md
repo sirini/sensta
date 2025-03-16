@@ -1,2 +1,2 @@
 # sensta
-Android Native App for sensta.me
+Android Native App for https://sensta.me
