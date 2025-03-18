@@ -12,13 +12,6 @@ import me.domain.model.gallery.TsboardPhoto
 @Composable
 fun PostCard(photo: TsboardPhoto) {
     PostCardHeader(photo)
-    AsyncImage(
-        model = Env.domain + photo.images[0].thumbnail.large,
-        contentDescription = photo.title,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f),
-        contentScale = ContentScale.Crop
-    )
+    PostCarousel(photo.images)
     PostCardFooter(photo)
 }
