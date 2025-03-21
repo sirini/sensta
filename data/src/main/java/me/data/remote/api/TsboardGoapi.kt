@@ -1,12 +1,13 @@
 package me.data.remote.api
 
-import me.data.remote.dto.BoardListResponseDto
-import me.data.remote.dto.BoardPhotoListResponseDto
-import me.data.remote.dto.PostDto
+import me.data.remote.dto.board.BoardListResponseDto
+import me.data.remote.dto.board.CommentListResponseDto
+import me.data.remote.dto.board.PostDto
+import me.data.remote.dto.photo.BoardPhotoListResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface PostApi {
+interface TsboardGoapi {
 
     // 게시글 목록 가져오기
     @GET("board/list")
@@ -36,4 +37,16 @@ interface PostApi {
         @Query("sinceUid") sinceUid: Int,
         @Query("option") option: Int
     ): BoardPhotoListResponseDto
+
+    // 댓글 목록 가져오기
+    @GET("comment/list")
+    suspend fun getComments(
+        @Query("id") id: String,
+        @Query("postUid") postUid: Int,
+        @Query("page") page: Int,
+        @Query("pagingDirection") pagingDirection: Int,
+        @Query("bunch") bunch: Int,
+        @Query("sinceUid") sinceUid: Int
+    ): CommentListResponseDto
+
 }

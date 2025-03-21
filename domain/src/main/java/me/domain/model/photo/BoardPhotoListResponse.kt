@@ -1,4 +1,4 @@
-package me.domain.model.gallery
+package me.domain.model.photo
 
 import me.domain.model.board.TsboardConfig
 

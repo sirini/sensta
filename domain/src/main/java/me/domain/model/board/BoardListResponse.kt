@@ -8,7 +8,7 @@ data class BoardListResponse(
     val result: BoardListResult
 )
 
-// Result 엔티티
+// 게시글 목록 Result 엔티티
 data class BoardListResult(
     val totalPostCount: Int,
     val config: TsboardConfig,

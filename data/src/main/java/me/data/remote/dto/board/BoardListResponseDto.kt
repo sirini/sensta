@@ -1,4 +1,4 @@
-package me.data.remote.dto
+package me.data.remote.dto.board
 
 import kotlinx.serialization.Serializable
 import me.domain.model.board.BoardListResponse

@@ -2,16 +2,16 @@ package me.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.TsboardComment
 import me.domain.repository.TsboardBoardRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
-// 게시글 목록 가져오기
-class GetPostListUseCase @Inject constructor(
+// 댓글 목록 가져오기
+class GetCommentListUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
-    operator fun invoke(): Flow<TsboardResponse<List<TsboardPost>>> = flow {
-        emit(repository.getPosts(sinceUid = 0))
+    operator fun invoke(postUid: Int): Flow<TsboardResponse<List<TsboardComment>>> = flow {
+        emit(repository.getComments(postUid = postUid))
     }
 }

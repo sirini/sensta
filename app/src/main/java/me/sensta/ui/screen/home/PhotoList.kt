@@ -28,10 +28,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
-import me.domain.model.gallery.TsboardPhoto
+import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
-import me.sensta.ui.screen.home.card.PostCard
-import me.sensta.viewmodel.PhotoListViewModel
+import me.sensta.ui.screen.home.post.PostCard
+import me.sensta.viewmodel.PhotoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
@@ -39,7 +39,7 @@ fun PhotoList(
     photoResponse: TsboardResponse<List<TsboardPhoto>>
 ) {
     val context = LocalContext.current
-    val viewModel: PhotoListViewModel = hiltViewModel()
+    val viewModel: PhotoViewModel = hiltViewModel()
     val isLoading by viewModel.isLoadingMore.collectAsState()
     val photos = (photoResponse as TsboardResponse.Success<List<TsboardPhoto>>).data
     val listState = rememberLazyListState()
@@ -73,7 +73,6 @@ fun PhotoList(
                     .fillMaxSize()
                     .pullRefresh(pullRefreshState)
             ) {
-
                 // 사진 목록 보여주기
                 LazyColumn(
                     state = listState,

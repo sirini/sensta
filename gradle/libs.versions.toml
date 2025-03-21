@@ -20,6 +20,7 @@ composeBom = "2024.09.00"
 appcompat = "1.6.1"
 lifecycleViewmodelCompose = "2.8.7"
 material = "1.10.0"
+materialIconsExtended = "1.5.0"
 navigationUi = "2.8.9"
 okhttp = "4.12.0"
 retrofit = "2.9.0"
@@ -37,6 +38,7 @@ androidx-compose-bom-v20240300 = { module = "androidx.compose:compose-bom", vers
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-ui = { module = "androidx.navigation:navigation-ui", version.ref = "navigationUi" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }

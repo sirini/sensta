@@ -1,6 +1,5 @@
 package me.sensta.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,13 +8,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import me.domain.model.gallery.TsboardPhoto
+import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.GetPhotoListUseCase
 import javax.inject.Inject
 
 @HiltViewModel
-class PhotoListViewModel @Inject constructor(
+class PhotoViewModel @Inject constructor(
     private val getPhotoListUseCase: GetPhotoListUseCase
 ) : ViewModel() {
     private val _photos =
@@ -48,7 +47,5 @@ class PhotoListViewModel @Inject constructor(
     // 갤러리 목록 업데이트
     fun refresh(sinceUid: Int = 0) {
         loadPhotos(sinceUid = sinceUid)
-
-        Log.d("DEBUG", "loadPhotos($sinceUid)") /// DEBUG
     }
 }

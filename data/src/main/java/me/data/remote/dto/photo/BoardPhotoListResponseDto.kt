@@ -1,8 +1,10 @@
-package me.data.remote.dto
+package me.data.remote.dto.photo
 
 import kotlinx.serialization.Serializable
-import me.domain.model.gallery.BoardPhotoListResponse
-import me.domain.model.gallery.BoardPhotoListResult
+import me.data.remote.dto.board.ConfigDto
+import me.data.remote.dto.board.toEntity
+import me.domain.model.photo.BoardPhotoListResponse
+import me.domain.model.photo.BoardPhotoListResult
 
 // 갤러리 목록 가져오기 JSON 응답 정의
 @Serializable

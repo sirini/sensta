@@ -1,4 +1,4 @@
-package me.sensta.ui.screen.home.card
+package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
-import me.domain.model.gallery.TsboardPhoto
+import me.domain.model.photo.TsboardPhoto
 
 @Composable
 fun PostCardHeader(photo: TsboardPhoto) {

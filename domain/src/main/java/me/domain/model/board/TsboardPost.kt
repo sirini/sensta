@@ -1,5 +1,6 @@
 package me.domain.model.board
 
+import me.domain.model.common.TsboardWriter
 import java.time.LocalDateTime
 
 // 게시글 엔티티
@@ -22,12 +23,4 @@ data class TsboardPost(
 data class TsboardCategory(
     val uid: Int,
     val name: String
-)
-
-// 게시글 작성자 엔티티
-data class TsboardWriter(
-    val uid: Int,
-    val name: String,
-    val profile: String,
-    val signature: String
 )
