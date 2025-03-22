@@ -38,8 +38,8 @@ SENSTA 서비스는 TSBOARD 기반으로 운영되고 있고, TSBOARD의 GOAPI�
 
 # 참고
 
-- SENSTA.ME 웹사이트 : https://sensta.me (이 프로젝트의 목표 서비스)
-- TSBOARD 공식 홈페이지 : https://tsboard.dev (TSBOARD 서비스)
+- SENSTA.ME 웹사이트 : https://sensta.me
+- TSBOARD 공식 홈페이지 : https://tsboard.dev
     - TSBOARD GitHub : https://github.com/sirini/tsboard
     - GOAPI GitHub : https://github.com/sirini/goapi
 
