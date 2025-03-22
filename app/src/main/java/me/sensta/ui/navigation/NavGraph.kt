@@ -29,7 +29,8 @@ import me.sensta.ui.screen.NotificationScreen
 import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.UploadScreen
 import me.sensta.ui.screen.ViewScreen
-import me.sensta.viewmodel.CommonViewModel
+import me.sensta.ui.screen.view.ViewPostCommentDialog
+import me.sensta.viewmodel.common.CommonViewModel
 import me.sensta.viewmodel.common.LocalCommonViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
@@ -69,6 +70,16 @@ fun AppNavigation() {
                     composable(Screen.Profile.route) { ProfileScreen() }
                     composable(Screen.Notification.route) { NotificationScreen() }
                     composable(Screen.Config.route) { ConfigScreen() }
+                }
+
+                // 댓글 작성하기 다이얼로그
+                if (commonViewModel.showCommentDialog.value) {
+                    ViewPostCommentDialog(
+                        onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
+                    ) {
+                        // TODO 댓글 작성 처리
+                        commonViewModel.closeWriteCommentDialog()
+                    }
                 }
             }
         }

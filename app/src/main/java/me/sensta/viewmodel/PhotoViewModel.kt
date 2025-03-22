@@ -45,7 +45,5 @@ class PhotoViewModel @Inject constructor(
     }
 
     // 갤러리 목록 업데이트
-    fun refresh(sinceUid: Int = 0) {
-        loadPhotos(sinceUid = sinceUid)
-    }
+    fun refresh(sinceUid: Int = 0) = loadPhotos(sinceUid = sinceUid)
 }

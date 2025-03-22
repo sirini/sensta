@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,13 +18,23 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.rememberPagerState
+import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
 import me.domain.model.photo.TsboardImage
+import me.sensta.viewmodel.common.LocalCommonViewModel
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun PostCarousel(images: List<TsboardImage>) {
     val pagerState = rememberPagerState()
+    val commonViewModel = LocalCommonViewModel.current
+
+    // 보고 있는 페이지가 변경되면 인덱스를 공용 뷰모델에 저장
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { page -> commonViewModel.updatePagerIndex(page) }
+    }
 
     Box(
         modifier = Modifier

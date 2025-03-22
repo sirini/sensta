@@ -1,14 +1,14 @@
 package me.data.remote.dto.photo
 
 import kotlinx.serialization.Serializable
-import me.data.remote.dto.common.FileDto
+import me.data.remote.dto.common.ImageFileDto
 import me.data.remote.dto.common.toEntity
 import me.domain.model.photo.TsboardImage
 
 // 썸네일 이미지, AI 설명 JSON 응답 정의
 @Serializable
 data class ImageDto(
-    val file: FileDto,
+    val file: ImageFileDto,
     val thumbnail: PhotoImageThumbnailDto,
     val exif: ExifDto,
     val description: String

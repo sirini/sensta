@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.activity.compose.v190)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.accompanist.flowlayout)
 
     // ViewModel & StateFlow
     implementation(libs.androidx.lifecycle.viewmodel.compose)

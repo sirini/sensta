@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,10 +23,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
-import me.domain.model.photo.TsboardPhoto
+import me.domain.model.common.TsboardWriter
 
 @Composable
-fun PostCardHeader(photo: TsboardPhoto) {
+fun PostCardHeader(writer: TsboardWriter) {
+    HorizontalDivider(
+        thickness = 1.dp,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    )
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -35,8 +41,8 @@ fun PostCardHeader(photo: TsboardPhoto) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = Env.domain + photo.writer.profile,
-                contentDescription = photo.writer.name,
+                model = Env.domain + writer.profile,
+                contentDescription = writer.name,
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
@@ -44,8 +50,8 @@ fun PostCardHeader(photo: TsboardPhoto) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = photo.writer.name,
-                style = MaterialTheme.typography.bodyMedium
+                text = writer.name,
+                style = MaterialTheme.typography.bodyLarge
             )
         }
 

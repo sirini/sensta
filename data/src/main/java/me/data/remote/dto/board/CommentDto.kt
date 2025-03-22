@@ -30,7 +30,7 @@ fun CommentDto.toEntity(): TsboardComment = TsboardComment(
     writer = writer.toEntity(),
     like = like,
     liked = liked,
-    submitted = Instant.ofEpochMilli(submitted).atZone(ZoneOffset.UTC).toLocalDateTime(),
+    submitted = Instant.ofEpochMilli(submitted).atZone(ZoneOffset.ofHours(9)).toLocalDateTime(),
     status = status,
     content = content
 )

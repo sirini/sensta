@@ -1,7 +1,6 @@
 package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +11,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +34,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp, start = 0.dp, end = 8.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -47,36 +45,36 @@ fun PostCardFooter(photo: TsboardPhoto) {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "like",
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
-            Text(text = "${photo.like}개 좋아요", style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = "${photo.like}개 좋아요", style = MaterialTheme.typography.bodyMedium)
 
-            Icon(
-                imageVector = Icons.Default.ChatBubbleOutline,
-                contentDescription = "comment",
-                modifier = Modifier.size(16.dp)
-            )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "${photo.comment}개 댓글", style = MaterialTheme.typography.bodySmall)
+
+            IconButton(onClick = { commonViewModel.openWriteCommentDialog(photo.uid) }) {
+                Icon(
+                    imageVector = Icons.Default.ChatBubbleOutline,
+                    contentDescription = "comment",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Text(text = "${photo.comment}개 댓글", style = MaterialTheme.typography.bodyMedium)
         }
 
-        Button(
+        TextButton(
             onClick = {
-                commonViewModel.setPhoto(photo)
+                commonViewModel.updatePostUid(photo.uid)
                 navController.navigate(Screen.View.route) {
                     launchSingleTop = true
                     restoreState = true
                     popUpTo(navController.graph.startDestinationId) { saveState = true }
                 }
             },
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
         ) {
             Text(
                 text = "보기",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(0.dp)
             )
@@ -84,7 +82,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
                 contentDescription = Screen.View.title,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }

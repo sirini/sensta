@@ -48,7 +48,7 @@ fun CommentCardBody(comment: TsboardComment) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val dateFormatter = DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")
+                val dateFormatter = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분")
 
                 Text(
                     text = "${comment.like}개 좋아요",

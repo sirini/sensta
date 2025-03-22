@@ -4,6 +4,7 @@ import me.data.env.Env
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.board.toEntity
 import me.data.remote.dto.photo.toEntity
+import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
 import me.domain.model.board.TsboardPost
 import me.domain.model.photo.TsboardPhoto
@@ -26,6 +27,21 @@ class TsboardBoardRepositoryImpl @Inject constructor(
                 option = 0
             )
             TsboardResponse.Success(response.toEntity().result.posts)
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 게시글 내용 가져오기
+    override suspend fun getPost(postUid: Int): TsboardResponse<TsboardBoardViewResponse> {
+        return try {
+            val response = api.getPost(
+                id = Env.boardId,
+                postUid = postUid,
+                needUpdateHit = 1,
+                latestLimit = 3
+            )
+            TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }

@@ -5,7 +5,7 @@ import me.domain.model.photo.TsboardPhoto
 
 @Composable
 fun PostCard(photo: TsboardPhoto) {
-    PostCardHeader(photo)
-    PostCarousel(photo.images)
+    PostCardHeader(writer = photo.writer)
+    PostCarousel(images = photo.images)
     PostCardFooter(photo)
 }

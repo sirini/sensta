@@ -1,8 +1,8 @@
 package me.data.remote.api
 
 import me.data.remote.dto.board.BoardListResponseDto
+import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
-import me.data.remote.dto.board.PostDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -26,7 +26,7 @@ interface TsboardGoapi {
         @Query("postUid") postUid: Int,
         @Query("needUpdateHit") needUpdateHit: Int,
         @Query("latestLimit") latestLimit: Int
-    ): PostDto
+    ): BoardViewResponseDto
 
     // 갤러리 목록 가져오기
     @GET("board/photo/list")
