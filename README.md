@@ -1,5 +1,11 @@
 # SENSTA
 
+<div style="text-align: center; padding: 20px;">
+  ![Android Badge](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=fff&style=for-the-badge)
+  ![Kotlin Badge](https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=fff&style=for-the-badge)
+  ![Jetpack Compose Badge](https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=fff&style=for-the-badge)
+</div>
+
 1. SENSTA란 무엇인가요?
 2. TSBOARD와는 무슨 관계인가요?
 3. 어떻게 활용하면 좋을까요?
@@ -22,8 +28,8 @@ SENSTA 서비스는 TSBOARD 기반으로 운영되고 있고, TSBOARD의 GOAPI�
 따라서 이 SENSTA 안드로이드 앱은 약간의 설정 변경만으로도 TSBOARD 기반의 커뮤니티 사이트에 딱 맞춘 안드로이드 앱을
 빠르게 제작 하실 수 있습니다.
 
-- 즉, TSBOARD 기반으로 커뮤니티를 운영하시는 분들에게는 처음부터 새로 앱을 제작하실 필요가 없습니다.
-- 본 프로젝트를 따로 포크 하신 후, 자신의 커뮤니티에 맞게 도메인이나 게시판 ID, 앱 이름 정도만 바꾸시면 바로 앱이 완성됩니다.
+- 즉, TSBOARD 기반으로 커뮤니티를 운영하시는 분들은 처음부터 새로 앱을 제작 하실 필요가 없습니다.
+- 본 프로젝트를 따로 포크 하신 후, 자신의 커뮤니티에 맞게 조금만 수정 하시면 바로 앱이 완성 됩니다.
 
 ## 어떻게 활용하면 좋을까요?
 
