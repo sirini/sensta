@@ -39,14 +39,14 @@ fun PhotoList(
     photoResponse: TsboardResponse<List<TsboardPhoto>>
 ) {
     val context = LocalContext.current
-    val viewModel: PhotoViewModel = hiltViewModel()
-    val isLoading by viewModel.isLoadingMore.collectAsState()
+    val photoViewModel: PhotoViewModel = hiltViewModel()
+    val isLoading by photoViewModel.isLoadingMore.collectAsState()
     val photos = (photoResponse as TsboardResponse.Success<List<TsboardPhoto>>).data
     val listState = rememberLazyListState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
         onRefresh = {
-            viewModel.refresh()
+            photoViewModel.refresh(resetLastUid = true)
             Toast.makeText(context, "최근 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
         }
     )
@@ -58,8 +58,7 @@ fun PhotoList(
             .collect { index ->
                 index?.let {
                     if (index >= photos.size - 1) {
-                        val sinceUid = photos.dropLast(1).lastOrNull()?.uid ?: photos.last().uid
-                        viewModel.refresh(sinceUid = sinceUid)
+                        photoViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }

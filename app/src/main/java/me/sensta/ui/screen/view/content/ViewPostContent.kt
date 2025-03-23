@@ -50,9 +50,7 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
             mainAxisSpacing = 8.dp,
             crossAxisSpacing = 8.dp
         ) {
-            for (tag in result.tags) {
-                ViewPostTag(tag)
-            }
+            result.tags.forEach { tag -> ViewPostTag(tag) }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

@@ -1,0 +1,74 @@
+package me.sensta.ui.screen.explorer
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import kotlinx.coroutines.flow.distinctUntilChanged
+import me.data.env.Env
+import me.domain.model.board.TsboardPost
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
+import me.sensta.viewmodel.ExplorerViewModel
+import me.sensta.viewmodel.common.LocalCommonViewModel
+
+@Composable
+fun GridImage(posts: List<TsboardPost>) {
+    val navController = LocalNavController.current
+    val commonViewModel = LocalCommonViewModel.current
+    val explorerViewModel: ExplorerViewModel = hiltViewModel()
+    val gridState = rememberLazyGridState()
+
+    // 스크롤 상태를 감시해서 마지막 항목에 도달하면 이전 사진들 불러오기
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .distinctUntilChanged()
+            .collect { index ->
+                index?.let {
+                    if (index >= posts.size - 1 && !explorerViewModel.isLoadingMore.value) {
+                        explorerViewModel.refresh()
+                    }
+                }
+            }
+    }
+
+    LazyVerticalGrid(
+        state = gridState,
+        columns = GridCells.Fixed(3),
+        contentPadding = PaddingValues(0.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        items(posts) { post ->
+            AsyncImage(
+                model = Env.domain + post.cover,
+                contentDescription = post.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .clickable {
+                        commonViewModel.updatePostUid(post.uid)
+                        navController.navigate(Screen.View.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        }
+                    }
+            )
+        }
+    }
+}

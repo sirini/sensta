@@ -9,9 +9,9 @@ import androidx.compose.ui.unit.dp
 import me.domain.model.board.TsboardBoardViewResponse
 import me.sensta.ui.screen.home.post.PostCardHeader
 import me.sensta.ui.screen.home.post.PostCarousel
-import me.sensta.ui.screen.view.content.ViewPostAIDescription
 import me.sensta.ui.screen.view.content.ViewPostCenterButtons
 import me.sensta.ui.screen.view.content.ViewPostContent
+import me.sensta.ui.screen.view.content.ViewPostExifDescription
 import me.sensta.ui.screen.view.content.ViewPostLikeButton
 
 @Composable
@@ -25,7 +25,7 @@ fun ViewPost(
     )
     PostCardHeader(writer = postView.result.post.writer)
     PostCarousel(images = postView.result.images)
-    ViewPostAIDescription(images = postView.result.images)
+    ViewPostExifDescription(images = postView.result.images)
     ViewPostLikeButton(post = postView.result.post)
     ViewPostContent(result = postView.result)
     ViewPostCenterButtons()

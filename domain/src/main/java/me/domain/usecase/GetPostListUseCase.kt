@@ -11,7 +11,11 @@ import javax.inject.Inject
 class GetPostListUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
-    operator fun invoke(): Flow<TsboardResponse<List<TsboardPost>>> = flow {
-        emit(repository.getPosts(sinceUid = 0))
+    operator fun invoke(
+        sinceUid: Int,
+        option: Int,
+        keyword: String
+    ): Flow<TsboardResponse<List<TsboardPost>>> = flow {
+        emit(repository.getPosts(sinceUid = sinceUid, option = option, keyword = keyword))
     }
 }

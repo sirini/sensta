@@ -26,7 +26,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "죄송합니다. 잠시 서버와의 연결이 원할하지 않습니다")
+            Text(text = "내부 오류 발생: 데이터를 가져오지 못했습니다.")
             Text(
                 text = Env.domain,
                 fontFamily = titleFontFamily,

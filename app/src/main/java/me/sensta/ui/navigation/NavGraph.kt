@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.screen.ConfigScreen
 import me.sensta.ui.screen.ExplorerScreen
@@ -50,36 +51,38 @@ fun AppNavigation() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val commonViewModel: CommonViewModel = hiltViewModel()
 
-    CompositionLocalProvider(LocalCommonViewModel provides commonViewModel) {
-        CompositionLocalProvider(LocalNavController provides navController) {
-            Scaffold(
-                topBar = { TopBar(navController, scrollBehavior) },
-                bottomBar = { BottomNavigationBar(navController) }
-            ) { innerPadding ->
-                NavHost(
-                    navController = navController,
-                    startDestination = Screen.Home.route,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .nestedScroll(scrollBehavior.nestedScrollConnection)
-                ) {
-                    composable(Screen.Home.route) { HomeScreen() }
-                    composable(Screen.View.route) { ViewScreen(scrollBehavior = scrollBehavior) }
-                    composable(Screen.Explorer.route) { ExplorerScreen() }
-                    composable(Screen.Upload.route) { UploadScreen() }
-                    composable(Screen.Profile.route) { ProfileScreen() }
-                    composable(Screen.Notification.route) { NotificationScreen() }
-                    composable(Screen.Config.route) { ConfigScreen() }
-                }
+    CompositionLocalProvider(
+        LocalCommonViewModel provides commonViewModel,
+        LocalNavController provides navController,
+        LocalScrollBehavior provides scrollBehavior
+    ) {
+        Scaffold(
+            topBar = { TopBar(navController, scrollBehavior) },
+            bottomBar = { BottomNavigationBar(navController) }
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.route,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+            ) {
+                composable(Screen.Home.route) { HomeScreen() }
+                composable(Screen.View.route) { ViewScreen() }
+                composable(Screen.Explorer.route) { ExplorerScreen() }
+                composable(Screen.Upload.route) { UploadScreen() }
+                composable(Screen.Profile.route) { ProfileScreen() }
+                composable(Screen.Notification.route) { NotificationScreen() }
+                composable(Screen.Config.route) { ConfigScreen() }
+            }
 
-                // 댓글 작성하기 다이얼로그
-                if (commonViewModel.showCommentDialog.value) {
-                    ViewPostCommentDialog(
-                        onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
-                    ) {
-                        // TODO 댓글 작성 처리
-                        commonViewModel.closeWriteCommentDialog()
-                    }
+            // 댓글 작성하기 다이얼로그
+            if (commonViewModel.showCommentDialog.value) {
+                ViewPostCommentDialog(
+                    onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
+                ) {
+                    // TODO 댓글 작성 처리
+                    commonViewModel.closeWriteCommentDialog()
                 }
             }
         }

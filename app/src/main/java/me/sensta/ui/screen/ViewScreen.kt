@@ -3,7 +3,6 @@ package me.sensta.ui.screen
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,6 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
 import me.domain.repository.TsboardResponse
+import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.home.Loading
 import me.sensta.ui.screen.home.comment.CommentCard
 import me.sensta.ui.screen.view.ViewPost
@@ -21,10 +21,11 @@ import me.sensta.viewmodel.common.LocalCommonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewScreen(scrollBehavior: TopAppBarScrollBehavior) {
+fun ViewScreen() {
     val postViewViewModel: PostViewViewModel = hiltViewModel()
     val postViewResponse by postViewViewModel.post.collectAsState()
 
+    val scrollBehavior = LocalScrollBehavior.current
     val commonViewModel = LocalCommonViewModel.current
     val postUid by commonViewModel.postUid
 

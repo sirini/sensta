@@ -3,6 +3,7 @@ package me.data.remote.api
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
+import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -16,7 +17,8 @@ interface TsboardGoapi {
         @Query("page") page: Int,
         @Query("pagingDirection") pagingDirection: Int,
         @Query("sinceUid") sinceUid: Int,
-        @Query("option") option: Int
+        @Query("option") option: Int,
+        @Query("keyword") keyword: String
     ): BoardListResponseDto
 
     // 게시글 상세 정보 가져오기
@@ -48,5 +50,13 @@ interface TsboardGoapi {
         @Query("bunch") bunch: Int,
         @Query("sinceUid") sinceUid: Int
     ): CommentListResponseDto
+
+    // 최신글 목록 가져오기 (탐색 페이지 초기 로딩용)
+    @GET("home/latest/post")
+    suspend fun getHomeLatestPosts(
+        @Query("id") id: String,
+        @Query("limit") limit: Int,
+        @Query("accessUserUid") accessUserUid: Int
+    ): HomeLatestResponseDto
 
 }
