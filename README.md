@@ -4,6 +4,7 @@
   <img src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=fff&style=for-the-badge" />
   <img src="https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=fff&style=for-the-badge" />
   <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=fff&style=for-the-badge" />
+  <img src="https://img.shields.io/badge/TSBOARD-000000.svg?&style=for-the-badge&&logoColor=3178C6"/>
 </p>
 
 1. SENSTA란 무엇인가요?
