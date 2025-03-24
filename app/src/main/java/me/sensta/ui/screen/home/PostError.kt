@@ -13,10 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.data.env.Env
 import me.sensta.ui.theme.titleFontFamily
-import me.sensta.viewmodel.PhotoViewModel
+import me.sensta.viewmodel.HomeViewModel
 
 @Composable
-fun PhotoError(viewModel: PhotoViewModel, modifier: Modifier = Modifier) {
+fun PhotoError(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "사진 목록을 가져오지 못했습니다.")

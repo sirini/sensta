@@ -39,7 +39,6 @@ fun PostCardFooter(photo: TsboardPhoto) {
         navController.navigate(Screen.View.route) {
             launchSingleTop = true
             restoreState = true
-            popUpTo(navController.graph.startDestinationId) { saveState = true }
         }
     }
 
@@ -57,7 +56,8 @@ fun PostCardFooter(photo: TsboardPhoto) {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "like",
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier
+                        .size(20.dp)
                 )
             }
             Text(
@@ -65,13 +65,12 @@ fun PostCardFooter(photo: TsboardPhoto) {
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.clickable { doLike() })
 
-            Spacer(modifier = Modifier.width(8.dp))
-
             IconButton(onClick = { commonViewModel.openWriteCommentDialog(photo.uid) }) {
                 Icon(
                     imageVector = Icons.Default.ChatBubbleOutline,
                     contentDescription = "comment",
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier
+                        .size(20.dp)
                 )
             }
             Text(

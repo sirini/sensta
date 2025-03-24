@@ -6,14 +6,14 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import me.sensta.ui.navigation.common.LocalNavController
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
+fun BottomNavigationBar() {
+    val navController = LocalNavController.current
     val screens = listOf(Screen.Home, Screen.Explorer, Screen.Upload, Screen.Profile)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar {
         screens.forEach { screen ->
@@ -23,7 +23,6 @@ fun BottomNavigationBar(navController: NavHostController) {
                 selected = navBackStackEntry?.destination?.route == screen.route,
                 onClick = {
                     navController.navigate(screen.route) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }

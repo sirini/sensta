@@ -57,8 +57,8 @@ fun AppNavigation() {
         LocalScrollBehavior provides scrollBehavior
     ) {
         Scaffold(
-            topBar = { TopBar(navController, scrollBehavior) },
-            bottomBar = { BottomNavigationBar(navController) }
+            topBar = { TopBar() },
+            bottomBar = { BottomNavigationBar() }
         ) { innerPadding ->
             NavHost(
                 navController = navController,
@@ -77,7 +77,7 @@ fun AppNavigation() {
             }
 
             // 댓글 작성하기 다이얼로그
-            if (commonViewModel.showCommentDialog.value) {
+            if (commonViewModel.showCommentDialog) {
                 ViewPostCommentDialog(
                     onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
                 ) {

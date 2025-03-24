@@ -11,7 +11,6 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +29,6 @@ import me.sensta.viewmodel.ExplorerViewModel
 fun ExplorerScreen() {
     val scrollBehavior = LocalScrollBehavior.current
     val explorerViewModel: ExplorerViewModel = hiltViewModel()
-    val postResponse by explorerViewModel.posts.collectAsState()
     val isLoading by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
@@ -54,14 +52,13 @@ fun ExplorerScreen() {
         ) {
             SearchBox()
 
-            when (postResponse) {
+            when (val postResponse = explorerViewModel.posts) {
                 is TsboardResponse.Loading -> {
                     Loading()
                 }
 
                 is TsboardResponse.Success -> {
-                    val posts = (postResponse as TsboardResponse.Success).data
-                    GridImage(posts)
+                    GridImage(postResponse.data)
                 }
 
                 is TsboardResponse.Error -> {

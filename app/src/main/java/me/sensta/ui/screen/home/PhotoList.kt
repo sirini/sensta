@@ -19,8 +19,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,19 +29,15 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domain.model.photo.TsboardPhoto
-import me.domain.repository.TsboardResponse
 import me.sensta.ui.screen.home.post.PostCard
-import me.sensta.viewmodel.PhotoViewModel
+import me.sensta.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, FlowPreview::class)
 @Composable
-fun PhotoList(
-    photoResponse: TsboardResponse<List<TsboardPhoto>>
-) {
+fun PhotoList(photos: List<TsboardPhoto>) {
     val context = LocalContext.current
-    val photoViewModel: PhotoViewModel = hiltViewModel()
-    val isLoading by photoViewModel.isLoadingMore.collectAsState()
-    val photos = (photoResponse as TsboardResponse.Success<List<TsboardPhoto>>).data
+    val photoViewModel: HomeViewModel = hiltViewModel()
+    val isLoading = photoViewModel.isLoadingMore
     val listState = rememberLazyListState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
@@ -60,7 +54,7 @@ fun PhotoList(
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= (photos.size * photoViewModel.page.value) - 1) {
+                    if (index >= (photoViewModel.bunch * photoViewModel.page) - 1) {
                         photoViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }

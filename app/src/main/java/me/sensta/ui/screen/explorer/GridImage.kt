@@ -45,7 +45,7 @@ fun GridImage(posts: List<TsboardPost>) {
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= (posts.size * explorerViewModel.page.value) - 1) {
+                    if (index >= (explorerViewModel.bunch * explorerViewModel.page) - 1) {
                         explorerViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
@@ -73,7 +73,6 @@ fun GridImage(posts: List<TsboardPost>) {
                         navController.navigate(Screen.View.route) {
                             launchSingleTop = true
                             restoreState = true
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
                         }
                     }
             )

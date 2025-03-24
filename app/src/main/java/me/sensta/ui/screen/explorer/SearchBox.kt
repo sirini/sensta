@@ -35,7 +35,7 @@ fun SearchBox() {
 
     var selectedOption by remember { mutableStateOf(options[0]) }
     var searchQuery by remember { mutableStateOf("") }
-    var isExpanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)) {
         OutlinedTextField(
@@ -48,7 +48,7 @@ fun SearchBox() {
             leadingIcon = {
                 Row(
                     modifier = Modifier
-                        .clickable { isExpanded = true }
+                        .clickable { expanded = true }
                         .padding(start = 16.dp, end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -76,8 +76,8 @@ fun SearchBox() {
         )
 
         DropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false },
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth(0.3f),
             containerColor = MaterialTheme.colorScheme.background
         ) {
@@ -85,7 +85,7 @@ fun SearchBox() {
                 DropdownMenuItem(
                     onClick = {
                         selectedOption = option
-                        isExpanded = false
+                        expanded = false
                     }, text = { Text(text = option) }
                 )
             }
