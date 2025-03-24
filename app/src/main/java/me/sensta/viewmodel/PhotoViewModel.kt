@@ -23,6 +23,9 @@ class PhotoViewModel @Inject constructor(
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
 
+    private val _page = MutableStateFlow(1)
+    val page = _page.asStateFlow()
+
     private val _lastPostUid = mutableIntStateOf(0)
 
     init {
@@ -34,19 +37,29 @@ class PhotoViewModel @Inject constructor(
         if (_isLoadingMore.value) return
 
         viewModelScope.launch {
-            _photos.value = TsboardResponse.Loading
+            if (_lastPostUid.intValue == 0) {
+                _photos.value = TsboardResponse.Loading
+                _page.value = 1
+            }
             _isLoadingMore.value = true
 
             getPhotoListUseCase(sinceUid = _lastPostUid.intValue).collect {
-                _photos.value = it
+                val photoData = (it as TsboardResponse.Success<List<TsboardPhoto>>).data
+                if (_lastPostUid.intValue == 0) {
+                    _photos.value = it
 
-                if (it is TsboardResponse.Success) {
-                    it.data.ifEmpty {
+                } else {
+                    // 이전 게시글들을 이어서 붙여나가기
+                    val currentPhotos =
+                        (_photos.value as TsboardResponse.Success<List<TsboardPhoto>>).data
+                    photoData.ifEmpty {
+                        _photos.value = TsboardResponse.Success(currentPhotos)
                         return@collect
                     }
-
-                    _lastPostUid.intValue = it.data.last().uid
+                    _photos.value = TsboardResponse.Success(currentPhotos + photoData)
+                    _page.value++
                 }
+                _lastPostUid.intValue = photoData.last().uid
             }
             _isLoadingMore.value = false
         }

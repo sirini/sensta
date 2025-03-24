@@ -27,13 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
 import me.sensta.ui.screen.home.post.PostCard
 import me.sensta.viewmodel.PhotoViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class, FlowPreview::class)
 @Composable
 fun PhotoList(
     photoResponse: TsboardResponse<List<TsboardPhoto>>
@@ -54,10 +56,11 @@ fun PhotoList(
     // 스크롤 상태를 감시해서 마지막 항목에 도달하면 이전 사진들 불러오기
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .debounce(500)
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= photos.size - 1) {
+                    if (index >= (photos.size * photoViewModel.page.value) - 1) {
                         photoViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }

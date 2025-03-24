@@ -29,6 +29,9 @@ class ExplorerViewModel @Inject constructor(
     private val _keyword = MutableStateFlow("")
     val keyword = _keyword.asStateFlow()
 
+    private val _page = MutableStateFlow(1)
+    val page = _page.asStateFlow()
+
     private val _lastPostUid = mutableIntStateOf(0)
 
     init {
@@ -43,34 +46,27 @@ class ExplorerViewModel @Inject constructor(
             // 처음 로딩할 때는 Loading 상태로 두기
             if (_lastPostUid.intValue == 0) {
                 _posts.value = TsboardResponse.Loading
+                _page.value = 1
             }
             _isLoadingMore.value = true
 
             getPostListUseCase(_lastPostUid.intValue, _option.value, _keyword.value).collect {
+                val postData = (it as TsboardResponse.Success<List<TsboardPost>>).data
                 if (_lastPostUid.intValue == 0) {
                     _posts.value = it
 
-                    val posts = (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
-                    if (posts.isNotEmpty()) {
-                        _lastPostUid.intValue = posts.last().uid
-                    }
                 } else {
-                    // 이전 게시글들을 기존 것에 더해서 붙이기
-                    if (it is TsboardResponse.Success) {
-                        val currentPosts =
-                            (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
-
-                        // 더 이상 가져올 것이 없을 때 collect 나가기
-                        it.data.ifEmpty {
-                            _posts.value = TsboardResponse.Success(currentPosts)
-                            return@collect
-                        }
-
-                        val newPosts = it.data
-                        _posts.value = TsboardResponse.Success(currentPosts + newPosts)
-                        _lastPostUid.intValue = newPosts.last().uid
+                    // 이전 게시글들을 이어서 붙여나가기
+                    val currentPosts =
+                        (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
+                    postData.ifEmpty {
+                        _posts.value = TsboardResponse.Success(currentPosts)
+                        return@collect
                     }
+                    _posts.value = TsboardResponse.Success(currentPosts + postData)
+                    _page.value++
                 }
+                _lastPostUid.intValue = postData.last().uid
             }
             _isLoadingMore.value = false
         }

@@ -1,5 +1,6 @@
 package me.sensta.ui.screen.explorer
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,9 +15,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
 import me.domain.model.board.TsboardPost
@@ -25,8 +29,10 @@ import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.ExplorerViewModel
 import me.sensta.viewmodel.common.LocalCommonViewModel
 
+@OptIn(FlowPreview::class)
 @Composable
 fun GridImage(posts: List<TsboardPost>) {
+    val context = LocalContext.current
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
     val explorerViewModel: ExplorerViewModel = hiltViewModel()
@@ -35,11 +41,13 @@ fun GridImage(posts: List<TsboardPost>) {
     // 스크롤 상태를 감시해서 마지막 항목에 도달하면 이전 사진들 불러오기
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .debounce(500)
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= posts.size - 1 && !explorerViewModel.isLoadingMore.value) {
+                    if (index >= (posts.size * explorerViewModel.page.value) - 1) {
                         explorerViewModel.refresh()
+                        Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

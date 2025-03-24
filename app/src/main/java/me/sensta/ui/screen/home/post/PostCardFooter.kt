@@ -1,5 +1,6 @@
 package me.sensta.ui.screen.home.post
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,17 @@ import me.sensta.viewmodel.common.LocalCommonViewModel
 fun PostCardFooter(photo: TsboardPhoto) {
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
+    val doLike: () -> Unit = { }
+
+    // 게시글 보기 페이지로 이동
+    val moveToView: () -> Unit = {
+        commonViewModel.updatePostUid(photo.uid)
+        navController.navigate(Screen.View.route) {
+            launchSingleTop = true
+            restoreState = true
+            popUpTo(navController.graph.startDestinationId) { saveState = true }
+        }
+    }
 
     Row(
         modifier = Modifier
@@ -41,14 +53,17 @@ fun PostCardFooter(photo: TsboardPhoto) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = doLike) {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "like",
                     modifier = Modifier.size(20.dp)
                 )
             }
-            Text(text = "${photo.like}개 좋아요", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${photo.like}개 좋아요",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.clickable { doLike() })
 
             Spacer(modifier = Modifier.width(8.dp))
 
@@ -59,18 +74,14 @@ fun PostCardFooter(photo: TsboardPhoto) {
                     modifier = Modifier.size(20.dp)
                 )
             }
-            Text(text = "${photo.comment}개 댓글", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = "${photo.comment}개 댓글",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.clickable { moveToView() })
         }
 
         TextButton(
-            onClick = {
-                commonViewModel.updatePostUid(photo.uid)
-                navController.navigate(Screen.View.route) {
-                    launchSingleTop = true
-                    restoreState = true
-                    popUpTo(navController.graph.startDestinationId) { saveState = true }
-                }
-            },
+            onClick = { moveToView() },
         ) {
             Text(
                 text = "보기",

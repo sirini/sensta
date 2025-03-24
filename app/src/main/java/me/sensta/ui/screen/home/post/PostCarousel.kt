@@ -36,6 +36,11 @@ fun PostCarousel(images: List<TsboardImage>) {
             .collect { page -> commonViewModel.updatePagerIndex(page) }
     }
 
+    // 게시글 번호가 바뀌면 pagerState 초기화
+    LaunchedEffect(commonViewModel.postUid) {
+        pagerState.scrollToPage(0)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
