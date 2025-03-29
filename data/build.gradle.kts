@@ -53,7 +53,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // DataStore
-    implementation("androidx.datastore:datastore-preferences:1.1.3")
+    implementation(libs.androidx.datastore.preferences)
 
     // Room
     implementation(libs.androidx.room.runtime)
@@ -67,6 +67,9 @@ dependencies {
     // Coroutine support
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
+    // Security Crypto
+    implementation(libs.androidx.security.crypto)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

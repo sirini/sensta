@@ -3,7 +3,6 @@ package me.sensta.ui.screen
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.repository.TsboardResponse
-import me.sensta.ui.screen.home.Loading
 import me.sensta.ui.screen.home.PhotoError
 import me.sensta.ui.screen.home.PhotoList
 import me.sensta.viewmodel.HomeViewModel
@@ -14,7 +13,7 @@ fun HomeScreen() {
 
     when (val photoResponse = viewModel.photos) {
         is TsboardResponse.Loading -> {
-            Loading()
+            LoadingScreen()
         }
 
         is TsboardResponse.Success -> {

@@ -22,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
 import me.domain.model.board.TsboardComment
+import me.sensta.util.Format
 import me.sensta.util.NewlineTagHandler
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun CommentCardBody(comment: TsboardComment) {
@@ -48,8 +48,6 @@ fun CommentCardBody(comment: TsboardComment) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val dateFormatter = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분")
-
                 Text(
                     text = "${comment.like}개 좋아요",
                     style = MaterialTheme.typography.bodySmall
@@ -58,7 +56,7 @@ fun CommentCardBody(comment: TsboardComment) {
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "${comment.submitted.format(dateFormatter)}에 작성됨",
+                    text = "${comment.submitted.format(Format.fullDate)}에 작성됨",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

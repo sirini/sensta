@@ -1,18 +1,20 @@
 package me.sensta.ui.screen
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import me.sensta.ui.screen.profile.ProfileView
+import me.sensta.viewmodel.AuthViewModel
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = "Please login.",
-            modifier = modifier
-        )
+fun ProfileScreen() {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val user by authViewModel.user.collectAsState()
+
+    when {
+        authViewModel.isLoading -> LoadingScreen()
+        user.token.isEmpty() -> LoginScreen()
+        else -> ProfileView()
     }
 }

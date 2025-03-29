@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import me.data.env.Env
-import me.sensta.ui.theme.titleFontFamily
+import me.sensta.ui.theme.robotoSlabFontFamily
 
 @Composable
 fun ErrorScreen(modifier: Modifier = Modifier) {
@@ -29,7 +29,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             Text(text = "내부 오류 발생: 데이터를 가져오지 못했습니다.")
             Text(
                 text = Env.domain,
-                fontFamily = titleFontFamily,
+                fontFamily = robotoSlabFontFamily,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
             )

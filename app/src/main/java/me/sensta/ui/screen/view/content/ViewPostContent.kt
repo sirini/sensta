@@ -17,8 +17,8 @@ import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
 import com.google.accompanist.flowlayout.FlowRow
 import me.domain.model.board.TsboardBoardViewResult
+import me.sensta.util.Format
 import me.sensta.util.NewlineTagHandler
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -59,12 +59,10 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.End
         ) {
-            val dateFormatter = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분")
-
             Text(
                 text = "${
                     String.format(Locale.KOREAN, "%,d", result.post.hit)
-                }번 열람됨    ${result.post.submitted.format(dateFormatter)}에 작성됨",
+                }번 열람됨    ${result.post.submitted.format(Format.fullDate)}에 작성됨",
                 modifier = Modifier.padding(12.dp),
                 style = MaterialTheme.typography.bodySmall
             )

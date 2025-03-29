@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -11,7 +12,6 @@ import androidx.compose.ui.Modifier
 import me.data.env.Env
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.ui.theme.titleFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,12 +21,15 @@ fun TopBar() {
 
     TopAppBar(
         title = {
-            Text(Env.title, fontFamily = titleFontFamily, modifier = Modifier.clickable {
-                navController.navigate(Screen.Home.route) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            })
+            Text(
+                Env.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.clickable {
+                    navController.navigate(Screen.Home.route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                })
         },
         scrollBehavior = scrollBehavior,
         actions = {

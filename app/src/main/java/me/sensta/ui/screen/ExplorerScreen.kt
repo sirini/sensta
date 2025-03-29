@@ -21,7 +21,6 @@ import me.domain.repository.TsboardResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.explorer.GridImage
 import me.sensta.ui.screen.explorer.SearchBox
-import me.sensta.ui.screen.home.Loading
 import me.sensta.viewmodel.ExplorerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -54,7 +53,7 @@ fun ExplorerScreen() {
 
             when (val postResponse = explorerViewModel.posts) {
                 is TsboardResponse.Loading -> {
-                    Loading()
+                    LoadingScreen()
                 }
 
                 is TsboardResponse.Success -> {

@@ -2,14 +2,18 @@
 
 package me.data.di
 
+import android.content.Context
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import me.data.remote.api.TsboardGoapi
+import me.data.repository.TsboardAuthRepositoryImpl
 import me.data.repository.TsboardBoardRepositoryImpl
+import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardBoardRepository
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
@@ -40,4 +44,13 @@ object TsboardDataModule {
     @Singleton
     fun provideTsboardRepository(api: TsboardGoapi): TsboardBoardRepository =
         TsboardBoardRepositoryImpl(api)
+
+    // 인증용 리포지토리 구현체 생성
+    @Provides
+    @Singleton
+    fun provideTsboardAuthRepository(
+        api: TsboardGoapi,
+        @ApplicationContext context: Context
+    ): TsboardAuthRepository =
+        TsboardAuthRepositoryImpl(api, context)
 }

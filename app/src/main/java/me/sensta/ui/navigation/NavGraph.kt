@@ -3,6 +3,7 @@ package me.sensta.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -26,6 +27,7 @@ import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.screen.ConfigScreen
 import me.sensta.ui.screen.ExplorerScreen
 import me.sensta.ui.screen.HomeScreen
+import me.sensta.ui.screen.LoginScreen
 import me.sensta.ui.screen.NotificationScreen
 import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.UploadScreen
@@ -38,6 +40,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Home : Screen("home", "홈", Icons.Default.Home)
     data object View : Screen("view", "게시글", Icons.AutoMirrored.Default.Article)
     data object Explorer : Screen("explorer", "탐색", Icons.Default.Search)
+    data object Login : Screen("login", "로그인", Icons.AutoMirrored.Default.Login)
     data object Upload : Screen("upload", "업로드", Icons.Default.Upload)
     data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
     data object Notification : Screen("notification", "알림", Icons.Default.Notifications)
@@ -70,6 +73,7 @@ fun AppNavigation() {
                 composable(Screen.Home.route) { HomeScreen() }
                 composable(Screen.View.route) { ViewScreen() }
                 composable(Screen.Explorer.route) { ExplorerScreen() }
+                composable(Screen.Login.route) { LoginScreen() }
                 composable(Screen.Upload.route) { UploadScreen() }
                 composable(Screen.Profile.route) { ProfileScreen() }
                 composable(Screen.Notification.route) { NotificationScreen() }

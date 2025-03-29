@@ -6,8 +6,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import me.sensta.R
 
-val titleFontFamily = FontFamily(
-    Font(R.font.zendot, FontWeight.Bold)
+val robotoSlabFontFamily = FontFamily(
+    Font(R.font.robotoslab_extra_light, FontWeight.ExtraLight),
+    Font(R.font.robotoslab_light, FontWeight.Light),
+    Font(R.font.robotoslab_thin, FontWeight.Thin),
+    Font(R.font.robotoslab_regular, FontWeight.Normal),
+    Font(R.font.robotoslab_medium, FontWeight.Medium),
+    Font(R.font.robotoslab_semi_bold, FontWeight.SemiBold),
+    Font(R.font.robotoslab_bold, FontWeight.Bold),
+    Font(R.font.robotoslab_black, FontWeight.Black),
+    Font(R.font.robotoslab_extra_bold, FontWeight.ExtraBold),
 )
 
 // Pretendard 폰트 패밀리
@@ -28,13 +36,13 @@ val baseline = Typography()
 
 val AppTypography = Typography(
     displayLarge = baseline.displayLarge.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.ExtraBold
+        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.ExtraBold
     ),
     displayMedium = baseline.displayMedium.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
+        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Bold
     ),
     displaySmall = baseline.displaySmall.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium
+        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Medium
     ),
     headlineLarge = baseline.headlineLarge.copy(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.ExtraBold
@@ -46,13 +54,13 @@ val AppTypography = Typography(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium
     ),
     titleLarge = baseline.titleLarge.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
+        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Bold
     ),
     titleMedium = baseline.titleMedium.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium
+        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Medium
     ),
     titleSmall = baseline.titleSmall.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Thin
+        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Thin
     ),
     bodyLarge = baseline.bodyLarge.copy(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium /* Default */

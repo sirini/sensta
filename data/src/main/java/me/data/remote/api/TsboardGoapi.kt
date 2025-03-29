@@ -1,11 +1,16 @@
 package me.data.remote.api
 
+import me.data.remote.dto.auth.CheckEmailDto
+import me.data.remote.dto.auth.SigninDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
 import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 interface TsboardGoapi {
@@ -59,4 +64,18 @@ interface TsboardGoapi {
         @Query("accessUserUid") accessUserUid: Int
     ): HomeLatestResponseDto
 
+    // 아이디가 존재하는지 확인하기
+    @FormUrlEncoded
+    @POST("auth/checkemail")
+    suspend fun checkID(
+        @Field("email") email: String
+    ): CheckEmailDto
+
+    // 로그인 하기
+    @FormUrlEncoded
+    @POST("auth/signin")
+    suspend fun signin(
+        @Field("id") id: String,
+        @Field("password") password: String
+    ): SigninDto
 }

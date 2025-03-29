@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.data.env.Env
-import me.sensta.ui.theme.titleFontFamily
+import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.viewmodel.HomeViewModel
 
 @Composable
@@ -22,7 +22,7 @@ fun PhotoError(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
             Text(text = "사진 목록을 가져오지 못했습니다.")
             Text(
                 text = Env.domain,
-                fontFamily = titleFontFamily,
+                fontFamily = robotoSlabFontFamily,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
             )

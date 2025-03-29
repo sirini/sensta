@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.repository.TsboardResponse
 import me.sensta.ui.common.LocalScrollBehavior
-import me.sensta.ui.screen.home.Loading
 import me.sensta.ui.screen.home.comment.CommentCard
 import me.sensta.ui.screen.view.ViewPost
 import me.sensta.viewmodel.CommentViewModel
@@ -39,7 +38,7 @@ fun ViewScreen() {
     // 게시글 가져오기 성공 시에만 내용 표시
     when (val postViewResponse = postViewViewModel.post) {
         is TsboardResponse.Loading -> {
-            Loading()
+            LoadingScreen()
         }
 
         is TsboardResponse.Success -> {
