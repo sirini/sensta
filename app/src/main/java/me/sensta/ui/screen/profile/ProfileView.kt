@@ -50,6 +50,11 @@ fun ProfileView() {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
+                ProfileViewItem(name = "아이디", value = user.id)
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
+                )
                 ProfileViewItem(name = "이름", value = user.name)
                 HorizontalDivider(
                     thickness = 1.dp,
