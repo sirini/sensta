@@ -36,10 +36,13 @@ fun ViewPostExifDescription(images: List<TsboardImage>) {
                 color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f)
             )
         }
-        Text(
-            text = image.description,
-            modifier = Modifier.padding(12.dp),
-            style = MaterialTheme.typography.bodySmall
-        )
+
+        if (image.description.isNotEmpty()) {
+            Text(
+                text = image.description,
+                modifier = Modifier.padding(12.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }
