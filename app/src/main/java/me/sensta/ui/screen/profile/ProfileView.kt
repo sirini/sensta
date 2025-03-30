@@ -55,7 +55,9 @@ fun ProfileView() {
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                 )
-                ProfileViewItem(name = "이름", value = user.name)
+                ProfileViewItem(name = "이름", value = user.name) {
+                    authViewModel.openEditNameDialog()
+                }
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
@@ -112,8 +114,13 @@ fun ProfileView() {
                 )
                 ProfileViewItem(name = "관리자", value = if (user.admin) "관리자님, 환영합니다" else "일반 회원")
             }
+        }
 
-
+        if (authViewModel.editNameDialog) {
+            ProfileViewEditNameDialog(
+                onDismissRequest = { authViewModel.closeEditNameDialog() },
+                onConfirm = { /* TODO */ }
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package me.sensta.ui.screen.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ProfileViewItem(name: String, value: String) {
+fun ProfileViewItem(name: String, value: String, onClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .padding(16.dp)
@@ -31,7 +32,8 @@ fun ProfileViewItem(name: String, value: String) {
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier
                 .padding(end = 4.dp)
-                .weight(2f),
+                .weight(2f)
+                .clickable { onClick() },
             textAlign = TextAlign.End
         )
     }

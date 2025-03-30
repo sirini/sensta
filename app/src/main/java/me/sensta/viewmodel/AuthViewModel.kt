@@ -57,6 +57,9 @@ class AuthViewModel @Inject constructor(
     private var _isLoading by mutableStateOf(false)
     val isLoading: Boolean get() = _isLoading
 
+    private var _editNameDialog by mutableStateOf(false)
+    val editNameDialog: Boolean get() = _editNameDialog
+
     // 생성 시점에 기존에 로그인했던 정보가 있다면 가져오기
     init {
         _isLoading = true
@@ -130,5 +133,15 @@ class AuthViewModel @Inject constructor(
                 _isLoading = false
             }
         }
+    }
+
+    // 이름 수정하는 다이얼로그 열기
+    fun openEditNameDialog() {
+        _editNameDialog = true
+    }
+
+    // 이름 수정하는 다이얼로그 닫기
+    fun closeEditNameDialog() {
+        _editNameDialog = false
     }
 }
