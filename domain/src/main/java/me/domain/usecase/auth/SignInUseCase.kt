@@ -7,10 +7,10 @@ import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
-class SigninUseCase @Inject constructor(
+class SignInUseCase @Inject constructor(
     private val repository: TsboardAuthRepository
 ) {
     operator fun invoke(id: String, password: String): Flow<TsboardResponse<TsboardSignin>> = flow {
-        emit(repository.signin(id, password))
+        emit(repository.signIn(id, password))
     }
 }

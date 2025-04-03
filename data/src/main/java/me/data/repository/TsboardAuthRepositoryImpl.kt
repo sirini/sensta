@@ -16,6 +16,7 @@ import me.data.util.toSHA256
 import me.domain.model.auth.TsboardCheckEmail
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
+import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.emptyUser
 import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
@@ -69,7 +70,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     }
 
     // 아이디와 비밀번호로 로그인하기
-    override suspend fun signin(id: String, password: String): TsboardResponse<TsboardSignin> {
+    override suspend fun signIn(id: String, password: String): TsboardResponse<TsboardSignin> {
         return try {
             val hashedPassword = password.toSHA256()
             val response = api.signin(id, hashedPassword).toEntity()
@@ -112,5 +113,18 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     // Data Store에 보관했던 사용자 정보 지우기
     override suspend fun clearUserInfo() {
         context.dataStore.edit { prefs -> prefs.clear() }
+    }
+
+    // 리프레시 토큰으로 새 액세스 토큰 발급받기
+    override suspend fun updateAccessToken(
+        userUid: Int,
+        refresh: String
+    ): TsboardResponse<TsboardUpdateAccessToken> {
+        return try {
+            val response = api.updateAccessToken(userUid, refresh)
+            TsboardResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
     }
 }

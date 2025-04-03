@@ -7,7 +7,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +24,6 @@ fun BottomNavigationBar() {
     val screens = listOf(Screen.Home, Screen.Explorer, Screen.Upload)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val authViewModel: AuthViewModel = hiltViewModel()
-    val user by authViewModel.user.collectAsState()
 
     NavigationBar {
         screens.forEach { screen ->
@@ -42,7 +40,7 @@ fun BottomNavigationBar() {
             )
         }
 
-        when (user.profile) {
+        when (authViewModel.user.profile) {
             "" -> {
                 NavigationBarItem(
                     icon = { Icon(Screen.Profile.icon, contentDescription = Screen.Profile.title) },
@@ -62,8 +60,8 @@ fun BottomNavigationBar() {
                 NavigationBarItem(
                     icon = {
                         AsyncImage(
-                            model = Env.domain + user.profile,
-                            contentDescription = user.name,
+                            model = Env.domain + authViewModel.user.profile,
+                            contentDescription = authViewModel.user.name,
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)

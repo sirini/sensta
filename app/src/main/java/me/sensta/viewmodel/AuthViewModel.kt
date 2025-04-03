@@ -9,17 +9,21 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import me.domain.model.auth.TsboardCheckEmail
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
+import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.emptyUser
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.auth.CheckEmailUseCase
+import me.domain.usecase.auth.ClearUserInfoUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
-import me.domain.usecase.auth.SigninUseCase
+import me.domain.usecase.auth.SaveUserInfoUseCase
+import me.domain.usecase.auth.SignInUseCase
+import me.domain.usecase.auth.UpdateAccessTokenUseCase
+import me.sensta.util.CustomTime
+import me.sensta.util.now
 import javax.inject.Inject
 
 // 로그인 단계 정의
@@ -36,8 +40,11 @@ const val ID_REGISTERED = 5
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val checkEmailUseCase: CheckEmailUseCase,
-    private val signinUseCase: SigninUseCase,
-    private val getUserInfoUseCase: GetUserInfoUseCase
+    private val signInUseCase: SignInUseCase,
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val updateAccessTokenUseCase: UpdateAccessTokenUseCase,
+    private val saveUserInfoUseCase: SaveUserInfoUseCase,
+    private val clearUserInfoUseCase: ClearUserInfoUseCase
 ) : ViewModel() {
     private var _id by mutableStateOf<String>("")
     val id: String get() = _id
@@ -48,8 +55,8 @@ class AuthViewModel @Inject constructor(
     private var _pw by mutableStateOf<String>("")
     val pw: String get() = _pw
 
-    private var _user = MutableStateFlow<TsboardSigninResult>(emptyUser)
-    val user: StateFlow<TsboardSigninResult> get() = _user
+    private var _user by mutableStateOf<TsboardSigninResult>(emptyUser)
+    val user: TsboardSigninResult get() = _user
 
     private var _loginState by mutableStateOf<LoginState>(LoginState.InputEmail)
     val loginState: LoginState get() = _loginState
@@ -64,8 +71,10 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             getUserInfoUseCase().collect { user ->
                 if (user.uid > 0) {
-                    _user.value = user
+                    _user = user
                     _loginState = LoginState.LoginCompleted
+
+                    updateAccessToken()
                 }
                 _isLoading = false
             }
@@ -118,18 +127,27 @@ class AuthViewModel @Inject constructor(
         _isLoading = true
 
         viewModelScope.launch {
-            signinUseCase(_id, _pw).collect {
-                val signinData = (it as TsboardResponse.Success<TsboardSignin>).data
+            signInUseCase(_id, _pw).collect {
+                val signInData = (it as TsboardResponse.Success<TsboardSignin>).data
 
-                if (null == signinData.result) {
+                if (null == signInData.result) {
                     Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG).show()
 
                 } else {
-                    _user.value = signinData.result!!
+                    _user = signInData.result!!
                     _loginState = LoginState.LoginCompleted
                 }
                 _isLoading = false
             }
+        }
+    }
+
+    // 로그아웃하기
+    fun logout() {
+        _loginState = LoginState.InputEmail
+        _user = emptyUser
+        viewModelScope.launch {
+            clearUserInfoUseCase()
         }
     }
 
@@ -141,5 +159,36 @@ class AuthViewModel @Inject constructor(
     // 사용자의 서명 업데이트하기
     fun updateSignature(signature: String) {
         // do something
+    }
+
+    // 사용자의 리프레시 토큰으로 새 액세스 토큰 발급받기
+    private suspend fun updateAccessToken(context: Context? = null) {
+        updateAccessTokenUseCase(_user.uid, _user.refresh).collect {
+            val token = (it as TsboardResponse.Success<TsboardUpdateAccessToken>).data
+            if (null != token.result) {
+                _user = _user.copy(
+                    token = token.result!!,
+                    signin = CustomTime.now()
+                )
+                saveUserInfoUseCase(_user)
+                context?.let {
+                    Toast.makeText(context, "로그인 세션이 갱신되었습니다", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                _user = emptyUser
+                clearUserInfoUseCase()
+                context?.let {
+                    Toast.makeText(context, "로그인 세션이 만료되었습니다. 다시 로그인을 해주세요.", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+    }
+
+    // 로그인 세션 갱신
+    fun refresh(context: Context) {
+        viewModelScope.launch {
+            updateAccessToken(context)
+        }
     }
 }

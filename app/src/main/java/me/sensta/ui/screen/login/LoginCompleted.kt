@@ -15,8 +15,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,7 +31,6 @@ import me.sensta.viewmodel.AuthViewModel
 fun LoginCompleted() {
     val navController = LocalNavController.current
     val authViewModel: AuthViewModel = hiltViewModel()
-    val user by authViewModel.user.collectAsState()
 
     Column(
         modifier = Modifier
@@ -48,10 +45,10 @@ fun LoginCompleted() {
             fontFamily = robotoSlabFontFamily,
         )
 
-        if (user.profile.isNotEmpty()) {
+        if (authViewModel.user.profile.isNotEmpty()) {
             AsyncImage(
-                model = Env.domain + user.profile,
-                contentDescription = user.name,
+                model = Env.domain + authViewModel.user.profile,
+                contentDescription = authViewModel.user.name,
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
@@ -69,7 +66,7 @@ fun LoginCompleted() {
         }
 
         Text(
-            text = "다시 오신 것을 환영합니다, ${user.name}님!",
+            text = "다시 오신 것을 환영합니다, ${authViewModel.user.name}님!",
             modifier = Modifier
                 .padding(top = 24.dp)
                 .align(alignment = Alignment.CenterHorizontally)

@@ -1,4 +1,4 @@
-package me.sensta.ui.screen.home.comment
+package me.sensta.ui.screen.view.comment
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
 import me.domain.model.board.TsboardComment
-import me.sensta.util.Format
+import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
 
 @Composable
@@ -56,7 +56,7 @@ fun CommentCardBody(comment: TsboardComment) {
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Text(
-                    text = "${comment.submitted.format(Format.fullDate)}에 작성됨",
+                    text = "${comment.submitted.format(CustomTime.fullDate)}에 작성됨",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

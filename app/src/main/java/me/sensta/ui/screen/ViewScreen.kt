@@ -9,8 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.repository.TsboardResponse
 import me.sensta.ui.common.LocalScrollBehavior
-import me.sensta.ui.screen.home.comment.CommentCard
 import me.sensta.ui.screen.view.ViewPost
+import me.sensta.ui.screen.view.comment.CommentCard
 import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.PostViewViewModel
 import me.sensta.viewmodel.common.LocalCommonViewModel

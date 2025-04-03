@@ -1,4 +1,4 @@
-package me.sensta.ui.screen.home.comment
+package me.sensta.ui.screen.view.comment
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

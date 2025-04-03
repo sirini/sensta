@@ -2,6 +2,7 @@ package me.data.remote.api
 
 import me.data.remote.dto.auth.CheckEmailDto
 import me.data.remote.dto.auth.SigninDto
+import me.data.remote.dto.auth.UpdateAccessTokenDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
@@ -78,4 +79,12 @@ interface TsboardGoapi {
         @Field("id") id: String,
         @Field("password") password: String
     ): SigninDto
+
+    // 리프레시 토큰으로 새 액세스 토큰 발급 받기
+    @FormUrlEncoded
+    @POST("auth/refresh")
+    suspend fun updateAccessToken(
+        @Field("userUid") userUid: Int,
+        @Field("refresh") refresh: String
+    ): UpdateAccessTokenDto
 }

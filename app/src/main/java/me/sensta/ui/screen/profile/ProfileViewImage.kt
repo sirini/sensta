@@ -14,8 +14,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,7 +26,6 @@ import me.sensta.viewmodel.AuthViewModel
 @Composable
 fun ProfileViewImage() {
     val authViewModel: AuthViewModel = hiltViewModel()
-    val user by authViewModel.user.collectAsState()
 
     Box(
         modifier = Modifier
@@ -40,10 +37,10 @@ fun ProfileViewImage() {
         contentAlignment = Alignment.Center
     ) {
         // 프로필 이미지 혹은 빈 아이콘 보여주기
-        if (user.profile.isNotEmpty()) {
+        if (authViewModel.user.profile.isNotEmpty()) {
             AsyncImage(
-                model = Env.domain + user.profile,
-                contentDescription = user.name,
+                model = Env.domain + authViewModel.user.profile,
+                contentDescription = authViewModel.user.name,
                 modifier = Modifier
                     .size(160.dp)
                     .clip(CircleShape)
