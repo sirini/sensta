@@ -29,6 +29,7 @@ retrofit2KotlinxSerializationConverter = "1.0.0"
 roomKtx = "2.6.1"
 roomRuntime = "2.6.1"
 securityCrypto = "1.1.0-alpha06"
+ucrop = "2.2.10"
 uiTextGoogleFonts = "1.7.8"
 navigationCompose = "2.8.9"
 
@@ -74,6 +75,7 @@ material3 = { module = "androidx.compose.material3:material3" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit2KotlinxSerializationConverter" }
+ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 ui = { module = "androidx.compose.ui:ui" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }

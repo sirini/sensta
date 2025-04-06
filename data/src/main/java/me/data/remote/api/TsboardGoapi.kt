@@ -3,15 +3,22 @@ package me.data.remote.api
 import me.data.remote.dto.auth.CheckEmailDto
 import me.data.remote.dto.auth.SigninDto
 import me.data.remote.dto.auth.UpdateAccessTokenDto
+import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
 import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Multipart
+import retrofit2.http.PATCH
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface TsboardGoapi {
@@ -87,4 +94,15 @@ interface TsboardGoapi {
         @Field("userUid") userUid: Int,
         @Field("refresh") refresh: String
     ): UpdateAccessTokenDto
+
+    // 사용자의 정보 업데이트하기
+    @Multipart
+    @PATCH("auth/update")
+    suspend fun updateUserInfo(
+        @Header("Authorization") authorization: String,
+        @Part("name") name: RequestBody,
+        @Part("signature") signature: RequestBody,
+        @Part("password") password: RequestBody,
+        @Part profile: MultipartBody.Part?
+    ): UpdateUserInfoDto
 }

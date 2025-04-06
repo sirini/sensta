@@ -17,9 +17,12 @@ import me.domain.model.auth.TsboardCheckEmail
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
 import me.domain.model.auth.TsboardUpdateAccessToken
+import me.domain.model.auth.TsboardUpdateUserInfo
+import me.domain.model.auth.TsboardUpdateUserInfoParam
 import me.domain.model.auth.emptyUser
 import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -122,6 +125,26 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     ): TsboardResponse<TsboardUpdateAccessToken> {
         return try {
             val response = api.updateAccessToken(userUid, refresh)
+            TsboardResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 사용자의 정보 업데이트하기
+    override suspend fun updateUserInfo(param: TsboardUpdateUserInfoParam): TsboardResponse<TsboardUpdateUserInfo> {
+        return try {
+            val response = api.updateUserInfo(
+                authorization = param.authorization,
+                name = param.name.toRequestBody(),
+                signature = param.signature.toRequestBody(),
+                password = if (param.password.length > 3) {
+                    param.password.toSHA256()
+                } else {
+                    ""
+                }.toRequestBody(),
+                profile = param.profile
+            )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")

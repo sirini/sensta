@@ -47,6 +47,9 @@ dependencies {
     // kotlinx.serialization (Entities에 사용 가능)
     implementation(libs.kotlinx.serialization.json)
 
+    // okhttp3
+    implementation(libs.okhttp)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

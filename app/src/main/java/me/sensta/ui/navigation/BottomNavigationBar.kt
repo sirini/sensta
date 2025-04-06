@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +25,7 @@ fun BottomNavigationBar() {
     val screens = listOf(Screen.Home, Screen.Explorer, Screen.Upload)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val user by authViewModel.user.collectAsState()
 
     NavigationBar {
         screens.forEach { screen ->
@@ -40,43 +42,24 @@ fun BottomNavigationBar() {
             )
         }
 
-        when (authViewModel.user.profile) {
-            "" -> {
-                NavigationBarItem(
-                    icon = { Icon(Screen.Profile.icon, contentDescription = Screen.Profile.title) },
-                    label = { Text(Screen.Profile.title) },
-                    selected = navBackStackEntry?.destination?.route == Screen.Profile.route,
-                    onClick = {
-                        navController.navigate(Screen.Profile.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+        NavigationBarItem(
+            icon = {
+                AsyncImage(
+                    model = Env.domain + user.profile,
+                    contentDescription = user.name,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
                 )
+            },
+            label = { Text(Screen.Profile.title) },
+            selected = navBackStackEntry?.destination?.route == Screen.Profile.route,
+            onClick = {
+                navController.navigate(Screen.Profile.route) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
             }
-
-            // 로그인을 했을 때는 프로필 이미지가 우측 하단에 나오도록 해주기
-            else -> {
-                NavigationBarItem(
-                    icon = {
-                        AsyncImage(
-                            model = Env.domain + authViewModel.user.profile,
-                            contentDescription = authViewModel.user.name,
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                        )
-                    },
-                    label = { Text(Screen.Profile.title) },
-                    selected = navBackStackEntry?.destination?.route == Screen.Profile.route,
-                    onClick = {
-                        navController.navigate(Screen.Profile.route) {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-        }
+        )
     }
 }

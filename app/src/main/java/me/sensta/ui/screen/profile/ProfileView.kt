@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import java.util.Locale
 fun ProfileView() {
     val context = LocalContext.current
     val authViewModel: AuthViewModel = hiltViewModel()
+    val user by authViewModel.user.collectAsState()
 
     var isEditNameDialog by remember { mutableStateOf(false) }
     var isEditSignatureDialog by remember { mutableStateOf(false) }
@@ -65,21 +67,21 @@ fun ProfileView() {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                ProfileViewItem(name = "아이디", value = authViewModel.user.id) {
+                ProfileViewItem(name = "아이디", value = user.id) {
                     Toast.makeText(context, "아이디는 수정할 수 없습니다.", Toast.LENGTH_SHORT).show()
                 }
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                 )
-                ProfileViewItem(name = "이름", value = authViewModel.user.name) {
+                ProfileViewItem(name = "이름", value = user.name) {
                     isEditNameDialog = !isEditNameDialog
                 }
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.1f)
                 )
-                ProfileViewItem(name = "레벨", value = authViewModel.user.level.toString()) {
+                ProfileViewItem(name = "레벨", value = user.level.toString()) {
                     Toast.makeText(context, "레벨은 오직 관리자만 변경 가능합니다.", Toast.LENGTH_SHORT).show()
                 }
                 HorizontalDivider(
@@ -91,7 +93,7 @@ fun ProfileView() {
                     value = String.format(
                         locale = Locale.KOREAN,
                         format = "%,d",
-                        authViewModel.user.point
+                        user.point
                     )
                 ) {
                     Toast.makeText(context, "포인트는 임의로 수정할 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -111,7 +113,7 @@ fun ProfileView() {
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = authViewModel.user.signature,
+                        text = user.signature,
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -130,11 +132,11 @@ fun ProfileView() {
             ) {
                 ProfileViewItem(
                     name = "가입일",
-                    value = authViewModel.user.signup.format(CustomTime.simpleDate)
+                    value = user.signup.format(CustomTime.simpleDate)
                 ) {
                     Toast.makeText(
                         context,
-                        "최초 가입일은 ${authViewModel.user.signup.format(CustomTime.fullDate)} 입니다.",
+                        "최초 가입일은 ${user.signup.format(CustomTime.fullDate)} 입니다.",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -144,7 +146,7 @@ fun ProfileView() {
                 )
                 ProfileViewItem(
                     name = "로그인",
-                    value = authViewModel.user.signin.format(CustomTime.fullDate)
+                    value = user.signin.format(CustomTime.fullDate)
                 ) {
                     Toast.makeText(context, "마지막으로 로그인 하신 시간입니다.", Toast.LENGTH_SHORT).show()
                 }
@@ -154,7 +156,7 @@ fun ProfileView() {
                 )
                 ProfileViewItem(
                     name = "관리자",
-                    value = if (authViewModel.user.admin) "관리자님, 환영합니다" else "일반 회원"
+                    value = if (user.admin) "관리자님, 환영합니다" else "일반 회원"
                 )
             }
 
@@ -186,7 +188,7 @@ fun ProfileView() {
             ProfileViewEditNameDialog(
                 onDismissRequest = { isEditNameDialog = !isEditNameDialog },
                 onConfirm = {
-                    authViewModel.updateName(it)
+                    authViewModel.updateName(it, context)
                     isEditNameDialog = !isEditNameDialog
                 }
             )
@@ -196,7 +198,7 @@ fun ProfileView() {
             ProfileViewEditSignatureDialog(
                 onDismissRequest = { isEditSignatureDialog = !isEditSignatureDialog },
                 onConfirm = {
-                    authViewModel.updateSignature(it)
+                    authViewModel.updateSignature(it, context)
                     isEditSignatureDialog = !isEditSignatureDialog
                 }
             )
