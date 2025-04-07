@@ -8,6 +8,7 @@ import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
 import me.data.remote.dto.home.HomeLatestResponseDto
+import me.data.remote.dto.home.NotificationDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -82,7 +83,7 @@ interface TsboardGoapi {
     // 로그인 하기
     @FormUrlEncoded
     @POST("auth/signin")
-    suspend fun signin(
+    suspend fun signIn(
         @Field("id") id: String,
         @Field("password") password: String
     ): SigninDto
@@ -105,4 +106,11 @@ interface TsboardGoapi {
         @Part("password") password: RequestBody,
         @Part profile: MultipartBody.Part?
     ): UpdateUserInfoDto
+
+    // 사용자에게 온 알림 내역 가져오기
+    @GET("noti/load")
+    suspend fun getUserNotifications(
+        @Header("Authorization") authorization: String,
+        @Query("limit") limit: Int,
+    ): NotificationDto
 }

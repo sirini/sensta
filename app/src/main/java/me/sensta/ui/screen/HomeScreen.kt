@@ -6,12 +6,15 @@ import me.domain.repository.TsboardResponse
 import me.sensta.ui.screen.home.PhotoError
 import me.sensta.ui.screen.home.PhotoList
 import me.sensta.viewmodel.HomeViewModel
+import me.sensta.viewmodel.NotificationViewModel
 
 @Composable
 fun HomeScreen() {
-    val viewModel: HomeViewModel = hiltViewModel()
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val notificationViewModel: NotificationViewModel = hiltViewModel()
 
-    when (val photoResponse = viewModel.photos) {
+    // 사진 목록 가져오기
+    when (val photoResponse = homeViewModel.photos) {
         is TsboardResponse.Loading -> {
             LoadingScreen()
         }
@@ -21,7 +24,18 @@ fun HomeScreen() {
         }
 
         is TsboardResponse.Error -> {
-            PhotoError(viewModel = viewModel)
+            PhotoError(viewModel = homeViewModel)
         }
+    }
+
+    // 알림 목록 가져오기
+    when (val notificationResponse = notificationViewModel.notifications) {
+        is TsboardResponse.Loading -> {}
+        
+        is TsboardResponse.Success -> {
+            notificationViewModel.updateNotificationCount(notificationResponse.data.size)
+        }
+
+        is TsboardResponse.Error -> {}
     }
 }

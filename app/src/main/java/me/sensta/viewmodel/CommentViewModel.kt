@@ -9,7 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import me.domain.model.board.TsboardComment
 import me.domain.repository.TsboardResponse
-import me.domain.usecase.GetCommentListUseCase
+import me.domain.usecase.view.GetCommentListUseCase
 import javax.inject.Inject
 
 @HiltViewModel

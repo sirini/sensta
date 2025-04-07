@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Password
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,7 +72,12 @@ fun LoginInputPassword() {
                 false -> PasswordVisualTransformation()
             },
             trailingIcon = {
-                IconButton(onClick = { isPwVisible = !isPwVisible }) { }
+                IconButton(onClick = { isPwVisible = !isPwVisible }) {
+                    Icon(
+                        imageVector = if (isPwVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = "Password"
+                    )
+                }
             }
         )
 

@@ -76,7 +76,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     override suspend fun signIn(id: String, password: String): TsboardResponse<TsboardSignin> {
         return try {
             val hashedPassword = password.toSHA256()
-            val response = api.signin(id, hashedPassword).toEntity()
+            val response = api.signIn(id, hashedPassword).toEntity()
 
             response.result?.also { saveUserInfo(it) }
             TsboardResponse.Success(response)

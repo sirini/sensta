@@ -13,8 +13,10 @@ import kotlinx.serialization.json.Json
 import me.data.remote.api.TsboardGoapi
 import me.data.repository.TsboardAuthRepositoryImpl
 import me.data.repository.TsboardBoardRepositoryImpl
+import me.data.repository.TsboardNotificationRepositoryImpl
 import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardBoardRepository
+import me.domain.repository.TsboardNotificationRepository
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -51,6 +53,12 @@ object TsboardDataModule {
     fun provideTsboardAuthRepository(
         api: TsboardGoapi,
         @ApplicationContext context: Context
-    ): TsboardAuthRepository =
-        TsboardAuthRepositoryImpl(api, context)
+    ): TsboardAuthRepository = TsboardAuthRepositoryImpl(api, context)
+
+    // 알림용 리포지토리 구현체 생성
+    @Provides
+    @Singleton
+    fun provideTsboardNotificationRepository(
+        api: TsboardGoapi
+    ): TsboardNotificationRepository = TsboardNotificationRepositoryImpl(api)
 }

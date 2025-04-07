@@ -1,4 +1,4 @@
-package me.domain.usecase
+package me.domain.usecase.home
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

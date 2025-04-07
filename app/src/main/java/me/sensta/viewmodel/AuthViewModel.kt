@@ -90,6 +90,8 @@ class AuthViewModel @Inject constructor(
 
     // 사용자의 리프레시 토큰으로 새 액세스 토큰 발급받기
     private suspend fun updateAccessToken(context: Context? = null) {
+        if (_user.value.uid < 1) return
+        
         updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
             val token = (it as TsboardResponse.Success<TsboardUpdateAccessToken>).data
             if (null != token.result) {

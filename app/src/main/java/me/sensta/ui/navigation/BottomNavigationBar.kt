@@ -44,13 +44,21 @@ fun BottomNavigationBar() {
 
         NavigationBarItem(
             icon = {
-                AsyncImage(
-                    model = Env.domain + user.profile,
-                    contentDescription = user.name,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                )
+                if (user.profile.isEmpty()) {
+                    Icon(
+                        Screen.Profile.icon,
+                        contentDescription = Screen.Profile.title,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    AsyncImage(
+                        model = Env.domain + user.profile,
+                        contentDescription = user.name,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                    )
+                }
             },
             label = { Text(Screen.Profile.title) },
             selected = navBackStackEntry?.destination?.route == Screen.Profile.route,

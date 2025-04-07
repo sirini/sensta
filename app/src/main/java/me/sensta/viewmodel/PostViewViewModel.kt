@@ -9,7 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.repository.TsboardResponse
-import me.domain.usecase.GetPostViewUseCase
+import me.domain.usecase.view.GetPostViewUseCase
 import javax.inject.Inject
 
 @HiltViewModel
