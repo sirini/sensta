@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +33,7 @@ import me.sensta.ui.screen.LoginScreen
 import me.sensta.ui.screen.NotificationScreen
 import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.UploadScreen
+import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 import me.sensta.viewmodel.AuthViewModel
@@ -50,6 +52,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
     data object Notification : Screen("notification", "알림", Icons.Default.Notifications)
     data object Config : Screen("config", "설정", Icons.Default.Settings)
+    data object Version : Screen("version", "버전", Icons.Default.Verified)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +90,7 @@ fun AppNavigation() {
                 composable(Screen.Profile.route) { ProfileScreen() }
                 composable(Screen.Notification.route) { NotificationScreen() }
                 composable(Screen.Config.route) { ConfigScreen() }
+                composable(Screen.Version.route) { VersionScreen() }
             }
 
             // 댓글 작성하기 다이얼로그

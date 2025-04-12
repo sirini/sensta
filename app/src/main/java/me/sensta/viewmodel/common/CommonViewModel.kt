@@ -16,7 +16,7 @@ class CommonViewModel @Inject constructor() : ViewModel() {
 
     private val _pagerIndex = mutableIntStateOf(0)
     val pagerIndex = _pagerIndex.asIntState()
-    
+
     private var _showCommentDialog by mutableStateOf(false)
     val showCommentDialog: Boolean get() = _showCommentDialog
 

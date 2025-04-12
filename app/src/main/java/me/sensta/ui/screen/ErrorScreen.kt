@@ -18,11 +18,11 @@ import me.data.env.Env
 import me.sensta.ui.theme.robotoSlabFontFamily
 
 @Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
+fun ErrorScreen() {
     val context = LocalContext.current
 
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
