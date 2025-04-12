@@ -1,8 +1,17 @@
 package me.sensta.viewmodel
 
-import androidx.compose.runtime.getValue
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.filled.AddComment
+import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,45 +19,104 @@ import kotlinx.coroutines.launch
 import me.domain.model.home.TsboardNotification
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.auth.GetUserInfoUseCase
+import me.domain.usecase.home.CheckAllNotificationUseCase
+import me.domain.usecase.home.CheckNotificationUseCase
 import me.domain.usecase.home.GetNotificationUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class NotificationViewModel @Inject constructor(
     private val getNotificationUseCase: GetNotificationUseCase,
-    private val getUserInfoUseCase: GetUserInfoUseCase
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val checkNotificationUseCase: CheckNotificationUseCase,
+    private val checkAllNotificationUseCase: CheckAllNotificationUseCase
 ) : ViewModel() {
-    private var _notifications by mutableStateOf<TsboardResponse<List<TsboardNotification>>>(
+    private val _notifications = mutableStateOf<TsboardResponse<List<TsboardNotification>>>(
         TsboardResponse.Loading
     )
-    val notifications: TsboardResponse<List<TsboardNotification>> get() = _notifications
+    val notifications: State<TsboardResponse<List<TsboardNotification>>> get() = _notifications
 
-    private var _notificationCount by mutableStateOf(0)
-    val notificationCount: Int get() = _notificationCount
+    private val _hasUncheckedNotification = mutableStateOf(false)
+    val hasUncheckedNotification: State<Boolean> get() = _hasUncheckedNotification
+
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> get() = _isLoading
 
     init {
         loadNotifications()
     }
 
     // 사용자에게 온 알림 목록 가져오기
-    fun loadNotifications() {
+    fun loadNotifications(context: Context? = null) {
+        _isLoading.value = true
         viewModelScope.launch {
             getUserInfoUseCase().collect {
                 if (it.token.isEmpty()) {
-                    _notifications = TsboardResponse.Success(emptyList())
-                    _notificationCount = 0
+                    _notifications.value = TsboardResponse.Success(emptyList())
+                    _hasUncheckedNotification.value = false
+                    _isLoading.value = false
                     return@collect
                 }
 
-                getNotificationUseCase(it.token, 10).collect {
-                    _notifications = it
+                getNotificationUseCase(it.token, 20).collect { notis ->
+                    val notiResponse = (notis as TsboardResponse.Success)
+                    _notifications.value = notiResponse
+                    _hasUncheckedNotification.value = notiResponse.data.count { !it.checked } > 0
+                    _isLoading.value = false
+
+                    Log.d("DEBUG", "_hasUncheckedNotification: ${_hasUncheckedNotification.value}")
+
+                    context?.let {
+                        Toast.makeText(context, "알림 목록을 업데이트 하였습니다", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
     }
 
-    // 확인한 알림 갯수 업데이트 하기
-    fun updateNotificationCount(count: Int) {
-        _notificationCount = count
+    // 알림 내용 해석하기
+    fun translateNotification(type: Int): Pair<ImageVector, String> {
+        return when (type) {
+            0 -> Icons.Default.Favorite to "내 게시글을 좋아합니다"
+            1 -> Icons.Default.FavoriteBorder to "내 댓글을 좋아합니다"
+            2 -> Icons.AutoMirrored.Default.Comment to "내 게시글에 댓글을 남겼습니다"
+            3 -> Icons.Default.AddComment to "내 댓글에 답글을 남겼습니다"
+            else -> Icons.Default.ChatBubbleOutline to "나에게 쪽지를 보냈습니다"
+        }
+    }
+
+    // 개별 알림 확인 처리하기
+    fun checkNotification(notiUid: Int) {
+        viewModelScope.launch {
+            getUserInfoUseCase().collect {
+                if (it.token.isEmpty()) {
+                    return@collect
+                }
+                checkNotificationUseCase(it.token, notiUid).collect {
+                    if (it is TsboardResponse.Success) {
+                        loadNotifications()
+                    }
+                }
+            }
+        }
+    }
+
+    // 전체 알림 확인 처리하기
+    fun checkAllNotifications(context: Context? = null) {
+        viewModelScope.launch {
+            getUserInfoUseCase().collect {
+                if (it.token.isEmpty()) {
+                    return@collect
+                }
+                checkAllNotificationUseCase(it.token).collect {
+                    if (it is TsboardResponse.Success) {
+                        loadNotifications()
+                        context?.let {
+                            Toast.makeText(context, "모든 알림을 확인하였습니다", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
     }
 }

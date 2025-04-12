@@ -22,13 +22,16 @@ import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.explorer.GridImage
 import me.sensta.ui.screen.explorer.SearchBox
 import me.sensta.viewmodel.ExplorerViewModel
+import me.sensta.viewmodel.common.LocalNotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ExplorerScreen() {
+    val notiViewModel = LocalNotificationViewModel.current
     val scrollBehavior = LocalScrollBehavior.current
     val explorerViewModel: ExplorerViewModel = hiltViewModel()
     val isLoading by remember { mutableStateOf(false) }
+    val posts by explorerViewModel.posts
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
         onRefresh = { explorerViewModel.search(0, "") }
@@ -37,6 +40,7 @@ fun ExplorerScreen() {
     // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = 0f
+        notiViewModel.loadNotifications()
     }
 
     Box(
@@ -51,18 +55,10 @@ fun ExplorerScreen() {
         ) {
             SearchBox()
 
-            when (val postResponse = explorerViewModel.posts) {
-                is TsboardResponse.Loading -> {
-                    LoadingScreen()
-                }
-
-                is TsboardResponse.Success -> {
-                    GridImage(postResponse.data)
-                }
-
-                is TsboardResponse.Error -> {
-                    ErrorScreen()
-                }
+            when (val postResponse = posts) {
+                is TsboardResponse.Loading -> LoadingScreen()
+                is TsboardResponse.Success -> GridImage(postResponse.data)
+                is TsboardResponse.Error -> ErrorScreen()
             }
         }
 

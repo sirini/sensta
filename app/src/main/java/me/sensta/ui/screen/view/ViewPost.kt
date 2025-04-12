@@ -24,8 +24,12 @@ fun ViewPost(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp)
     )
     PostCardHeader(writer = postView.result.post.writer)
-    PostCarousel(images = postView.result.images)
-    ViewPostExifDescription(images = postView.result.images)
+
+    if (postView.result.images.isNotEmpty()) {
+        PostCarousel(images = postView.result.images)
+        ViewPostExifDescription(images = postView.result.images)
+    }
+    
     ViewPostLikeButton(post = postView.result.post)
     ViewPostContent(result = postView.result)
     ViewPostCenterButtons()

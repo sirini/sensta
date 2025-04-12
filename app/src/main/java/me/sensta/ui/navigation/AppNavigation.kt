@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.common.LocalNavController
+import me.sensta.ui.navigation.topbar.TopBar
 import me.sensta.ui.screen.ConfigScreen
 import me.sensta.ui.screen.ExplorerScreen
 import me.sensta.ui.screen.HomeScreen
@@ -33,8 +34,12 @@ import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.UploadScreen
 import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
+import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.NotificationViewModel
 import me.sensta.viewmodel.common.CommonViewModel
+import me.sensta.viewmodel.common.LocalAuthViewModel
 import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.common.LocalNotificationViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Home : Screen("home", "홈", Icons.Default.Home)
@@ -53,11 +58,15 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val commonViewModel: CommonViewModel = hiltViewModel()
+    val notiViewModel: NotificationViewModel = hiltViewModel()
+    val authViewModel: AuthViewModel = hiltViewModel()
 
     CompositionLocalProvider(
         LocalCommonViewModel provides commonViewModel,
+        LocalNotificationViewModel provides notiViewModel,
+        LocalAuthViewModel provides authViewModel,
         LocalNavController provides navController,
-        LocalScrollBehavior provides scrollBehavior
+        LocalScrollBehavior provides scrollBehavior,
     ) {
         Scaffold(
             topBar = { TopBar() },

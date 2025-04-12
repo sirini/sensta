@@ -1,8 +1,7 @@
 package me.sensta.viewmodel
 
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,15 +15,15 @@ import javax.inject.Inject
 class CommentViewModel @Inject constructor(
     private val getCommentListUseCase: GetCommentListUseCase
 ) : ViewModel() {
-    private var _comments by
-    mutableStateOf<TsboardResponse<List<TsboardComment>>>(TsboardResponse.Loading)
-    val comments: TsboardResponse<List<TsboardComment>> get() = _comments
+    private val _comments =
+        mutableStateOf<TsboardResponse<List<TsboardComment>>>(TsboardResponse.Loading)
+    val comments: State<TsboardResponse<List<TsboardComment>>> get() = _comments
 
     // 댓글 목록 가져오기
     private fun loadComments(postUid: Int) {
         viewModelScope.launch {
             getCommentListUseCase(postUid = postUid).collect {
-                _comments = it
+                _comments.value = it
             }
         }
     }

@@ -12,19 +12,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import me.data.env.Env
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.common.LocalAuthViewModel
 
 @Composable
 fun BottomNavigationBar() {
     val navController = LocalNavController.current
     val screens = listOf(Screen.Home, Screen.Explorer, Screen.Upload)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel = LocalAuthViewModel.current
     val user by authViewModel.user.collectAsState()
 
     NavigationBar {
@@ -34,9 +33,11 @@ fun BottomNavigationBar() {
                 label = { Text(screen.title) },
                 selected = navBackStackEntry?.destination?.route == screen.route,
                 onClick = {
-                    navController.navigate(screen.route) {
-                        launchSingleTop = true
-                        restoreState = true
+                    if (navBackStackEntry?.destination?.route != screen.route) {
+                        navController.navigate(screen.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 },
             )

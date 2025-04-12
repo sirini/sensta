@@ -28,16 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.yalantis.ucrop.UCrop
 import me.data.env.Env
-import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.common.LocalAuthViewModel
 import java.io.File
 
 @Composable
 fun ProfileViewImage() {
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel = LocalAuthViewModel.current
     val context = LocalContext.current
     val user by authViewModel.user.collectAsState()
 

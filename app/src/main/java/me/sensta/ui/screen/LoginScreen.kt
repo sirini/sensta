@@ -23,18 +23,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import me.sensta.ui.screen.login.LoginCompleted
 import me.sensta.ui.screen.login.LoginInputEmail
 import me.sensta.ui.screen.login.LoginInputPassword
-import me.sensta.viewmodel.AuthViewModel
 import me.sensta.viewmodel.LoginState
+import me.sensta.viewmodel.common.LocalAuthViewModel
 
 @Composable
 fun LoginScreen() {
     val imeInsets = WindowInsets.ime
     val density = LocalDensity.current
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel = LocalAuthViewModel.current
+    val isLoading by authViewModel.isLoading
+
 
     // 가상 키보드 높이 절반 계산
     val halfKeyboardPadding by remember {
@@ -58,7 +59,7 @@ fun LoginScreen() {
                 .padding(32.dp)
         ) {
             Column {
-                if (authViewModel.isLoading) {
+                if (isLoading) {
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -79,7 +80,8 @@ fun LoginScreen() {
                     },
                     label = "ConditionTransition"
                 ) { currentLoginState ->
-                    when (currentLoginState) {
+                    val state by currentLoginState
+                    when (state) {
                         LoginState.InputEmail -> LoginInputEmail()
                         LoginState.InputPassword -> LoginInputPassword()
                         LoginState.LoginCompleted -> LoginCompleted()

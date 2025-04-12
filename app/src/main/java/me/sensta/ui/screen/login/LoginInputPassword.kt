@@ -33,14 +33,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import me.sensta.ui.theme.robotoSlabFontFamily
-import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.common.LocalAuthViewModel
 
 @Composable
 fun LoginInputPassword() {
     val context = LocalContext.current
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel = LocalAuthViewModel.current
+    val pw by authViewModel.pw
     var isPwVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -57,7 +57,7 @@ fun LoginInputPassword() {
         )
 
         OutlinedTextField(
-            value = authViewModel.pw,
+            value = pw,
             onValueChange = { authViewModel.setPW(it) },
             label = { Text(text = "비밀번호를 입력하세요") },
             leadingIcon = {

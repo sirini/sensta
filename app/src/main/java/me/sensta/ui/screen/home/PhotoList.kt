@@ -19,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +38,9 @@ import me.sensta.viewmodel.HomeViewModel
 fun PhotoList(photos: List<TsboardPhoto>) {
     val context = LocalContext.current
     val photoViewModel: HomeViewModel = hiltViewModel()
-    val isLoading = photoViewModel.isLoadingMore
+    val isLoading by photoViewModel.isLoadingMore
+    val bunch by photoViewModel.bunch
+    val page by photoViewModel.page
     val listState = rememberLazyListState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
@@ -54,7 +57,7 @@ fun PhotoList(photos: List<TsboardPhoto>) {
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= (photoViewModel.bunch * photoViewModel.page) - 1) {
+                    if (index >= (bunch * page) - 1) {
                         photoViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }

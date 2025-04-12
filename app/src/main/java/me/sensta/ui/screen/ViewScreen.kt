@@ -22,9 +22,9 @@ fun ViewScreen() {
     val scrollBehavior = LocalScrollBehavior.current
     val commonViewModel = LocalCommonViewModel.current
     val postUid by commonViewModel.postUid
-
+    val post by postViewViewModel.post
     val commentViewModel: CommentViewModel = hiltViewModel()
-    val commentResponse = commentViewModel.comments
+    val comments by commentViewModel.comments
 
     // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
     LaunchedEffect(Unit) {
@@ -36,26 +36,21 @@ fun ViewScreen() {
     }
 
     // 게시글 가져오기 성공 시에만 내용 표시
-    when (val postViewResponse = postViewViewModel.post) {
-        is TsboardResponse.Loading -> {
-            LoadingScreen()
-        }
-
+    when (val postViewResponse = post) {
+        is TsboardResponse.Loading -> LoadingScreen()
         is TsboardResponse.Success -> {
             val postView = postViewResponse.data
+            val commentResponse = comments
 
             if (commentResponse is TsboardResponse.Success) {
-                val comments = commentResponse.data
-
+                val commentList = commentResponse.data
                 LazyColumn {
                     item { ViewPost(postView) }
-                    items(comments) { CommentCard(it) }
+                    items(commentList) { CommentCard(it) }
                 }
             }
         }
 
-        is TsboardResponse.Error -> {
-            ErrorScreen()
-        }
+        is TsboardResponse.Error -> ErrorScreen()
     }
 }

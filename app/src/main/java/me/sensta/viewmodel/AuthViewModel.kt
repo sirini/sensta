@@ -4,9 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Patterns
 import android.widget.Toast
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,35 +54,35 @@ class AuthViewModel @Inject constructor(
     private val clearUserInfoUseCase: ClearUserInfoUseCase,
     private val updateUserInfoUseCase: UpdateUserInfoUseCase
 ) : ViewModel() {
-    private var _id by mutableStateOf("")
-    val id: String get() = _id
+    private val _id = mutableStateOf("")
+    val id: State<String> get() = _id
 
-    private var _isEmailValid by mutableStateOf(true)
-    val isEmailValid: Boolean get() = _isEmailValid
+    private val _isEmailValid = mutableStateOf(true)
+    val isEmailValid: State<Boolean> get() = _isEmailValid
 
-    private var _pw by mutableStateOf("")
-    val pw: String get() = _pw
+    private val _pw = mutableStateOf("")
+    val pw: State<String> get() = _pw
 
     private val _user = MutableStateFlow(emptyUser)
     val user: StateFlow<TsboardSigninResult> = _user.asStateFlow()
 
-    private var _loginState by mutableStateOf<LoginState>(LoginState.InputEmail)
-    val loginState: LoginState get() = _loginState
+    private val _loginState = mutableStateOf<LoginState>(LoginState.InputEmail)
+    val loginState: State<LoginState> get() = _loginState
 
-    private var _isLoading by mutableStateOf(false)
-    val isLoading: Boolean get() = _isLoading
+    private val _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> get() = _isLoading
 
 
     // 생성 시점에 기존에 로그인했던 정보가 있다면 가져오기
     init {
-        _isLoading = true
+        _isLoading.value = true
         viewModelScope.launch {
             getUserInfoUseCase().collect { user ->
                 if (user.uid > 0) {
                     _user.value = user
                 }
-                _loginState = LoginState.InputEmail
-                _isLoading = false
+                _loginState.value = LoginState.InputEmail
+                _isLoading.value = false
             }
         }
     }
@@ -91,7 +90,7 @@ class AuthViewModel @Inject constructor(
     // 사용자의 리프레시 토큰으로 새 액세스 토큰 발급받기
     private suspend fun updateAccessToken(context: Context? = null) {
         if (_user.value.uid < 1) return
-        
+
         updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
             val token = (it as TsboardResponse.Success<TsboardUpdateAccessToken>).data
             if (null != token.result) {
@@ -116,66 +115,66 @@ class AuthViewModel @Inject constructor(
 
     // 아이디(이메일 주소) 입력 받기
     fun setID(id: String) {
-        _id = id
-        _isEmailValid = Patterns.EMAIL_ADDRESS.matcher(id).matches()
+        _id.value = id
+        _isEmailValid.value = Patterns.EMAIL_ADDRESS.matcher(id).matches()
     }
 
     // 비밀번호 입력 받기
     fun setPW(pw: String) {
-        _pw = pw
+        _pw.value = pw
     }
 
     // 아이디(이메일)가 존재하는지 확인 후 비밀번호 입력란으로 이동
     fun checkValidID(context: Context) {
-        if (_id.isEmpty() || !_isEmailValid) {
+        if (_id.value.isEmpty() || !_isEmailValid.value) {
             Toast.makeText(context, "올바른 이메일 주소를 입력해주세요", Toast.LENGTH_SHORT).show()
             return
         }
-        _isLoading = true
+        _isLoading.value = true
 
         viewModelScope.launch {
-            checkEmailUseCase(_id).collect {
+            checkEmailUseCase(_id.value).collect {
                 val checkEmailData = (it as TsboardResponse.Success<TsboardCheckEmail>).data
 
                 if (checkEmailData.code == ID_REGISTERED) {
-                    _loginState = LoginState.InputPassword
+                    _loginState.value = LoginState.InputPassword
                 } else if (checkEmailData.code == ID_INVALID) {
                     Toast.makeText(context, "유효하지 않은 메일 주소입니다", Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(context, "등록된 이메일 주소가 아닙니다", Toast.LENGTH_LONG).show()
                 }
-                _isLoading = false
+                _isLoading.value = false
             }
         }
     }
 
     // 비밀번호 입력 화면에서 아이디 입력 화면으로 (뒤로)
     fun backToID() {
-        _loginState = LoginState.InputEmail
+        _loginState.value = LoginState.InputEmail
     }
 
     // 입력된 아이디와 비밀번호가 유효한지 확인 후 (유효할 시) 홈 화면으로 이동
     fun login(context: Context) {
-        _isLoading = true
+        _isLoading.value = true
 
         viewModelScope.launch {
-            signInUseCase(_id, _pw).collect {
+            signInUseCase(_id.value, _pw.value).collect {
                 val signInData = (it as TsboardResponse.Success<TsboardSignin>).data
 
                 if (null == signInData.result) {
                     Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG).show()
                 } else {
                     _user.value = signInData.result!!
-                    _loginState = LoginState.LoginCompleted
+                    _loginState.value = LoginState.LoginCompleted
                 }
-                _isLoading = false
+                _isLoading.value = false
             }
         }
     }
 
     // 로그아웃하기
     fun logout() {
-        _loginState = LoginState.InputEmail
+        _loginState.value = LoginState.InputEmail
         _user.value = emptyUser
         viewModelScope.launch {
             clearUserInfoUseCase()
@@ -183,7 +182,7 @@ class AuthViewModel @Inject constructor(
     }
 
     // 로그인 세션 갱신
-    fun refresh(context: Context) {
+    fun refresh(context: Context? = null) {
         viewModelScope.launch {
             updateAccessToken(context)
         }
@@ -195,7 +194,7 @@ class AuthViewModel @Inject constructor(
             Toast.makeText(context, "이름은 2자 이상이어야 합니다", Toast.LENGTH_SHORT).show()
             return
         }
-        _isLoading = true
+        _isLoading.value = true
 
         viewModelScope.launch {
             updateAccessToken(context)
@@ -217,14 +216,14 @@ class AuthViewModel @Inject constructor(
                     Toast.makeText(context, "이름 변경에 실패했습니다 (${data.error})", Toast.LENGTH_SHORT)
                         .show()
                 }
-                _isLoading = false
+                _isLoading.value = false
             }
         }
     }
 
     // 사용자의 서명 업데이트하기
     fun updateSignature(signature: String, context: Context) {
-        _isLoading = true
+        _isLoading.value = true
 
         viewModelScope.launch {
             updateAccessToken(context)
@@ -246,14 +245,14 @@ class AuthViewModel @Inject constructor(
                     Toast.makeText(context, "서명 변경에 실패했습니다 (${data.error})", Toast.LENGTH_LONG)
                         .show()
                 }
-                _isLoading = false
+                _isLoading.value = false
             }
         }
     }
 
     // 사용자의 프로필 업데이트하기
     fun updateProfileImage(uri: Uri, context: Context) {
-        _isLoading = true
+        _isLoading.value = true
 
         viewModelScope.launch {
             updateAccessToken(context)
@@ -281,7 +280,7 @@ class AuthViewModel @Inject constructor(
                         context, "프로필 변경에 실패했습니다 (${data.error})", Toast.LENGTH_LONG
                     ).show()
                 }
-                _isLoading = false
+                _isLoading.value = false
             }
         }
     }

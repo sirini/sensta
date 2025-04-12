@@ -19,18 +19,20 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import me.sensta.ui.theme.robotoSlabFontFamily
-import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.common.LocalAuthViewModel
 
 @Composable
 fun LoginInputEmail() {
     val context = LocalContext.current
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel = LocalAuthViewModel.current
+    val id by authViewModel.id
+    val isEmailValid by authViewModel.isEmailValid
 
     Column(
         modifier = Modifier
@@ -46,7 +48,7 @@ fun LoginInputEmail() {
         )
 
         OutlinedTextField(
-            value = authViewModel.id,
+            value = id,
             onValueChange = { authViewModel.setID(it) },
             label = { Text(text = "이메일 주소를 입력하세요") },
             leadingIcon = {
@@ -56,7 +58,7 @@ fun LoginInputEmail() {
                 )
             },
             singleLine = true,
-            isError = authViewModel.id.isNotEmpty() && !authViewModel.isEmailValid
+            isError = id.isNotEmpty() && !isEmailValid
         )
 
         Spacer(modifier = Modifier.height(32.dp))

@@ -1,5 +1,6 @@
 package me.sensta.viewmodel
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,9 +18,9 @@ import javax.inject.Inject
 class ExplorerViewModel @Inject constructor(
     private val getPostListUseCase: GetPostListUseCase
 ) : ViewModel() {
-    private var _posts by
-    mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
-    val posts: TsboardResponse<List<TsboardPost>> get() = _posts
+    private var _posts =
+        mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
+    val posts: State<TsboardResponse<List<TsboardPost>>> get() = _posts
 
     private var _isLoadingMore by mutableStateOf(false)
     private var _option by mutableIntStateOf(0)
@@ -43,7 +44,7 @@ class ExplorerViewModel @Inject constructor(
         viewModelScope.launch {
             // 처음 로딩할 때는 Loading 상태로 두기
             if (_lastPostUid == 0) {
-                _posts = TsboardResponse.Loading
+                _posts.value = TsboardResponse.Loading
                 _page = 1
             }
             _isLoadingMore = true
@@ -51,18 +52,18 @@ class ExplorerViewModel @Inject constructor(
             getPostListUseCase(_lastPostUid, _option, _keyword).collect {
                 val postData = (it as TsboardResponse.Success<List<TsboardPost>>).data
                 if (_lastPostUid == 0) {
-                    _posts = it
+                    _posts.value = it
                     _bunch = it.data.size
 
                 } else {
                     // 이전 게시글들을 이어서 붙여나가기
                     val currentPosts =
-                        (_posts as TsboardResponse.Success<List<TsboardPost>>).data
+                        (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
                     postData.ifEmpty {
-                        _posts = TsboardResponse.Success(currentPosts)
+                        _posts.value = TsboardResponse.Success(currentPosts)
                         return@collect
                     }
-                    _posts = TsboardResponse.Success(currentPosts + postData)
+                    _posts.value = TsboardResponse.Success(currentPosts + postData)
                     _page++
                 }
                 _lastPostUid = postData.last().uid

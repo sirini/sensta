@@ -21,18 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import me.data.env.Env
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.robotoSlabFontFamily
-import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.common.LocalAuthViewModel
 
 @Composable
 fun LoginCompleted() {
     val navController = LocalNavController.current
-    val authViewModel: AuthViewModel = hiltViewModel()
+    val authViewModel = LocalAuthViewModel.current
     val user by authViewModel.user.collectAsState()
 
     Column(
