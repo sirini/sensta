@@ -54,9 +54,13 @@ class TsboardBoardRepositoryImpl @Inject constructor(
     }
 
     // 갤러리 사진 목록 가져오기
-    override suspend fun getPhotos(sinceUid: Int): TsboardResponse<List<TsboardPhoto>> {
+    override suspend fun getPhotos(
+        sinceUid: Int,
+        token: String
+    ): TsboardResponse<List<TsboardPhoto>> {
         return try {
             val response = api.getPhotos(
+                authorization = "Bearer $token",
                 id = Env.boardId,
                 page = 1,
                 pagingDirection = 1,

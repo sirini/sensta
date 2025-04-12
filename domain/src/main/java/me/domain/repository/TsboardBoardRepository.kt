@@ -15,7 +15,7 @@ interface TsboardBoardRepository {
     ): TsboardResponse<List<TsboardPost>>
 
     suspend fun getPost(postUid: Int): TsboardResponse<TsboardBoardViewResponse>
-    suspend fun getPhotos(sinceUid: Int): TsboardResponse<List<TsboardPhoto>>
+    suspend fun getPhotos(sinceUid: Int, token: String): TsboardResponse<List<TsboardPhoto>>
     suspend fun getComments(postUid: Int): TsboardResponse<List<TsboardComment>>
     suspend fun getHomeLatestPosts(
         limit: Int,

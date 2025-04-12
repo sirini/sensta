@@ -12,11 +12,13 @@ import kotlinx.coroutines.launch
 import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.GetPhotoListUseCase
+import me.domain.usecase.auth.GetUserInfoUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getPhotoListUseCase: GetPhotoListUseCase
+    private val getPhotoListUseCase: GetPhotoListUseCase,
+    private val getUserInfoUseCase: GetUserInfoUseCase
 ) : ViewModel() {
     private val _photos =
         mutableStateOf<TsboardResponse<List<TsboardPhoto>>>(TsboardResponse.Loading)
@@ -44,15 +46,20 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             if (_lastPostUid == 0) {
                 _photos.value = TsboardResponse.Loading
-                _page.value = 1
+                _page.intValue = 1
             }
             _isLoadingMore.value = true
 
-            getPhotoListUseCase(sinceUid = _lastPostUid).collect {
+            var token = ""
+            getUserInfoUseCase().collect {
+                token = it.token
+            }
+
+            getPhotoListUseCase(sinceUid = _lastPostUid, token = token).collect {
                 val photoData = (it as TsboardResponse.Success<List<TsboardPhoto>>).data
                 if (_lastPostUid == 0) {
                     _photos.value = it
-                    _bunch.value = it.data.size
+                    _bunch.intValue = it.data.size
 
                 } else {
                     // 이전 게시글들을 이어서 붙여나가기
@@ -63,7 +70,7 @@ class HomeViewModel @Inject constructor(
                         return@collect
                     }
                     _photos.value = TsboardResponse.Success(currentPhotos + photoData)
-                    _page.value++
+                    _page.intValue++
                 }
                 _lastPostUid = photoData.last().uid
             }

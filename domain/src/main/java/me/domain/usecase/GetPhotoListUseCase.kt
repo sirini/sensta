@@ -11,7 +11,10 @@ import javax.inject.Inject
 class GetPhotoListUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
-    operator fun invoke(sinceUid: Int = 0): Flow<TsboardResponse<List<TsboardPhoto>>> = flow {
-        emit(repository.getPhotos(sinceUid = sinceUid))
+    operator fun invoke(
+        sinceUid: Int = 0,
+        token: String
+    ): Flow<TsboardResponse<List<TsboardPhoto>>> = flow {
+        emit(repository.getPhotos(sinceUid = sinceUid, token = token))
     }
 }

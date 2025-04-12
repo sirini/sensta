@@ -49,6 +49,7 @@ interface TsboardGoapi {
     // 갤러리 목록 가져오기
     @GET("board/photo/list")
     suspend fun getPhotos(
+        @Header("Authorization") authorization: String,
         @Query("id") id: String,
         @Query("page") page: Int,
         @Query("pagingDirection") pagingDirection: Int,

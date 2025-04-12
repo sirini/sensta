@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,12 +54,22 @@ fun PostCardFooter(photo: TsboardPhoto) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = doLike) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "like",
-                    modifier = Modifier
-                        .size(20.dp)
-                )
+                if (photo.liked) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "like",
+                        modifier = Modifier
+                            .size(20.dp),
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "like",
+                        modifier = Modifier
+                            .size(20.dp)
+                    )
+                }
             }
             Text(
                 text = "${photo.like}개 좋아요",
