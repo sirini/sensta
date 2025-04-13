@@ -12,10 +12,12 @@ import kotlinx.coroutines.launch
 import me.domain.model.board.TsboardPost
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.GetPostListUseCase
+import me.domain.usecase.auth.GetUserInfoUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class ExplorerViewModel @Inject constructor(
+    private val getUserInfoUseCase: GetUserInfoUseCase,
     private val getPostListUseCase: GetPostListUseCase
 ) : ViewModel() {
     private var _posts =
@@ -49,7 +51,17 @@ class ExplorerViewModel @Inject constructor(
             }
             _isLoadingMore = true
 
-            getPostListUseCase(_lastPostUid, _option, _keyword).collect {
+            var token = ""
+            getUserInfoUseCase().collect {
+                token = it.token
+            }
+
+            getPostListUseCase(
+                sinceUid = _lastPostUid,
+                option = _option,
+                keyword = _keyword,
+                token = token
+            ).collect {
                 val postData = (it as TsboardResponse.Success<List<TsboardPost>>).data
                 if (_lastPostUid == 0) {
                     _posts.value = it

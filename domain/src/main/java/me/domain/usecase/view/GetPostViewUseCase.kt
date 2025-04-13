@@ -11,7 +11,10 @@ import javax.inject.Inject
 class GetPostViewUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
-    operator fun invoke(postUid: Int): Flow<TsboardResponse<TsboardBoardViewResponse>> = flow {
-        emit(repository.getPost(postUid = postUid))
+    operator fun invoke(
+        postUid: Int,
+        token: String
+    ): Flow<TsboardResponse<TsboardBoardViewResponse>> = flow {
+        emit(repository.getPost(postUid = postUid, token = token))
     }
 }

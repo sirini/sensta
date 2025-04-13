@@ -37,10 +37,12 @@ import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
 import me.sensta.viewmodel.common.CommonViewModel
 import me.sensta.viewmodel.common.LocalAuthViewModel
 import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.common.LocalHomeViewModel
 import me.sensta.viewmodel.common.LocalNotificationViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
@@ -60,12 +62,14 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 fun AppNavigation() {
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val homeViewModel: HomeViewModel = hiltViewModel()
     val commonViewModel: CommonViewModel = hiltViewModel()
     val notiViewModel: NotificationViewModel = hiltViewModel()
     val authViewModel: AuthViewModel = hiltViewModel()
 
     CompositionLocalProvider(
         LocalCommonViewModel provides commonViewModel,
+        LocalHomeViewModel provides homeViewModel,
         LocalNotificationViewModel provides notiViewModel,
         LocalAuthViewModel provides authViewModel,
         LocalNavController provides navController,

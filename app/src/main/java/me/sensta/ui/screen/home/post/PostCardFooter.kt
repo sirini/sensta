@@ -19,20 +19,44 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.domain.model.photo.TsboardPhoto
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.common.LocalHomeViewModel
 
 @Composable
 fun PostCardFooter(photo: TsboardPhoto) {
+    val context = LocalContext.current
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
-    val doLike: () -> Unit = { }
+    val homeViewModel = LocalHomeViewModel.current
+
+    var likeState by remember { mutableStateOf(photo.liked) }
+    var likeCount by remember { mutableIntStateOf(photo.like) }
+    var commentCount by remember { mutableIntStateOf(photo.comment) }
+
+    // 좋아요 클릭
+    val doLike: () -> Unit = {
+        likeState = !likeState
+        homeViewModel.like(photo.uid, likeState, context)
+
+        if (likeState) {
+            likeCount++
+        } else {
+            likeCount--
+        }
+    }
 
     // 게시글 보기 페이지로 이동
     val moveToView: () -> Unit = {
@@ -54,7 +78,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = doLike) {
-                if (photo.liked) {
+                if (likeState) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = "like",
@@ -72,7 +96,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
                 }
             }
             Text(
-                text = "${photo.like}개 좋아요",
+                text = "${likeCount}개 좋아요",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.clickable { doLike() })
 
@@ -85,7 +109,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
                 )
             }
             Text(
-                text = "${photo.comment}개 댓글",
+                text = "${commentCount}개 댓글",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.clickable { moveToView() })
         }

@@ -26,56 +26,6 @@ import retrofit2.http.Query
 
 interface TsboardGoapi {
 
-    // 게시글 목록 가져오기
-    @GET("board/list")
-    suspend fun getPosts(
-        @Query("id") id: String,
-        @Query("page") page: Int,
-        @Query("pagingDirection") pagingDirection: Int,
-        @Query("sinceUid") sinceUid: Int,
-        @Query("option") option: Int,
-        @Query("keyword") keyword: String
-    ): BoardListResponseDto
-
-    // 게시글 상세 정보 가져오기
-    @GET("board/view")
-    suspend fun getPost(
-        @Query("id") id: String,
-        @Query("postUid") postUid: Int,
-        @Query("needUpdateHit") needUpdateHit: Int,
-        @Query("latestLimit") latestLimit: Int
-    ): BoardViewResponseDto
-
-    // 갤러리 목록 가져오기
-    @GET("board/photo/list")
-    suspend fun getPhotos(
-        @Header("Authorization") authorization: String,
-        @Query("id") id: String,
-        @Query("page") page: Int,
-        @Query("pagingDirection") pagingDirection: Int,
-        @Query("sinceUid") sinceUid: Int,
-        @Query("option") option: Int
-    ): BoardPhotoListResponseDto
-
-    // 댓글 목록 가져오기
-    @GET("comment/list")
-    suspend fun getComments(
-        @Query("id") id: String,
-        @Query("postUid") postUid: Int,
-        @Query("page") page: Int,
-        @Query("pagingDirection") pagingDirection: Int,
-        @Query("bunch") bunch: Int,
-        @Query("sinceUid") sinceUid: Int
-    ): CommentListResponseDto
-
-    // 최신글 목록 가져오기 (탐색 페이지 초기 로딩용)
-    @GET("home/latest/post")
-    suspend fun getHomeLatestPosts(
-        @Query("id") id: String,
-        @Query("limit") limit: Int,
-        @Query("accessUserUid") accessUserUid: Int
-    ): HomeLatestResponseDto
-
     // 아이디가 존재하는지 확인하기
     @FormUrlEncoded
     @POST("auth/checkemail")
@@ -109,6 +59,68 @@ interface TsboardGoapi {
         @Part("password") password: RequestBody,
         @Part profile: MultipartBody.Part?
     ): UpdateUserInfoDto
+
+    // 게시글 목록 가져오기
+    @GET("board/list")
+    suspend fun getPosts(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("page") page: Int,
+        @Query("pagingDirection") pagingDirection: Int,
+        @Query("sinceUid") sinceUid: Int,
+        @Query("option") option: Int,
+        @Query("keyword") keyword: String
+    ): BoardListResponseDto
+
+    // 게시글에 좋아요 누르기
+    @PATCH("board/like")
+    suspend fun likePost(
+        @Header("Authorization") authorization: String,
+        @Query("boardUid") boardUid: Int,
+        @Query("postUid") postUid: Int,
+        @Query("liked") liked: Int
+    ): ResponseNothingDto
+
+    // 갤러리 목록 가져오기
+    @GET("board/photo/list")
+    suspend fun getPhotos(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("page") page: Int,
+        @Query("pagingDirection") pagingDirection: Int,
+        @Query("sinceUid") sinceUid: Int,
+        @Query("option") option: Int
+    ): BoardPhotoListResponseDto
+
+    // 게시글 상세 정보 가져오기
+    @GET("board/view")
+    suspend fun getPost(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("postUid") postUid: Int,
+        @Query("needUpdateHit") needUpdateHit: Int,
+        @Query("latestLimit") latestLimit: Int
+    ): BoardViewResponseDto
+
+    // 댓글 목록 가져오기
+    @GET("comment/list")
+    suspend fun getComments(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("postUid") postUid: Int,
+        @Query("page") page: Int,
+        @Query("pagingDirection") pagingDirection: Int,
+        @Query("bunch") bunch: Int,
+        @Query("sinceUid") sinceUid: Int
+    ): CommentListResponseDto
+
+    // 최신글 목록 가져오기 (탐색 페이지 초기 로딩용)
+    @GET("home/latest/post")
+    suspend fun getHomeLatestPosts(
+        @Query("id") id: String,
+        @Query("limit") limit: Int,
+        @Query("accessUserUid") accessUserUid: Int
+    ): HomeLatestResponseDto
 
     // 사용자에게 온 알림 내역 가져오기
     @GET("noti/load")

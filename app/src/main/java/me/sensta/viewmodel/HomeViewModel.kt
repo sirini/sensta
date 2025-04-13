@@ -1,5 +1,7 @@
 package me.sensta.viewmodel
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -9,16 +11,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import me.data.env.Env
+import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.GetPhotoListUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
+import me.domain.usecase.board.UpdateLikePostUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getPhotoListUseCase: GetPhotoListUseCase,
-    private val getUserInfoUseCase: GetUserInfoUseCase
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val updateLikePostUseCase: UpdateLikePostUseCase
 ) : ViewModel() {
     private val _photos =
         mutableStateOf<TsboardResponse<List<TsboardPhoto>>>(TsboardResponse.Loading)
@@ -84,5 +90,30 @@ class HomeViewModel @Inject constructor(
             _lastPostUid = 0
         }
         loadPhotos()
+    }
+
+    // 게시글에 좋아요 누르기
+    fun like(postUid: Int, liked: Boolean, context: Context? = null) {
+        viewModelScope.launch {
+            getUserInfoUseCase().collect {
+                if (it.token.isEmpty()) return@collect
+
+                updateLikePostUseCase(
+                    boardUid = Env.boardUid,
+                    postUid = postUid,
+                    liked = liked,
+                    token = it.token
+                ).collect { result ->
+                    val data = (result as TsboardResponse.Success<TsboardResponseNothing>).data
+                    if (data.success && null != context) {
+                        if (liked) {
+                            Toast.makeText(context, "이 게시글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "이 게시글의 좋아요를 취소했습니다", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
     }
 }

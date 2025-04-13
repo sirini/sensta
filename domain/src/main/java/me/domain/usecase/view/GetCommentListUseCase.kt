@@ -11,7 +11,8 @@ import javax.inject.Inject
 class GetCommentListUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
-    operator fun invoke(postUid: Int): Flow<TsboardResponse<List<TsboardComment>>> = flow {
-        emit(repository.getComments(postUid = postUid))
-    }
+    operator fun invoke(postUid: Int, token: String): Flow<TsboardResponse<List<TsboardComment>>> =
+        flow {
+            emit(repository.getComments(postUid = postUid, token = token))
+        }
 }

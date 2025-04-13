@@ -15,6 +15,6 @@ class GetNotificationUseCase @Inject constructor(
         token: String,
         limit: Int
     ): Flow<TsboardResponse<List<TsboardNotification>>> = flow {
-        emit(repository.getUserNotifications(token, limit))
+        emit(repository.getUserNotifications(limit = limit, token = token))
     }
 }

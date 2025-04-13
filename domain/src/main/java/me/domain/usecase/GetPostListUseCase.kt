@@ -14,8 +14,16 @@ class GetPostListUseCase @Inject constructor(
     operator fun invoke(
         sinceUid: Int,
         option: Int,
-        keyword: String
+        keyword: String,
+        token: String
     ): Flow<TsboardResponse<List<TsboardPost>>> = flow {
-        emit(repository.getPosts(sinceUid = sinceUid, option = option, keyword = keyword))
+        emit(
+            repository.getPosts(
+                sinceUid = sinceUid,
+                option = option,
+                keyword = keyword,
+                token = token
+            )
+        )
     }
 }

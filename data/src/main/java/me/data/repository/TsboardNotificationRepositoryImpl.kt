@@ -3,7 +3,7 @@ package me.data.repository
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.common.toEntity
 import me.data.remote.dto.home.toEntity
-import me.domain.model.common.ResponseNothing
+import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.home.TsboardNotification
 import me.domain.repository.TsboardNotificationRepository
 import me.domain.repository.TsboardResponse
@@ -15,8 +15,8 @@ class TsboardNotificationRepositoryImpl @Inject constructor(
 
     // 사용자에게 전달된 알림 내역 가져오기
     override suspend fun getUserNotifications(
-        token: String,
-        limit: Int
+        limit: Int,
+        token: String
     ): TsboardResponse<List<TsboardNotification>> {
         return try {
             val response = api.getUserNotifications(
@@ -31,9 +31,9 @@ class TsboardNotificationRepositoryImpl @Inject constructor(
 
     // 개별 알림에 대해서 확인 처리하기
     override suspend fun checkNotification(
-        token: String,
-        notiUid: Int
-    ): TsboardResponse<ResponseNothing> {
+        notiUid: Int,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing> {
         return try {
             val response = api.checkNotification(
                 authorization = "Bearer $token",
@@ -46,7 +46,7 @@ class TsboardNotificationRepositoryImpl @Inject constructor(
     }
 
     // 사용자에게 온 전체 알림 확인 처리하기
-    override suspend fun checkAllNotifications(token: String): TsboardResponse<ResponseNothing> {
+    override suspend fun checkAllNotifications(token: String): TsboardResponse<TsboardResponseNothing> {
         return try {
             val response = api.checkAllNotifications(
                 authorization = "Bearer $token"

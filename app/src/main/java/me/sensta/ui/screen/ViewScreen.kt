@@ -19,11 +19,11 @@ import me.sensta.viewmodel.common.LocalCommonViewModel
 @Composable
 fun ViewScreen() {
     val postViewViewModel: PostViewViewModel = hiltViewModel()
+    val commentViewModel: CommentViewModel = hiltViewModel()
     val scrollBehavior = LocalScrollBehavior.current
     val commonViewModel = LocalCommonViewModel.current
     val postUid by commonViewModel.postUid
     val post by postViewViewModel.post
-    val commentViewModel: CommentViewModel = hiltViewModel()
     val comments by commentViewModel.comments
 
     // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기

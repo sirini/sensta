@@ -24,27 +24,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domain.model.photo.TsboardPhoto
 import me.sensta.ui.screen.home.post.PostCard
-import me.sensta.viewmodel.HomeViewModel
+import me.sensta.viewmodel.common.LocalHomeViewModel
 
 @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
 @Composable
 fun PhotoList(photos: List<TsboardPhoto>) {
     val context = LocalContext.current
-    val photoViewModel: HomeViewModel = hiltViewModel()
-    val isLoading by photoViewModel.isLoadingMore
-    val bunch by photoViewModel.bunch
-    val page by photoViewModel.page
+    val homeViewModel = LocalHomeViewModel.current
+    val isLoading by homeViewModel.isLoadingMore
+    val bunch by homeViewModel.bunch
+    val page by homeViewModel.page
     val listState = rememberLazyListState()
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
         onRefresh = {
-            photoViewModel.refresh(resetLastUid = true)
+            homeViewModel.refresh(resetLastUid = true)
             Toast.makeText(context, "최근 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
         }
     )
@@ -57,7 +56,7 @@ fun PhotoList(photos: List<TsboardPhoto>) {
             .collect { index ->
                 index?.let {
                     if (index >= (bunch * page) - 1) {
-                        photoViewModel.refresh()
+                        homeViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
