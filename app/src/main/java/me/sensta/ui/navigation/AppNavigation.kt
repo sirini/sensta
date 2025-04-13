@@ -59,7 +59,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation() {
+fun AppNavigation(startDestination: String) {
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val homeViewModel: HomeViewModel = hiltViewModel()
@@ -81,7 +81,7 @@ fun AppNavigation() {
         ) { innerPadding ->
             NavHost(
                 navController = navController,
-                startDestination = Screen.Home.route,
+                startDestination = startDestination,
                 modifier = Modifier
                     .padding(innerPadding)
                     .nestedScroll(scrollBehavior.nestedScrollConnection)

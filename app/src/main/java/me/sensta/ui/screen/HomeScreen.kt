@@ -1,23 +1,19 @@
 package me.sensta.ui.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import me.domain.repository.TsboardResponse
+import me.sensta.ui.screen.home.CheckNotification
 import me.sensta.ui.screen.home.PhotoError
 import me.sensta.ui.screen.home.PhotoList
 import me.sensta.viewmodel.common.LocalHomeViewModel
-import me.sensta.viewmodel.common.LocalNotificationViewModel
 
 @Composable
 fun HomeScreen() {
     val homeViewModel = LocalHomeViewModel.current
-    val notiViewModel = LocalNotificationViewModel.current
     val photos by homeViewModel.photos
 
-    LaunchedEffect(Unit) {
-        notiViewModel.loadNotifications()
-    }
+    CheckNotification()
 
     // 사진 목록 가져오기
     when (val photoResponse = photos) {

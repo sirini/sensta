@@ -1,7 +1,6 @@
 package me.sensta.viewmodel
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Comment
@@ -15,6 +14,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.domain.model.home.TsboardNotification
 import me.domain.repository.TsboardResponse
@@ -46,30 +46,33 @@ class NotificationViewModel @Inject constructor(
         loadNotifications()
     }
 
+    // 사용자 정보 가져오기 헬퍼 함수
+    suspend fun getUserInfo() = getUserInfoUseCase().first()
+
+    // 알림 가져오기 헬퍼 함수
+    suspend fun getNotification(token: String, limit: Int) =
+        getNotificationUseCase(token, limit).first()
+
     // 사용자에게 온 알림 목록 가져오기
     fun loadNotifications(context: Context? = null) {
         _isLoading.value = true
         viewModelScope.launch {
-            getUserInfoUseCase().collect {
-                if (it.token.isEmpty()) {
-                    _notifications.value = TsboardResponse.Success(emptyList())
-                    _hasUncheckedNotification.value = false
-                    _isLoading.value = false
-                    return@collect
-                }
+            val user = getUserInfo()
+            if (user.token.isEmpty()) {
+                _notifications.value = TsboardResponse.Success(emptyList())
+                _hasUncheckedNotification.value = false
+                _isLoading.value = false
+                return@launch
+            }
 
-                getNotificationUseCase(it.token, 20).collect { notis ->
-                    val notiResponse = (notis as TsboardResponse.Success)
-                    _notifications.value = notiResponse
-                    _hasUncheckedNotification.value = notiResponse.data.count { !it.checked } > 0
-                    _isLoading.value = false
+            val noti = getNotification(user.token, 20)
+            val notiResponse = (noti as TsboardResponse.Success)
+            _notifications.value = notiResponse
+            _hasUncheckedNotification.value = notiResponse.data.count { !it.checked } > 0
+            _isLoading.value = false
 
-                    Log.d("DEBUG", "_hasUncheckedNotification: ${_hasUncheckedNotification.value}")
-
-                    context?.let {
-                        Toast.makeText(context, "알림 목록을 업데이트 하였습니다", Toast.LENGTH_SHORT).show()
-                    }
-                }
+            context?.let {
+                Toast.makeText(context, "알림 목록을 업데이트 하였습니다", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -88,14 +91,14 @@ class NotificationViewModel @Inject constructor(
     // 개별 알림 확인 처리하기
     fun checkNotification(notiUid: Int) {
         viewModelScope.launch {
-            getUserInfoUseCase().collect {
-                if (it.token.isEmpty()) {
-                    return@collect
-                }
-                checkNotificationUseCase(it.token, notiUid).collect {
-                    if (it is TsboardResponse.Success) {
-                        loadNotifications()
-                    }
+            val user = getUserInfo()
+            if (user.token.isEmpty()) {
+                return@launch
+            }
+
+            checkNotificationUseCase(user.token, notiUid).collect {
+                if (it is TsboardResponse.Success) {
+                    loadNotifications()
                 }
             }
         }
@@ -104,19 +107,20 @@ class NotificationViewModel @Inject constructor(
     // 전체 알림 확인 처리하기
     fun checkAllNotifications(context: Context? = null) {
         viewModelScope.launch {
-            getUserInfoUseCase().collect {
-                if (it.token.isEmpty()) {
-                    return@collect
-                }
-                checkAllNotificationUseCase(it.token).collect {
-                    if (it is TsboardResponse.Success) {
-                        loadNotifications()
-                        context?.let {
-                            Toast.makeText(context, "모든 알림을 확인하였습니다", Toast.LENGTH_SHORT).show()
-                        }
+            val user = getUserInfo()
+            if (user.token.isEmpty()) {
+                return@launch
+            }
+            
+            checkAllNotificationUseCase(user.token).collect {
+                if (it is TsboardResponse.Success) {
+                    loadNotifications()
+                    context?.let {
+                        Toast.makeText(context, "모든 알림을 확인하였습니다", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
         }
+
     }
 }
