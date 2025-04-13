@@ -30,4 +30,11 @@ interface TsboardBoardRepository {
         liked: Int,
         token: String
     ): TsboardResponse<TsboardResponseNothing>
+
+    suspend fun updateLikeComment(
+        boardUid: Int,
+        commentUid: Int,
+        liked: Int,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing>
 }

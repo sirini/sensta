@@ -139,4 +139,24 @@ class TsboardBoardRepositoryImpl @Inject constructor(
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
     }
+
+    // 댓글에 대한 좋아요 업데이트
+    override suspend fun updateLikeComment(
+        boardUid: Int,
+        commentUid: Int,
+        liked: Int,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing> {
+        return try {
+            val response = api.likeComment(
+                authorization = "Bearer $token",
+                boardUid = boardUid,
+                commentUid = commentUid,
+                liked = liked
+            )
+            TsboardResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
 }

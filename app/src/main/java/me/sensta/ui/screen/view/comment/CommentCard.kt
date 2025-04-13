@@ -8,12 +8,26 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.model.board.TsboardComment
+import me.sensta.viewmodel.CommentViewModel
 
 @Composable
 fun CommentCard(comment: TsboardComment) {
+    val context = LocalContext.current
+    val commentViewModel: CommentViewModel = hiltViewModel()
+
+    var likeState by remember { mutableStateOf(comment.liked) }
+    var likeCount by remember { mutableIntStateOf(comment.like) }
+
     Card(
         modifier = Modifier
             .padding(horizontal = 12.dp)
@@ -26,8 +40,17 @@ fun CommentCard(comment: TsboardComment) {
             defaultElevation = 0.dp
         )
     ) {
-        CommentCardHeader(comment)
-        CommentCardBody(comment)
+        CommentCardHeader(comment, likeState) {
+            likeState = !likeState
+            commentViewModel.like(comment.uid, likeState, context)
+
+            if (likeState) {
+                likeCount++
+            } else {
+                likeCount--
+            }
+        }
+        CommentCardBody(comment, likeCount)
     }
     Spacer(modifier = Modifier.height(12.dp))
 }

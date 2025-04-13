@@ -81,6 +81,15 @@ interface TsboardGoapi {
         @Query("liked") liked: Int
     ): ResponseNothingDto
 
+    // 댓글에 좋아요 누르기
+    @PATCH("comment/like")
+    suspend fun likeComment(
+        @Header("Authorization") authorization: String,
+        @Query("boardUid") boardUid: Int,
+        @Query("commentUid") commentUid: Int,
+        @Query("liked") liked: Int
+    ): ResponseNothingDto
+
     // 갤러리 목록 가져오기
     @GET("board/photo/list")
     suspend fun getPhotos(

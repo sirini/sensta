@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,7 +27,7 @@ import me.data.env.Env
 import me.domain.model.board.TsboardComment
 
 @Composable
-fun CommentCardHeader(comment: TsboardComment) {
+fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,11 +62,19 @@ fun CommentCardHeader(comment: TsboardComment) {
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { /* TODO */ }) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "like"
-                )
+            IconButton(onClick = onLikeClick) {
+                if (likeState) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "like",
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "like"
+                    )
+                }
             }
         }
     }

@@ -26,7 +26,7 @@ import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
 
 @Composable
-fun CommentCardBody(comment: TsboardComment) {
+fun CommentCardBody(comment: TsboardComment, likeCount: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,7 +49,7 @@ fun CommentCardBody(comment: TsboardComment) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "${comment.like}개 좋아요",
+                    text = "${likeCount}개 좋아요",
                     style = MaterialTheme.typography.bodySmall
                 )
 
