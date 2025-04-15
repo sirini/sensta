@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Sensta</string>
+    <string name="google_android_client_id">955290530916-68bkvcebi8i2lam86gnq261l1aja7e74.apps.googleusercontent.com</string>
+    <string name="google_web_client_id">955290530916-kdfl7ciihb0t48sl1sm6nrck1drhj428.apps.googleusercontent.com</string>
 </resources>

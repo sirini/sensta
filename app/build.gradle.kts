@@ -93,6 +93,9 @@ dependencies {
     kapt(libs.androidx.hilt.compiler)
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Google login
+    implementation(libs.play.services.auth)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -24,7 +24,7 @@ class NotificationCheckWorker @AssistedInject constructor(
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun doWork(): Result {
         val user = getUserInfoUseCase().first()
-        if (user.token.isEmpty()) return Result.failure()
+        if (user.token.isEmpty()) return Result.success()
 
         val noti = getNotificationUseCase(user.token, 20).first()
         AppNotification.check(applicationContext, noti)

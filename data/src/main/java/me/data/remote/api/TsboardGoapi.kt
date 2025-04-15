@@ -26,6 +26,13 @@ import retrofit2.http.Query
 
 interface TsboardGoapi {
 
+    // 구글 로그인 후 id_token값 전송하고 토큰 받아오기
+    @FormUrlEncoded
+    @POST("auth/android/google")
+    suspend fun loginWithGoogle(
+        @Field("id_token") idToken: String
+    ): SigninDto
+
     // 아이디가 존재하는지 확인하기
     @FormUrlEncoded
     @POST("auth/checkemail")
