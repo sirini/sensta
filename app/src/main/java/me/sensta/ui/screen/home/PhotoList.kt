@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.domain.model.photo.TsboardPhoto
 import me.sensta.ui.screen.home.post.PostCard
-import me.sensta.viewmodel.common.LocalHomeViewModel
+import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @OptIn(ExperimentalMaterialApi::class, FlowPreview::class)
 @Composable

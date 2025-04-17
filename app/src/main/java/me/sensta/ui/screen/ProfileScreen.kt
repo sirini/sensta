@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import me.sensta.ui.screen.profile.ProfileView
-import me.sensta.viewmodel.common.LocalAuthViewModel
-import me.sensta.viewmodel.common.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 @Composable
 fun ProfileScreen() {

@@ -1,4 +1,4 @@
-package me.sensta.viewmodel.common
+package me.sensta.viewmodel.local
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import me.sensta.viewmodel.NotificationViewModel

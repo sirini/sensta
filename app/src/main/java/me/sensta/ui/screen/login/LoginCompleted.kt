@@ -26,7 +26,7 @@ import me.data.env.Env
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.robotoSlabFontFamily
-import me.sensta.viewmodel.common.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun LoginCompleted() {

@@ -13,7 +13,7 @@ import me.sensta.ui.screen.view.ViewPost
 import me.sensta.ui.screen.view.comment.CommentCard
 import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.PostViewViewModel
-import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

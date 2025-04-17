@@ -21,7 +21,7 @@ import me.data.env.Env
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.common.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import me.domain.model.photo.TsboardPhoto
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.common.LocalCommonViewModel
-import me.sensta.viewmodel.common.LocalHomeViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @Composable
 fun PostCardFooter(photo: TsboardPhoto) {

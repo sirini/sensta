@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import me.domain.model.home.TsboardNotification
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.common.LocalCommonViewModel
-import me.sensta.viewmodel.common.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

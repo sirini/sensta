@@ -1,10 +1,9 @@
-package me.sensta.viewmodel.common
+package me.sensta.viewmodel
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.asIntState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -14,11 +13,17 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     private val _postUid = mutableIntStateOf(0)
     val postUid = _postUid.asIntState()
 
+    private val _fullImagePath = mutableStateOf<String>("")
+    val fullImagePath: State<String> get() = _fullImagePath
+
+    private val _showFullScreen = mutableStateOf(false)
+    val showFullScreen: State<Boolean> get() = _showFullScreen
+
     private val _pagerIndex = mutableIntStateOf(0)
     val pagerIndex = _pagerIndex.asIntState()
 
-    private var _showCommentDialog by mutableStateOf(false)
-    val showCommentDialog: Boolean get() = _showCommentDialog
+    private var _showCommentDialog = mutableStateOf(false)
+    val showCommentDialog: State<Boolean> get() = _showCommentDialog
 
     // 이미 목록에서 가져왔던 사진 정보들 저장하기
     fun updatePostUid(postUid: Int) {
@@ -33,11 +38,23 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     // 댓글 달기용 다이얼로그 띄우기
     fun openWriteCommentDialog(postUid: Int? = null) {
         postUid?.let { _postUid.intValue = postUid }
-        _showCommentDialog = true
+        _showCommentDialog.value = true
     }
 
     // 댓글 달기용 다이얼로그 닫기
     fun closeWriteCommentDialog() {
-        _showCommentDialog = false
+        _showCommentDialog.value = false
+    }
+
+    // 이미지 전체 화면으로 보기
+    fun openFullScreen(imagePath: String) {
+        _fullImagePath.value = imagePath
+        _showFullScreen.value = true
+    }
+
+    // 이미지 전체 화면 닫기
+    fun closeFullScreen() {
+        _fullImagePath.value = ""
+        _showFullScreen.value = false
     }
 }

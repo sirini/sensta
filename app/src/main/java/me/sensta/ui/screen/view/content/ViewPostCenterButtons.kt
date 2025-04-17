@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @Composable
 fun ViewPostCenterButtons() {

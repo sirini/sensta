@@ -27,7 +27,7 @@ import me.sensta.ui.screen.login.LoginCompleted
 import me.sensta.ui.screen.login.LoginInputEmail
 import me.sensta.ui.screen.login.LoginInputPassword
 import me.sensta.viewmodel.LoginState
-import me.sensta.viewmodel.common.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun LoginScreen() {

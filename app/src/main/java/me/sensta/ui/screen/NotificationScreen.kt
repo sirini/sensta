@@ -10,8 +10,8 @@ import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.screen.notification.NotificationList
-import me.sensta.viewmodel.common.LocalAuthViewModel
-import me.sensta.viewmodel.common.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

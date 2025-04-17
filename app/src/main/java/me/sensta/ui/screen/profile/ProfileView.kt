@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import me.sensta.util.CustomTime
-import me.sensta.viewmodel.common.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
 import java.util.Locale
 
 @Composable

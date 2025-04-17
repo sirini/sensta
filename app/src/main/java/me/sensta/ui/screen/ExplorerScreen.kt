@@ -22,7 +22,7 @@ import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.explorer.GridImage
 import me.sensta.ui.screen.explorer.SearchBox
 import me.sensta.viewmodel.ExplorerViewModel
-import me.sensta.viewmodel.common.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable

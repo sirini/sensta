@@ -27,7 +27,7 @@ import me.domain.model.board.TsboardPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.ExplorerViewModel
-import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @OptIn(FlowPreview::class)
 @Composable

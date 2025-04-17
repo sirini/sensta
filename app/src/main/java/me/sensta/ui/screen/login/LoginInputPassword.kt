@@ -34,7 +34,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import me.sensta.ui.theme.robotoSlabFontFamily
-import me.sensta.viewmodel.common.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun LoginInputPassword() {

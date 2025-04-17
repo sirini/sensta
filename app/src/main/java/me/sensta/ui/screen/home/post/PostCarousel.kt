@@ -1,5 +1,6 @@
 package me.sensta.ui.screen.home.post
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -21,7 +23,7 @@ import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
 import me.domain.model.photo.TsboardImage
-import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -55,7 +57,15 @@ fun PostCarousel(images: List<TsboardImage>) {
             AsyncImage(
                 model = Env.domain + images[page].thumbnail.large,
                 contentDescription = "Image ${page + 1}",
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures(onDoubleTap = {
+                            commonViewModel.openFullScreen(
+                                imagePath = images[page].thumbnail.large,
+                            )
+                        })
+                    },
                 contentScale = ContentScale.Crop
             )
         }

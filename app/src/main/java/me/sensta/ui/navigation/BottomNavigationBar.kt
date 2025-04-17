@@ -16,7 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import me.data.env.Env
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.common.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun BottomNavigationBar() {

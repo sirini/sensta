@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import me.domain.model.board.TsboardPost
-import me.sensta.viewmodel.common.LocalHomeViewModel
+import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @Composable
 fun ViewPostLikeButton(post: TsboardPost) {

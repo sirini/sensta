@@ -6,7 +6,7 @@ import me.domain.repository.TsboardResponse
 import me.sensta.ui.screen.home.CheckNotification
 import me.sensta.ui.screen.home.PhotoError
 import me.sensta.ui.screen.home.PhotoList
-import me.sensta.viewmodel.common.LocalHomeViewModel
+import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @Composable
 fun HomeScreen() {

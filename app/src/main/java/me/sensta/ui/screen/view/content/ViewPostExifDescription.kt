@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.domain.model.photo.TsboardImage
-import me.sensta.viewmodel.common.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @Composable
 fun ViewPostExifDescription(images: List<TsboardImage>) {

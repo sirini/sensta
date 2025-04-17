@@ -1,5 +1,12 @@
 package me.sensta.ui.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -16,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -35,15 +43,16 @@ import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.UploadScreen
 import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
+import me.sensta.ui.screen.home.post.PostCardFullScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.CommonViewModel
 import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
-import me.sensta.viewmodel.common.CommonViewModel
-import me.sensta.viewmodel.common.LocalAuthViewModel
-import me.sensta.viewmodel.common.LocalCommonViewModel
-import me.sensta.viewmodel.common.LocalHomeViewModel
-import me.sensta.viewmodel.common.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalHomeViewModel
+import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Home : Screen("home", "홈", Icons.Default.Home)
@@ -66,6 +75,8 @@ fun AppNavigation(startDestination: String) {
     val commonViewModel: CommonViewModel = hiltViewModel()
     val notiViewModel: NotificationViewModel = hiltViewModel()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val showFullScreen by commonViewModel.showFullScreen
+    val showCommentDialog by commonViewModel.showCommentDialog
 
     CompositionLocalProvider(
         LocalCommonViewModel provides commonViewModel,
@@ -75,36 +86,48 @@ fun AppNavigation(startDestination: String) {
         LocalNavController provides navController,
         LocalScrollBehavior provides scrollBehavior,
     ) {
-        Scaffold(
-            topBar = { TopBar() },
-            bottomBar = { BottomNavigationBar() }
-        ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .nestedScroll(scrollBehavior.nestedScrollConnection)
-            ) {
-                composable(Screen.Home.route) { HomeScreen() }
-                composable(Screen.View.route) { ViewScreen() }
-                composable(Screen.Explorer.route) { ExplorerScreen() }
-                composable(Screen.Login.route) { LoginScreen() }
-                composable(Screen.Upload.route) { UploadScreen() }
-                composable(Screen.Profile.route) { ProfileScreen() }
-                composable(Screen.Notification.route) { NotificationScreen() }
-                composable(Screen.Config.route) { ConfigScreen() }
-                composable(Screen.Version.route) { VersionScreen() }
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            Scaffold(
+                topBar = { TopBar() },
+                bottomBar = { BottomNavigationBar() }
+            ) { innerPadding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = startDestination,
+                    modifier = Modifier
+                        .padding(innerPadding)
+                        .nestedScroll(scrollBehavior.nestedScrollConnection)
+                ) {
+                    composable(Screen.Home.route) { HomeScreen() }
+                    composable(Screen.View.route) { ViewScreen() }
+                    composable(Screen.Explorer.route) { ExplorerScreen() }
+                    composable(Screen.Login.route) { LoginScreen() }
+                    composable(Screen.Upload.route) { UploadScreen() }
+                    composable(Screen.Profile.route) { ProfileScreen() }
+                    composable(Screen.Notification.route) { NotificationScreen() }
+                    composable(Screen.Config.route) { ConfigScreen() }
+                    composable(Screen.Version.route) { VersionScreen() }
+                }
+
+                // 댓글 작성하기 다이얼로그
+                if (showCommentDialog) {
+                    ViewPostCommentDialog(
+                        onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
+                    ) {
+                        // TODO 댓글 작성 처리
+                        commonViewModel.closeWriteCommentDialog()
+                    }
+                }
             }
 
-            // 댓글 작성하기 다이얼로그
-            if (commonViewModel.showCommentDialog) {
-                ViewPostCommentDialog(
-                    onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
-                ) {
-                    // TODO 댓글 작성 처리
-                    commonViewModel.closeWriteCommentDialog()
-                }
+            // 전체 화면 오버레이
+            AnimatedVisibility(
+                visible = showFullScreen,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically(),
+            ) {
+                PostCardFullScreen()
             }
         }
     }
