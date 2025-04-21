@@ -60,7 +60,7 @@ fun PostCarousel(images: List<TsboardImage>) {
                 modifier = Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
-                        detectTapGestures(onDoubleTap = {
+                        detectTapGestures(onTap = {
                             commonViewModel.openFullScreen(
                                 imagePath = images[page].thumbnail.large,
                             )

@@ -5,10 +5,10 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -20,19 +20,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import me.data.env.Env
 import me.sensta.viewmodel.local.LocalCommonViewModel
-import kotlin.math.abs
+import kotlin.math.max
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun PostCardFullScreen() {
+    val context = LocalContext.current
+    val density = LocalDensity.current
     val commonViewModel = LocalCommonViewModel.current
     val fullImagePath by commonViewModel.fullImagePath
+    val screenWidth = remember {
+        with(density) { context.resources.displayMetrics.widthPixels }
+    }
+    val screenHeight = remember {
+        with(density) { context.resources.displayMetrics.heightPixels }
+    }
 
     var scale by remember { mutableFloatStateOf(1f) }
     var offsetX by remember { mutableFloatStateOf(0f) }
@@ -46,12 +56,15 @@ fun PostCardFullScreen() {
             .pointerInput(Unit) {
                 detectTransformGestures { _, pan, zoom, _ ->
                     scale = (scale * zoom).coerceIn(1f, 5f)
-                    offsetX += pan.x
-                    offsetY += pan.y
 
-                    if (abs(offsetY) > 300f && scale < 1.2f) {
-                        commonViewModel.closeFullScreen()
-                    }
+                    val imageWidth = screenWidth * scale
+                    val imageHeight = screenHeight * scale
+
+                    val maxOffsetX = max((imageWidth - screenWidth) / 2f, 0f)
+                    val maxOffsetY = max((imageHeight - screenHeight) / 2f, 0f)
+
+                    offsetX = (offsetX + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
+                    offsetY = (offsetY + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
                 }
             }
     ) {
