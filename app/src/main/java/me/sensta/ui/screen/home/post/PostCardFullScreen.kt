@@ -55,10 +55,14 @@ fun PostCardFullScreen() {
             .zIndex(1f)
             .pointerInput(Unit) {
                 detectTransformGestures { _, pan, zoom, _ ->
+                    if (zoom < 0.9f) {
+                        commonViewModel.closeFullScreen()
+                        return@detectTransformGestures
+                    }
                     scale = (scale * zoom).coerceIn(1f, 5f)
 
                     val imageWidth = screenWidth * scale
-                    val imageHeight = screenHeight * scale
+                    val imageHeight = screenHeight * scale * 0.6f
 
                     val maxOffsetX = max((imageWidth - screenWidth) / 2f, 0f)
                     val maxOffsetY = max((imageHeight - screenHeight) / 2f, 0f)
