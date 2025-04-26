@@ -1,6 +1,7 @@
 package me.sensta.viewmodel
 
 import android.content.Context
+import android.credentials.GetCredentialException
 import android.net.Uri
 import android.util.Patterns
 import android.widget.Toast
@@ -9,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -289,16 +289,15 @@ class AuthViewModel @Inject constructor(
         updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
             val token = (it as TsboardResponse.Success<TsboardUpdateAccessToken>).data
             if (null != token.result) {
-                _user.value = _user.value.copy(
-                    token = token.result!!,
-                    signin = CustomTime.now()
+                _user.emit(
+                    _user.value.copy(token = token.result!!, signin = CustomTime.now())
                 )
                 saveUserInfoUseCase(_user.value)
                 context?.let {
                     Toast.makeText(context, "로그인 세션이 갱신되었습니다", Toast.LENGTH_SHORT).show()
                 }
             } else {
-                _user.value = emptyUser
+                _user.emit(emptyUser)
                 clearUserInfoUseCase()
                 context?.let {
                     Toast.makeText(context, "로그인 세션이 만료되었습니다. 다시 로그인을 해주세요.", Toast.LENGTH_SHORT)
