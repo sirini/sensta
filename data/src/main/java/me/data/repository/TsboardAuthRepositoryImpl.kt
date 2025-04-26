@@ -72,12 +72,37 @@ class TsboardAuthRepositoryImpl @Inject constructor(
         }
     }
 
+    // Data Store에 보관했던 사용자 정보 지우기
+    override suspend fun clearUserInfo() {
+        context.dataStore.edit { prefs -> prefs.clear() }
+    }
+
+    // 사용자 로그인 후 정보를 가져오기
+    override suspend fun getUserInfo(): TsboardSigninResult {
+        return try {
+            userInfoFlow.first()
+        } catch (e: Exception) {
+            emptyUser
+        }
+    }
+
     // 아이디와 비밀번호로 로그인하기
     override suspend fun signIn(id: String, password: String): TsboardResponse<TsboardSignin> {
         return try {
             val hashedPassword = password.toSHA256()
             val response = api.signIn(id, hashedPassword).toEntity()
 
+            response.result?.also { saveUserInfo(it) }
+            TsboardResponse.Success(response)
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 구글 계정으로 로그인하기
+    override suspend fun signInWithGoogle(idToken: String): TsboardResponse<TsboardSignin> {
+        return try {
+            val response = api.signInWithGoogle(idToken).toEntity()
             response.result?.also { saveUserInfo(it) }
             TsboardResponse.Success(response)
         } catch (e: Exception) {
@@ -102,20 +127,6 @@ class TsboardAuthRepositoryImpl @Inject constructor(
             prefs[UserPreferencesKeys.TOKEN] = user.token
             prefs[UserPreferencesKeys.REFRESH] = user.refresh
         }
-    }
-
-    // 사용자 로그인 후 정보를 가져오기
-    override suspend fun getUserInfo(): TsboardSigninResult {
-        return try {
-            userInfoFlow.first()
-        } catch (e: Exception) {
-            emptyUser
-        }
-    }
-
-    // Data Store에 보관했던 사용자 정보 지우기
-    override suspend fun clearUserInfo() {
-        context.dataStore.edit { prefs -> prefs.clear() }
     }
 
     // 리프레시 토큰으로 새 액세스 토큰 발급받기

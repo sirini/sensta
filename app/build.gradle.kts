@@ -94,7 +94,9 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     // Google login
-    implementation(libs.play.services.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

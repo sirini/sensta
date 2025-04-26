@@ -4,6 +4,7 @@ activityComposeVersion = "1.9.0"
 agp = "8.9.0"
 coilCompose = "2.6.0"
 composeBomVersion = "2024.03.00"
+credentials = "1.3.0"
 datastorePreferences = "1.1.3"
 hiltAndroidGradlePlugin = "2.52"
 hiltNavigationCompose = "1.2.0"
@@ -34,6 +35,7 @@ ucrop = "2.2.10"
 uiTextGoogleFonts = "1.7.8"
 navigationCompose = "2.8.9"
 workRuntimeKtx = "2.9.0"
+googleid = "1.1.1"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistPager" }
@@ -42,6 +44,8 @@ accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pa
 androidx-activity-compose-v190 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-compose-bom-v20240300 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltNavigationCompose" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -85,6 +89,7 @@ ucrop = { module = "com.github.yalantis:ucrop", version.ref = "ucrop" }
 ui = { module = "androidx.compose.ui:ui" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

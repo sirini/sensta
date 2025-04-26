@@ -29,7 +29,7 @@ interface TsboardGoapi {
     // 구글 로그인 후 id_token값 전송하고 토큰 받아오기
     @FormUrlEncoded
     @POST("auth/android/google")
-    suspend fun loginWithGoogle(
+    suspend fun signInWithGoogle(
         @Field("id_token") idToken: String
     ): SigninDto
 
