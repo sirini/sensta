@@ -69,6 +69,10 @@ fun PostCardFullScreen() {
 
                     offsetX = (offsetX + pan.x).coerceIn(-maxOffsetX, maxOffsetX)
                     offsetY = (offsetY + pan.y).coerceIn(-maxOffsetY, maxOffsetY)
+
+                    if (pan.y > 180f || pan.y < -180f) {
+                        commonViewModel.closeFullScreen()
+                    }
                 }
             }
     ) {
