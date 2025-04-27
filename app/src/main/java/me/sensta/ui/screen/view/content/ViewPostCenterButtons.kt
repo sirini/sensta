@@ -23,7 +23,7 @@ import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @Composable
-fun ViewPostCenterButtons() {
+fun ViewPostCenterButtons(postUid: Int) {
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
 
@@ -50,7 +50,7 @@ fun ViewPostCenterButtons() {
         }
 
         Button(
-            onClick = { commonViewModel.openWriteCommentDialog() },
+            onClick = { commonViewModel.openWriteCommentDialog(postUid) },
             modifier = Modifier
                 .weight(2f)
                 .padding(start = 8.dp),

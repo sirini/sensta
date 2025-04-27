@@ -7,6 +7,7 @@ import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
+// 닉네임 중복 확인하기
 class CheckNameUseCase @Inject constructor(
     private val repository: TsboardAuthRepository
 ) {

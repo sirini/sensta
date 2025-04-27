@@ -11,15 +11,15 @@ import me.domain.repository.TsboardResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.view.ViewPost
 import me.sensta.ui.screen.view.comment.CommentCard
-import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.PostViewViewModel
+import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewScreen() {
     val postViewViewModel: PostViewViewModel = hiltViewModel()
-    val commentViewModel: CommentViewModel = hiltViewModel()
+    val commentViewModel = LocalCommentViewModel.current
     val scrollBehavior = LocalScrollBehavior.current
     val commonViewModel = LocalCommonViewModel.current
     val postUid by commonViewModel.postUid

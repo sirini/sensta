@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,10 +49,12 @@ import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.home.post.PostCardFullScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.CommonViewModel
 import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
@@ -72,21 +75,25 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(startDestination: String) {
+    val context = LocalContext.current
     val navController = rememberNavController()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val homeViewModel: HomeViewModel = hiltViewModel()
-    val commonViewModel: CommonViewModel = hiltViewModel()
-    val notiViewModel: NotificationViewModel = hiltViewModel()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val commonViewModel: CommonViewModel = hiltViewModel()
+    val commentViewModel: CommentViewModel = hiltViewModel()
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val notiViewModel: NotificationViewModel = hiltViewModel()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val showFullScreen by commonViewModel.showFullScreen
     val showCommentDialog by commonViewModel.showCommentDialog
+    val postUid by commonViewModel.postUid
 
     CompositionLocalProvider(
+        LocalNavController provides navController,
+        LocalAuthViewModel provides authViewModel,
         LocalCommonViewModel provides commonViewModel,
+        LocalCommentViewModel provides commentViewModel,
         LocalHomeViewModel provides homeViewModel,
         LocalNotificationViewModel provides notiViewModel,
-        LocalAuthViewModel provides authViewModel,
-        LocalNavController provides navController,
         LocalScrollBehavior provides scrollBehavior,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -118,8 +125,8 @@ fun AppNavigation(startDestination: String) {
                 if (showCommentDialog) {
                     ViewPostCommentDialog(
                         onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
-                    ) {
-                        // TODO 댓글 작성 처리
+                    ) { content ->
+                        commentViewModel.write(postUid = postUid, content.trim(), context)
                         commonViewModel.closeWriteCommentDialog()
                     }
                 }

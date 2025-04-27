@@ -7,6 +7,7 @@ import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
+// 액세스 토큰 업데이트
 class UpdateAccessTokenUseCase @Inject constructor(
     private val repository: TsboardAuthRepository
 ) {

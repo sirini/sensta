@@ -7,23 +7,15 @@ import me.domain.repository.TsboardBoardRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
-// 게시글에 좋아요 누르기
-class UpdateLikePostUseCase @Inject constructor(
+// 댓글 삭제하기
+class RemoveCommentUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
     operator fun invoke(
         boardUid: Int,
-        postUid: Int,
-        liked: Boolean,
+        removeTargetUid: Int,
         token: String
     ): Flow<TsboardResponse<TsboardResponseNothing>> = flow {
-        emit(
-            repository.updateLikePost(
-                boardUid = boardUid,
-                postUid = postUid,
-                liked = if (liked) 1 else 0,
-                token = token
-            )
-        )
+        emit(repository.removeComment(boardUid, removeTargetUid, token))
     }
 }

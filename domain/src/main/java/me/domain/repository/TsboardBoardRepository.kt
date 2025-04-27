@@ -2,6 +2,7 @@ package me.domain.repository
 
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
+import me.domain.model.board.TsboardCommentWriteResponse
 import me.domain.model.board.TsboardPost
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.home.TsboardLatestPost
@@ -24,6 +25,12 @@ interface TsboardBoardRepository {
 
     suspend fun getPost(postUid: Int, token: String): TsboardResponse<TsboardBoardViewResponse>
     suspend fun getPhotos(sinceUid: Int, token: String): TsboardResponse<List<TsboardPhoto>>
+    suspend fun removeComment(
+        boardUid: Int,
+        removeTargetUid: Int,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing>
+
     suspend fun updateLikePost(
         boardUid: Int,
         postUid: Int,
@@ -37,4 +44,11 @@ interface TsboardBoardRepository {
         liked: Int,
         token: String
     ): TsboardResponse<TsboardResponseNothing>
+
+    suspend fun writeComment(
+        boardUid: Int,
+        postUid: Int,
+        content: String,
+        token: String
+    ): TsboardResponse<TsboardCommentWriteResponse>
 }

@@ -31,7 +31,7 @@ fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

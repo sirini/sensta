@@ -29,8 +29,8 @@ fun ViewPost(
         PostCarousel(images = postView.result.images)
         ViewPostExifDescription(images = postView.result.images)
     }
-    
+
     ViewPostLikeButton(post = postView.result.post)
     ViewPostContent(result = postView.result)
-    ViewPostCenterButtons()
+    ViewPostCenterButtons(postUid = postView.result.post.uid)
 }

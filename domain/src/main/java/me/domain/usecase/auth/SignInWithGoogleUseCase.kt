@@ -7,6 +7,7 @@ import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
+// 구글 계정으로 로그인하기
 class SignInWithGoogleUseCase @Inject constructor(
     private val repository: TsboardAuthRepository
 ) {

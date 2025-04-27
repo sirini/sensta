@@ -36,8 +36,8 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     }
 
     // 댓글 달기용 다이얼로그 띄우기
-    fun openWriteCommentDialog(postUid: Int? = null) {
-        postUid?.let { _postUid.intValue = postUid }
+    fun openWriteCommentDialog(postUid: Int) {
+        _postUid.intValue = postUid
         _showCommentDialog.value = true
     }
 

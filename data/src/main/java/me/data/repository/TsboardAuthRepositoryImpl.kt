@@ -20,7 +20,7 @@ import me.domain.model.auth.TsboardSignup
 import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.TsboardUpdateUserInfo
 import me.domain.model.auth.TsboardUpdateUserInfoParam
-import me.domain.model.auth.TsboardVerifyCodeParameter
+import me.domain.model.auth.TsboardVerifyCodeParam
 import me.domain.model.auth.emptyUser
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.repository.TsboardAuthRepository
@@ -189,7 +189,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     }
 
     // 회원가입 시 인증코드 전송하고 결과 받기
-    override suspend fun verifyCode(param: TsboardVerifyCodeParameter): TsboardResponse<TsboardResponseNothing> {
+    override suspend fun verifyCode(param: TsboardVerifyCodeParam): TsboardResponse<TsboardResponseNothing> {
         return try {
             val response = api.verifyCode(
                 target = param.target,

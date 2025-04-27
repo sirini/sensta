@@ -38,7 +38,7 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(12.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -46,7 +46,7 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(12.dp),
             mainAxisSpacing = 8.dp,
             crossAxisSpacing = 8.dp
         ) {
@@ -62,7 +62,7 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
             Text(
                 text = "${
                     String.format(Locale.KOREAN, "%,d", result.post.hit)
-                }번 열람됨    ${result.post.submitted.format(CustomTime.fullDate)}에 작성됨",
+                }번 조회      ${result.post.submitted.format(CustomTime.fullDate)}에 작성",
                 modifier = Modifier.padding(12.dp),
                 style = MaterialTheme.typography.bodySmall
             )

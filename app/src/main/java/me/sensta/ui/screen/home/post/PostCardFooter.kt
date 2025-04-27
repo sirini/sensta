@@ -98,7 +98,8 @@ fun PostCardFooter(photo: TsboardPhoto) {
             Text(
                 text = "${likeCount}개 좋아요",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.clickable { doLike() })
+                modifier = Modifier.clickable { doLike() }
+            )
 
             IconButton(onClick = { commonViewModel.openWriteCommentDialog(photo.uid) }) {
                 Icon(

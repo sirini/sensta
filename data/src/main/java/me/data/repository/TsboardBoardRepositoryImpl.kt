@@ -8,6 +8,7 @@ import me.data.remote.dto.home.toEntity
 import me.data.remote.dto.photo.toEntity
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
+import me.domain.model.board.TsboardCommentWriteResponse
 import me.domain.model.board.TsboardPost
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.home.TsboardLatestPost
@@ -117,6 +118,24 @@ class TsboardBoardRepositoryImpl @Inject constructor(
         }
     }
 
+    // 댓글 삭제하기
+    override suspend fun removeComment(
+        boardUid: Int,
+        removeTargetUid: Int,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing> {
+        return try {
+            val response = api.removeComment(
+                authorization = "Bearer $token",
+                boardUid = boardUid,
+                removeTargetUid = removeTargetUid
+            )
+            TsboardResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
     // 게시글에 대한 좋아요 업데이트
     override suspend fun updateLikePost(
         boardUid: Int,
@@ -150,6 +169,26 @@ class TsboardBoardRepositoryImpl @Inject constructor(
                 boardUid = boardUid,
                 commentUid = commentUid,
                 liked = liked
+            )
+            TsboardResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 댓글 작성하기
+    override suspend fun writeComment(
+        boardUid: Int,
+        postUid: Int,
+        content: String,
+        token: String
+    ): TsboardResponse<TsboardCommentWriteResponse> {
+        return try {
+            val response = api.writeComment(
+                authorization = "Bearer $token",
+                boardUid = boardUid,
+                postUid = postUid,
+                content = content
             )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {

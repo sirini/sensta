@@ -6,7 +6,7 @@ import me.domain.model.auth.TsboardSignup
 import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.TsboardUpdateUserInfo
 import me.domain.model.auth.TsboardUpdateUserInfoParam
-import me.domain.model.auth.TsboardVerifyCodeParameter
+import me.domain.model.auth.TsboardVerifyCodeParam
 import me.domain.model.common.TsboardResponseNothing
 
 // 사용자 인증 관련 인터페이스
@@ -25,5 +25,5 @@ interface TsboardAuthRepository {
     ): TsboardResponse<TsboardUpdateAccessToken>
 
     suspend fun updateUserInfo(param: TsboardUpdateUserInfoParam): TsboardResponse<TsboardUpdateUserInfo>
-    suspend fun verifyCode(param: TsboardVerifyCodeParameter): TsboardResponse<TsboardResponseNothing>
+    suspend fun verifyCode(param: TsboardVerifyCodeParam): TsboardResponse<TsboardResponseNothing>
 }

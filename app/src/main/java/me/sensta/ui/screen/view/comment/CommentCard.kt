@@ -16,14 +16,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.model.board.TsboardComment
-import me.sensta.viewmodel.CommentViewModel
+import me.sensta.viewmodel.local.LocalCommentViewModel
 
 @Composable
 fun CommentCard(comment: TsboardComment) {
     val context = LocalContext.current
-    val commentViewModel: CommentViewModel = hiltViewModel()
+    val commentViewModel = LocalCommentViewModel.current
 
     var likeState by remember { mutableStateOf(comment.liked) }
     var likeCount by remember { mutableIntStateOf(comment.like) }

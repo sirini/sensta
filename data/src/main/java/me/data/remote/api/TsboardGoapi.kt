@@ -7,12 +7,14 @@ import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
+import me.data.remote.dto.board.CommentWriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.home.NotificationDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -123,6 +125,24 @@ interface TsboardGoapi {
         @Query("commentUid") commentUid: Int,
         @Query("liked") liked: Int
     ): ResponseNothingDto
+
+    // 댓글 삭제하기
+    @DELETE("comment/remove")
+    suspend fun removeComment(
+        @Header("Authorization") authorization: String,
+        @Query("boardUid") boardUid: Int,
+        @Query("removeTargetUid") removeTargetUid: Int
+    ): ResponseNothingDto
+
+    // 댓글 작성하기
+    @FormUrlEncoded
+    @POST("comment/write")
+    suspend fun writeComment(
+        @Header("Authorization") authorization: String,
+        @Field("boardUid") boardUid: Int,
+        @Field("postUid") postUid: Int,
+        @Field("content") content: String
+    ): CommentWriteResponseDto
 
     // 갤러리 목록 가져오기
     @GET("board/photo/list")

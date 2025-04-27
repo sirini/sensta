@@ -27,7 +27,7 @@ import me.domain.model.auth.TsboardSignup
 import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.TsboardUpdateUserInfo
 import me.domain.model.auth.TsboardUpdateUserInfoParam
-import me.domain.model.auth.TsboardVerifyCodeParameter
+import me.domain.model.auth.TsboardVerifyCodeParam
 import me.domain.model.auth.emptyUser
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.repository.TsboardResponse
@@ -239,7 +239,7 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             verifyCodeUseCase(
-                TsboardVerifyCodeParameter(
+                TsboardVerifyCodeParam(
                     target = _targetUserUid.intValue,
                     code = _otp.value,
                     email = _id.value,
