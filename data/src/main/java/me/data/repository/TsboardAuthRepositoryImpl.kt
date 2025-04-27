@@ -12,14 +12,17 @@ import kotlinx.coroutines.flow.map
 import me.data.auth.UserPreferencesKeys
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.auth.toEntity
+import me.data.remote.dto.common.toEntity
 import me.data.util.toSHA256
-import me.domain.model.auth.TsboardCheckEmail
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
+import me.domain.model.auth.TsboardSignup
 import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.TsboardUpdateUserInfo
 import me.domain.model.auth.TsboardUpdateUserInfoParam
+import me.domain.model.auth.TsboardVerifyCodeParameter
 import me.domain.model.auth.emptyUser
+import me.domain.model.common.TsboardResponseNothing
 import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -64,9 +67,18 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     }
 
     // 이메일 주소를 쓸 수 있는지 확인하기
-    override suspend fun checkEmail(email: String): TsboardResponse<TsboardCheckEmail> {
+    override suspend fun checkEmail(email: String): TsboardResponse<TsboardResponseNothing> {
         return try {
             TsboardResponse.Success(api.checkID(email).toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 닉네임을 쓸 수 있는지 확인하기
+    override suspend fun checkName(name: String): TsboardResponse<TsboardResponseNothing> {
+        return try {
+            TsboardResponse.Success(api.checkName(name).toEntity())
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
@@ -104,6 +116,20 @@ class TsboardAuthRepositoryImpl @Inject constructor(
         return try {
             val response = api.signInWithGoogle(idToken).toEntity()
             response.result?.also { saveUserInfo(it) }
+            TsboardResponse.Success(response)
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 회원가입하기
+    override suspend fun signUp(
+        id: String,
+        password: String,
+        name: String
+    ): TsboardResponse<TsboardSignup> {
+        return try {
+            val response = api.signUp(id, password.toSHA256(), name).toEntity()
             TsboardResponse.Success(response)
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
@@ -155,6 +181,22 @@ class TsboardAuthRepositoryImpl @Inject constructor(
                     ""
                 }.toRequestBody(),
                 profile = param.profile
+            )
+            TsboardResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 회원가입 시 인증코드 전송하고 결과 받기
+    override suspend fun verifyCode(param: TsboardVerifyCodeParameter): TsboardResponse<TsboardResponseNothing> {
+        return try {
+            val response = api.verifyCode(
+                target = param.target,
+                code = param.code,
+                email = param.email,
+                password = param.password.toSHA256(),
+                name = param.name
             )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {

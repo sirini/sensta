@@ -1,7 +1,7 @@
 package me.data.remote.api
 
-import me.data.remote.dto.auth.CheckEmailDto
 import me.data.remote.dto.auth.SigninDto
+import me.data.remote.dto.auth.SignupDto
 import me.data.remote.dto.auth.UpdateAccessTokenDto
 import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.board.BoardListResponseDto
@@ -38,7 +38,22 @@ interface TsboardGoapi {
     @POST("auth/checkemail")
     suspend fun checkID(
         @Field("email") email: String
-    ): CheckEmailDto
+    ): ResponseNothingDto
+
+    // 닉네임이 존재하는지 확인하기
+    @FormUrlEncoded
+    @POST("auth/checkname")
+    suspend fun checkName(
+        @Field("name") name: String
+    ): ResponseNothingDto
+
+    // 리프레시 토큰으로 새 액세스 토큰 발급 받기
+    @FormUrlEncoded
+    @POST("auth/refresh")
+    suspend fun updateAccessToken(
+        @Field("userUid") userUid: Int,
+        @Field("refresh") refresh: String
+    ): UpdateAccessTokenDto
 
     // 로그인 하기
     @FormUrlEncoded
@@ -48,13 +63,14 @@ interface TsboardGoapi {
         @Field("password") password: String
     ): SigninDto
 
-    // 리프레시 토큰으로 새 액세스 토큰 발급 받기
+    // 회원가입 하기
     @FormUrlEncoded
-    @POST("auth/refresh")
-    suspend fun updateAccessToken(
-        @Field("userUid") userUid: Int,
-        @Field("refresh") refresh: String
-    ): UpdateAccessTokenDto
+    @POST("auth/signup")
+    suspend fun signUp(
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("name") name: String
+    ): SignupDto
 
     // 사용자의 정보 업데이트하기
     @Multipart
@@ -66,6 +82,17 @@ interface TsboardGoapi {
         @Part("password") password: RequestBody,
         @Part profile: MultipartBody.Part?
     ): UpdateUserInfoDto
+
+    // 회원가입 시 인증코드 확인하기
+    @FormUrlEncoded
+    @POST("auth/verify")
+    suspend fun verifyCode(
+        @Field("target") target: Int,
+        @Field("code") code: String,
+        @Field("email") email: String,
+        @Field("password") password: String,
+        @Field("name") name: String
+    ): ResponseNothingDto
 
     // 게시글 목록 가져오기
     @GET("board/list")

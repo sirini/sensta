@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -40,6 +41,7 @@ import me.sensta.ui.screen.HomeScreen
 import me.sensta.ui.screen.LoginScreen
 import me.sensta.ui.screen.NotificationScreen
 import me.sensta.ui.screen.ProfileScreen
+import me.sensta.ui.screen.SignupScreen
 import me.sensta.ui.screen.UploadScreen
 import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
@@ -55,14 +57,15 @@ import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
-    data object Home : Screen("home", "홈", Icons.Default.Home)
-    data object View : Screen("view", "게시글", Icons.AutoMirrored.Default.Article)
-    data object Explorer : Screen("explorer", "탐색", Icons.Default.Search)
-    data object Login : Screen("login", "로그인", Icons.AutoMirrored.Default.Login)
-    data object Upload : Screen("upload", "업로드", Icons.Default.Upload)
-    data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
-    data object Notification : Screen("notification", "알림", Icons.Default.Notifications)
     data object Config : Screen("config", "설정", Icons.Default.Settings)
+    data object Explorer : Screen("explorer", "탐색", Icons.Default.Search)
+    data object Home : Screen("home", "홈", Icons.Default.Home)
+    data object Login : Screen("login", "로그인", Icons.AutoMirrored.Default.Login)
+    data object Notification : Screen("notification", "알림", Icons.Default.Notifications)
+    data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
+    data object Signup : Screen("signup", "회원가입", Icons.Default.GroupAdd)
+    data object Upload : Screen("upload", "업로드", Icons.Default.Upload)
+    data object View : Screen("view", "게시글", Icons.AutoMirrored.Default.Article)
     data object Version : Screen("version", "버전", Icons.Default.Verified)
 }
 
@@ -99,14 +102,15 @@ fun AppNavigation(startDestination: String) {
                         .padding(innerPadding)
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
                 ) {
-                    composable(Screen.Home.route) { HomeScreen() }
-                    composable(Screen.View.route) { ViewScreen() }
-                    composable(Screen.Explorer.route) { ExplorerScreen() }
-                    composable(Screen.Login.route) { LoginScreen() }
-                    composable(Screen.Upload.route) { UploadScreen() }
-                    composable(Screen.Profile.route) { ProfileScreen() }
-                    composable(Screen.Notification.route) { NotificationScreen() }
                     composable(Screen.Config.route) { ConfigScreen() }
+                    composable(Screen.Explorer.route) { ExplorerScreen() }
+                    composable(Screen.Home.route) { HomeScreen() }
+                    composable(Screen.Login.route) { LoginScreen() }
+                    composable(Screen.Notification.route) { NotificationScreen() }
+                    composable(Screen.Profile.route) { ProfileScreen() }
+                    composable(Screen.Signup.route) { SignupScreen() }
+                    composable(Screen.Upload.route) { UploadScreen() }
+                    composable(Screen.View.route) { ViewScreen() }
                     composable(Screen.Version.route) { VersionScreen() }
                 }
 

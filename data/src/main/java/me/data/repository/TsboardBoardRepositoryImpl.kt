@@ -1,6 +1,5 @@
 package me.data.repository
 
-import android.util.Log
 import me.data.env.Env
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.board.toEntity
@@ -55,8 +54,6 @@ class TsboardBoardRepositoryImpl @Inject constructor(
             )
             TsboardResponse.Success(response.toEntity().result.items)
         } catch (e: Exception) {
-            Log.e("DEBUG", "Error: ${e.message}") /// DEBUG
-
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
     }

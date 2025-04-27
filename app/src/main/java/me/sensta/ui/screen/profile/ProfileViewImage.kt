@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -90,13 +91,22 @@ fun ProfileViewImage() {
         contentAlignment = Alignment.Center
     ) {
         // 프로필 이미지 혹은 빈 아이콘 보여주기
-        AsyncImage(
-            model = Env.domain + user.profile,
-            contentDescription = user.name,
-            modifier = Modifier
-                .size(160.dp)
-                .clip(CircleShape)
-        )
+        if (user.profile.isEmpty()) {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = "Edit profile",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(160.dp)
+            )
+        } else {
+            AsyncImage(
+                model = Env.domain + user.profile,
+                contentDescription = user.name,
+                modifier = Modifier
+                    .size(160.dp)
+                    .clip(CircleShape)
+            )
+        }
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomEnd) {
             Box(

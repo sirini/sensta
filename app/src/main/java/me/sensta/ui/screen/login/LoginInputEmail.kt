@@ -29,11 +29,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import me.sensta.R
+import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun LoginInputEmail() {
+    val navController = LocalNavController.current
     val context = LocalContext.current
     val authViewModel = LocalAuthViewModel.current
     val id by authViewModel.id
@@ -73,7 +75,12 @@ fun LoginInputEmail() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row {
-                TextButton(onClick = {}) {
+                TextButton(onClick = {
+                    navController.navigate("signup") {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }) {
                     Icon(
                         imageVector = Icons.Default.AddCircleOutline,
                         contentDescription = "Join",

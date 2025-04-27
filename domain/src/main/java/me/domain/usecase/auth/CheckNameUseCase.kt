@@ -7,10 +7,10 @@ import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
-class CheckEmailUseCase @Inject constructor(
+class CheckNameUseCase @Inject constructor(
     private val repository: TsboardAuthRepository
 ) {
-    operator fun invoke(email: String): Flow<TsboardResponse<TsboardResponseNothing>> = flow {
-        emit(repository.checkEmail(email = email))
+    operator fun invoke(name: String): Flow<TsboardResponse<TsboardResponseNothing>> = flow {
+        emit(repository.checkName(name = name))
     }
 }

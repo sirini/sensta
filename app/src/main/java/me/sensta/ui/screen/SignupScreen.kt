@@ -23,14 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import me.sensta.ui.screen.login.LoginCompleted
-import me.sensta.ui.screen.login.LoginInputEmail
-import me.sensta.ui.screen.login.LoginInputPassword
-import me.sensta.viewmodel.LoginState
+import me.sensta.ui.screen.signup.SignupCompleted
+import me.sensta.ui.screen.signup.SignupInputCode
+import me.sensta.ui.screen.signup.SignupInputEmail
+import me.sensta.ui.screen.signup.SignupInputName
+import me.sensta.ui.screen.signup.SignupInputPassword
+import me.sensta.viewmodel.SignupState
 import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
-fun LoginScreen() {
+fun SignupScreen() {
     val imeInsets = WindowInsets.ime
     val density = LocalDensity.current
     val authViewModel = LocalAuthViewModel.current
@@ -67,7 +69,7 @@ fun LoginScreen() {
                 }
 
                 AnimatedContent(
-                    targetState = authViewModel.loginState,
+                    targetState = authViewModel.signupState,
                     transitionSpec = {
                         slideInHorizontally(
                             animationSpec = tween(300),
@@ -78,12 +80,14 @@ fun LoginScreen() {
                         )
                     },
                     label = "ConditionTransition"
-                ) { currentLoginState ->
-                    val state by currentLoginState
+                ) { currentSignupState ->
+                    val state by currentSignupState
                     when (state) {
-                        LoginState.InputEmail -> LoginInputEmail()
-                        LoginState.InputPassword -> LoginInputPassword()
-                        LoginState.LoginCompleted -> LoginCompleted()
+                        SignupState.InputEmail -> SignupInputEmail()
+                        SignupState.InputPassword -> SignupInputPassword()
+                        SignupState.InputName -> SignupInputName()
+                        SignupState.InputCode -> SignupInputCode()
+                        SignupState.SignupCompleted -> SignupCompleted()
                     }
                 }
             }

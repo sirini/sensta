@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -20,20 +21,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.data.util.Upload
-import me.domain.model.auth.TsboardCheckEmail
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
+import me.domain.model.auth.TsboardSignup
 import me.domain.model.auth.TsboardUpdateAccessToken
 import me.domain.model.auth.TsboardUpdateUserInfo
 import me.domain.model.auth.TsboardUpdateUserInfoParam
+import me.domain.model.auth.TsboardVerifyCodeParameter
 import me.domain.model.auth.emptyUser
+import me.domain.model.common.TsboardResponseNothing
 import me.domain.repository.TsboardResponse
 import me.domain.usecase.auth.CheckEmailUseCase
+import me.domain.usecase.auth.CheckNameUseCase
+import me.domain.usecase.auth.CheckVerificationCodeUseCase
 import me.domain.usecase.auth.ClearUserInfoUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.auth.SaveUserInfoUseCase
 import me.domain.usecase.auth.SignInUseCase
 import me.domain.usecase.auth.SignInWithGoogleUseCase
+import me.domain.usecase.auth.SignUpUseCase
 import me.domain.usecase.auth.UpdateAccessTokenUseCase
 import me.domain.usecase.auth.UpdateUserInfoUseCase
 import me.sensta.R
@@ -48,6 +54,15 @@ sealed class LoginState {
     object LoginCompleted : LoginState()
 }
 
+// 회원가입 단계 정의
+sealed class SignupState {
+    object InputEmail : SignupState()
+    object InputPassword : SignupState()
+    object InputName : SignupState()
+    object InputCode : SignupState()
+    object SignupCompleted : SignupState()
+}
+
 // 아이디 체크 코드 확인
 const val ID_INVALID = 3
 const val ID_REGISTERED = 5
@@ -55,13 +70,16 @@ const val ID_REGISTERED = 5
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val checkEmailUseCase: CheckEmailUseCase,
+    private val checkNameUseCase: CheckNameUseCase,
     private val clearUserInfoUseCase: ClearUserInfoUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val saveUserInfoUseCase: SaveUserInfoUseCase,
     private val signInUseCase: SignInUseCase,
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
+    private val signUpUseCase: SignUpUseCase,
     private val updateAccessTokenUseCase: UpdateAccessTokenUseCase,
-    private val updateUserInfoUseCase: UpdateUserInfoUseCase
+    private val updateUserInfoUseCase: UpdateUserInfoUseCase,
+    private val verifyCodeUseCase: CheckVerificationCodeUseCase
 ) : ViewModel() {
     private val _id = mutableStateOf("")
     val id: State<String> get() = _id
@@ -72,6 +90,9 @@ class AuthViewModel @Inject constructor(
     private val _pw = mutableStateOf("")
     val pw: State<String> get() = _pw
 
+    private val _name = mutableStateOf("")
+    val name: State<String> get() = _name
+
     private val _user = MutableStateFlow(emptyUser)
     val user: StateFlow<TsboardSigninResult> = _user.asStateFlow()
 
@@ -80,6 +101,15 @@ class AuthViewModel @Inject constructor(
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> get() = _isLoading
+
+    private val _signupState = mutableStateOf<SignupState>(SignupState.InputEmail)
+    val signupState: State<SignupState> get() = _signupState
+
+    private val _targetUserUid = mutableIntStateOf(0)
+    val targetUserUid: State<Int> get() = _targetUserUid
+
+    private val _otp = mutableStateOf("")
+    val otp: State<String> get() = _otp
 
     // 생성 시점에 기존에 로그인했던 정보가 있다면 가져오기
     init {
@@ -100,8 +130,42 @@ class AuthViewModel @Inject constructor(
         _loginState.value = LoginState.InputEmail
     }
 
+    // 회원가입 시 아이디 확인
+    private fun checkIDForSignup(context: Context, checkEmailData: TsboardResponseNothing) {
+        when (checkEmailData.code) {
+            ID_REGISTERED -> {
+                Toast.makeText(context, "이미 존재하는 아이디입니다", Toast.LENGTH_SHORT).show()
+            }
+
+            ID_INVALID -> {
+                Toast.makeText(context, "유효하지 않은 메일 주소입니다", Toast.LENGTH_SHORT).show()
+            }
+
+            else -> {
+                _signupState.value = SignupState.InputPassword
+            }
+        }
+    }
+
+    // 로그인 시 아이디 확인
+    private fun checkIDForLogin(context: Context, checkEmailData: TsboardResponseNothing) {
+        when (checkEmailData.code) {
+            ID_INVALID -> {
+                Toast.makeText(context, "유효하지 않은 메일 주소입니다", Toast.LENGTH_SHORT).show()
+            }
+
+            ID_REGISTERED -> {
+                _loginState.value = LoginState.InputPassword
+            }
+
+            else -> {
+                Toast.makeText(context, "존재하지 않는 아이디입니다", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     // 아이디(이메일)가 존재하는지 확인 후 비밀번호 입력란으로 이동
-    fun checkValidID(context: Context) {
+    fun checkValidID(context: Context, isSignup: Boolean = false) {
         if (_id.value.isEmpty() || !_isEmailValid.value) {
             Toast.makeText(context, "올바른 이메일 주소를 입력해주세요", Toast.LENGTH_SHORT).show()
             return
@@ -110,17 +174,87 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             checkEmailUseCase(_id.value).collect {
-                val checkEmailData = (it as TsboardResponse.Success<TsboardCheckEmail>).data
-
-                if (checkEmailData.code == ID_REGISTERED) {
-                    _loginState.value = LoginState.InputPassword
-                } else if (checkEmailData.code == ID_INVALID) {
-                    Toast.makeText(context, "유효하지 않은 메일 주소입니다", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(context, "등록된 이메일 주소가 아닙니다", Toast.LENGTH_LONG).show()
+                val checkEmailData = (it as TsboardResponse.Success<TsboardResponseNothing>).data
+                when (isSignup) {
+                    true -> checkIDForSignup(context, checkEmailData)
+                    false -> checkIDForLogin(context, checkEmailData)
                 }
                 _isLoading.value = false
             }
+        }
+    }
+
+    // 회원 가입시 유효한 이름인지 확인하고, 확인되면 인증 코드 입력으로 이동 혹은 가입 완료
+    fun checkValidName(context: Context) {
+        if (_name.value.isEmpty() || _name.value.length < 2) {
+            Toast.makeText(context, "올바른 이름을 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            checkNameUseCase(_name.value).collect {
+                val checkNameData = (it as TsboardResponse.Success<TsboardResponseNothing>).data
+                if (checkNameData.code == ID_REGISTERED) {
+                    Toast.makeText(context, "이미 존재하는 이름입니다", Toast.LENGTH_SHORT).show()
+                } else {
+                    signUp(context) // 회원가입 진행
+                }
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // 회원 가입시 제대로된 비밀번호를 입력했는지 확인 후 (유효할 시) 닉네임 작성으로 이동
+    fun checkValidPW(context: Context, pwAgain: String) {
+        if (pw.value != pwAgain) {
+            Toast.makeText(context, "비밀번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (pw.value.length < 8) {
+            Toast.makeText(context, "비밀번호는 8자 이상이어야 합니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val regex = Regex("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).+$")
+        if (!regex.matches(pw.value)) {
+            Toast.makeText(
+                context, "비밀번호는 알파벳 대소문자, 숫자, 특수문자를 모두 포함해야 합니다", Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        _signupState.value = SignupState.InputName
+    }
+
+    // 회원 가입 시 인증 코드 입력이 필요한 경우 인증 코드 유효성 확인하고, 확인되면 가입 절차 완료
+    fun checkVerificationCode(context: Context) {
+        if (_targetUserUid.intValue == 0) {
+            Toast.makeText(context, "죄송합니다. 인증 대상 번호를 확인할 수 없습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (otp.value.length != 6) {
+            Toast.makeText(context, "인증 코드를 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            verifyCodeUseCase(
+                TsboardVerifyCodeParameter(
+                    target = _targetUserUid.intValue,
+                    code = _otp.value,
+                    email = _id.value,
+                    password = _pw.value,
+                    name = _name.value
+                )
+            ).collect {
+                val verifyCodeData = (it as TsboardResponse.Success<TsboardResponseNothing>).data
+                if (!verifyCodeData.success) {
+                    Toast.makeText(context, "인증 코드가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
+                } else {
+                    _signupState.value = SignupState.SignupCompleted
+                }
+            }
+            _isLoading.value = false
         }
     }
 
@@ -161,13 +295,29 @@ class AuthViewModel @Inject constructor(
 
     // 아이디(이메일 주소) 입력 받기
     fun setID(id: String) {
-        _id.value = id
+        _id.value = id.trim()
         _isEmailValid.value = Patterns.EMAIL_ADDRESS.matcher(id).matches()
+    }
+
+    // 회원가입 시 이름 입력 받기
+    fun setName(name: String) {
+        _name.value = name.trim()
+    }
+
+    // 인증코드 6자리 입력 받기
+    fun setOTP(otp: String) {
+        _otp.value = otp.trim()
+        //
     }
 
     // 비밀번호 입력 받기
     fun setPW(pw: String) {
-        _pw.value = pw
+        _pw.value = pw.trim()
+    }
+
+    // 회원가입 단계 변경하기
+    fun setSignupState(state: SignupState) {
+        _signupState.value = state
     }
 
     // 구글 계정으로 로그인하기
@@ -216,6 +366,39 @@ class AuthViewModel @Inject constructor(
                 Toast.makeText(
                     context, "구글 계정으로 로그인을 하지 못했습니다: ${e.message}", Toast.LENGTH_LONG
                 ).show()
+            }
+        }
+    }
+
+    // 회원정보 등록 및 필요시 이메일로 전달된 인증 코드 받기
+    private fun signUp(context: Context) {
+        if (_id.value.isEmpty() || _pw.value.isEmpty() || _name.value.isEmpty()) {
+            Toast.makeText(context, "모든 정보를 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        viewModelScope.launch {
+            signUpUseCase(_id.value, _pw.value, _name.value).collect {
+                val signUpData = (it as TsboardResponse.Success<TsboardSignup>).data
+                if (!signUpData.success) {
+                    Toast.makeText(context, "회원가입에 실패했습니다 (${signUpData.error})", Toast.LENGTH_LONG)
+                        .show()
+                    return@collect
+                }
+                if (signUpData.result.sendmail) {
+                    _targetUserUid.intValue = signUpData.result.target
+                    _signupState.value = SignupState.InputCode
+
+                    Toast.makeText(
+                        context,
+                        "인증 코드 6자리를 ${_id.value}로 발송했습니다.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    _signupState.value = SignupState.SignupCompleted
+
+                    Toast.makeText(context, "회원가입이 완료되었습니다", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
