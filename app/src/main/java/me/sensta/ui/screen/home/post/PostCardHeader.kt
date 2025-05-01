@@ -1,6 +1,7 @@
 package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -31,9 +32,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
 import me.domain.model.common.TsboardWriter
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
+import me.sensta.viewmodel.local.LocalUserViewModel
 
 @Composable
 fun PostCardHeader(writer: TsboardWriter) {
+    val navController = LocalNavController.current
+    val userViewModel = LocalUserViewModel.current
     val menus = listOf("수정", "삭제")
     var expanded by remember { mutableStateOf(false) }
 
@@ -56,6 +62,13 @@ fun PostCardHeader(writer: TsboardWriter) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
+                    .clickable {
+                        userViewModel.loadOtherUserInfo(writer)
+                        navController.navigate(Screen.User.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
             )
             Spacer(modifier = Modifier.width(8.dp))

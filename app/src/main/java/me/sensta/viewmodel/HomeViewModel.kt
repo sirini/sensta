@@ -12,9 +12,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import me.data.env.Env
-import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
+import me.domain.repository.handle
 import me.domain.usecase.GetPhotoListUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.UpdateLikePostUseCase
@@ -62,23 +62,24 @@ class HomeViewModel @Inject constructor(
             }
 
             getPhotoListUseCase(sinceUid = _lastPostUid, token = token).collect {
-                val photoData = (it as TsboardResponse.Success<List<TsboardPhoto>>).data
-                if (_lastPostUid == 0) {
-                    _photos.value = it
-                    _bunch.intValue = it.data.size
+                it.handle(null) { resp ->
+                    if (_lastPostUid == 0) {
+                        _photos.value = TsboardResponse.Success(resp)
+                        _bunch.intValue = resp.size
 
-                } else {
-                    // 이전 게시글들을 이어서 붙여나가기
-                    val currentPhotos =
-                        (_photos.value as TsboardResponse.Success<List<TsboardPhoto>>).data
-                    photoData.ifEmpty {
-                        _photos.value = TsboardResponse.Success(currentPhotos)
-                        return@collect
+                    } else {
+                        // 이전 게시글들을 이어서 붙여나가기
+                        val currentPhotos =
+                            (_photos.value as TsboardResponse.Success<List<TsboardPhoto>>).data
+                        resp.ifEmpty {
+                            _photos.value = TsboardResponse.Success(currentPhotos)
+                            return@handle
+                        }
+                        _photos.value = TsboardResponse.Success(currentPhotos + resp)
+                        _page.intValue++
                     }
-                    _photos.value = TsboardResponse.Success(currentPhotos + photoData)
-                    _page.intValue++
+                    _lastPostUid = resp.last().uid
                 }
-                _lastPostUid = photoData.last().uid
             }
             _isLoadingMore.value = false
         }
@@ -104,12 +105,15 @@ class HomeViewModel @Inject constructor(
                     liked = liked,
                     token = it.token
                 ).collect { result ->
-                    val data = (result as TsboardResponse.Success<TsboardResponseNothing>).data
-                    if (data.success && null != context) {
-                        if (liked) {
-                            Toast.makeText(context, "이 게시글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "이 게시글의 좋아요를 취소했습니다", Toast.LENGTH_SHORT).show()
+                    result.handle(context) { resp ->
+                        if (resp.success && null != context) {
+                            if (liked) {
+                                Toast.makeText(context, "이 게시글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                Toast.makeText(context, "이 게시글의 좋아요를 취소했습니다", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         }
                     }
                 }

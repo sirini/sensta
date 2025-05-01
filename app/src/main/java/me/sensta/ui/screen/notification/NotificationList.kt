@@ -32,11 +32,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import me.domain.model.home.NotificationType
 import me.domain.model.home.TsboardNotification
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalUserViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -44,6 +46,7 @@ fun NotificationList(notifications: List<TsboardNotification>) {
     val context = LocalContext.current
     val navController = LocalNavController.current
     val notiViewModel = LocalNotificationViewModel.current
+    val userViewModel = LocalUserViewModel.current
     val isLoading by notiViewModel.isLoading
     val commonViewModel = LocalCommonViewModel.current
     val pullRefreshState = rememberPullRefreshState(
@@ -74,17 +77,25 @@ fun NotificationList(notifications: List<TsboardNotification>) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    commonViewModel.apply {
-                                        updatePagerIndex(0)
-                                        updatePostUid(notification.postUid)
+                                    if (notification.type == NotificationType.NOTI_CHAT_MESSAGE) {
+                                        userViewModel.loadOtherUserInfo(notification.fromUser)
+                                        navController.navigate(Screen.User.route) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    } else {
+                                        commonViewModel.apply {
+                                            updatePagerIndex(0)
+                                            updatePostUid(notification.postUid)
+                                        }
+                                        notiViewModel.checkNotification(notification.uid)
+                                        navController.navigate(Screen.View.route) {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
-                                    notiViewModel.checkNotification(notification.uid)
-                                    navController.navigate(Screen.View.route) {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }) {
-
+                                }
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

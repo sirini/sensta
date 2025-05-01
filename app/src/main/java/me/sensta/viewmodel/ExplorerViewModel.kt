@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import me.domain.model.board.TsboardPost
 import me.domain.repository.TsboardResponse
+import me.domain.repository.handle
 import me.domain.usecase.GetPostListUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
 import javax.inject.Inject
@@ -62,23 +63,24 @@ class ExplorerViewModel @Inject constructor(
                 keyword = _keyword,
                 token = token
             ).collect {
-                val postData = (it as TsboardResponse.Success<List<TsboardPost>>).data
-                if (_lastPostUid == 0) {
-                    _posts.value = it
-                    _bunch = it.data.size
+                it.handle(null) { resp ->
+                    if (_lastPostUid == 0) {
+                        _posts.value = it
+                        _bunch = resp.size
 
-                } else {
-                    // 이전 게시글들을 이어서 붙여나가기
-                    val currentPosts =
-                        (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
-                    postData.ifEmpty {
-                        _posts.value = TsboardResponse.Success(currentPosts)
-                        return@collect
+                    } else {
+                        // 이전 게시글들을 이어서 붙여나가기
+                        val currentPosts =
+                            (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
+                        resp.ifEmpty {
+                            _posts.value = TsboardResponse.Success(currentPosts)
+                            return@handle
+                        }
+                        _posts.value = TsboardResponse.Success(currentPosts + resp)
+                        _page++
                     }
-                    _posts.value = TsboardResponse.Success(currentPosts + postData)
-                    _page++
+                    _lastPostUid = resp.last().uid
                 }
-                _lastPostUid = postData.last().uid
             }
             _isLoadingMore = false
         }

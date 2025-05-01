@@ -11,13 +11,14 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import me.domain.model.home.TsboardNotification
 import me.domain.repository.TsboardResponse
+import me.domain.repository.handle
 import me.sensta.R
 import me.sensta.ui.MainActivity
 
 object AppNotification {
 
     // 새로운 알림이 있다면 앱 알림으로 업데이트하기
-    fun check(
+    suspend fun check(
         context: Context,
         noti: TsboardResponse<List<TsboardNotification>>
     ) {
@@ -31,51 +32,53 @@ object AppNotification {
             var uncheckedNotiText = ""
 
             val inboxStyle = NotificationCompat.InboxStyle()
-            val notiData = (noti as TsboardResponse.Success<List<TsboardNotification>>).data
-
-            notiData.forEach { noti ->
-                if (!noti.checked) {
-                    val notiText = "${noti.fromUser.name}님이 ${
-                        translate(noti.type)
-                    }"
-                    if (uncheckedNotiText.isEmpty()) {
-                        uncheckedNotiText = notiText
-                        uncheckedNotiUid = noti.uid
+            noti.handle(context) { resp ->
+                resp.forEach { noti ->
+                    if (!noti.checked) {
+                        val notiText = "${noti.fromUser.name}님이 ${
+                            translate(noti.type)
+                        }"
+                        if (uncheckedNotiText.isEmpty()) {
+                            uncheckedNotiText = notiText
+                            uncheckedNotiUid = noti.uid
+                        }
+                        inboxStyle.addLine(notiText)
+                        uncheckedNotiCount++
                     }
-                    inboxStyle.addLine(notiText)
-                    uncheckedNotiCount++
                 }
-            }
 
-            val intent = Intent(context, MainActivity::class.java).apply {
-                putExtra("navigate_to", "notification")
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-            val pendingIntent =
-                PendingIntent.getActivity(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE
-                )
+                if (uncheckedNotiCount == 0) return@handle // 알림 없으면 아래 패스
 
-            val notification = NotificationCompat.Builder(context, "default")
-                .setContentTitle("Sensta 새 알림 ${uncheckedNotiCount}개")
-                .setContentText(uncheckedNotiText)
-                .setSmallIcon(R.drawable.notification)
-                .setLargeIcon(
-                    BitmapFactory.decodeResource(
-                        context.resources,
-                        R.drawable.notification
+                val intent = Intent(context, MainActivity::class.java).apply {
+                    putExtra("navigate_to", "notification")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                val pendingIntent =
+                    PendingIntent.getActivity(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE
                     )
-                )
-                .setStyle(inboxStyle)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .build()
 
-            NotificationManagerCompat.from(context)
-                .notify(uncheckedNotiUid, notification)
+                val notification = NotificationCompat.Builder(context, "default")
+                    .setContentTitle("Sensta 새 알림 ${uncheckedNotiCount}개")
+                    .setContentText(uncheckedNotiText)
+                    .setSmallIcon(R.drawable.notification)
+                    .setLargeIcon(
+                        BitmapFactory.decodeResource(
+                            context.resources,
+                            R.drawable.notification
+                        )
+                    )
+                    .setStyle(inboxStyle)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .build()
+
+                NotificationManagerCompat.from(context)
+                    .notify(uncheckedNotiUid, notification)
+            }
         }
     }
 

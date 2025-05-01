@@ -10,8 +10,11 @@ import me.data.remote.dto.board.CommentListResponseDto
 import me.data.remote.dto.board.CommentWriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.home.HomeLatestResponseDto
-import me.data.remote.dto.home.NotificationDto
+import me.data.remote.dto.home.NotificationListResponseDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
+import me.data.remote.dto.user.ChatHistoryListResponseDto
+import me.data.remote.dto.user.OtherUserInfoDto
+import me.data.remote.dto.user.SendChatResponseDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.DELETE
@@ -117,6 +120,44 @@ interface TsboardGoapi {
         @Query("liked") liked: Int
     ): ResponseNothingDto
 
+    // 갤러리 목록 가져오기
+    @GET("board/photo/list")
+    suspend fun getPhotos(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("page") page: Int,
+        @Query("pagingDirection") pagingDirection: Int,
+        @Query("sinceUid") sinceUid: Int,
+        @Query("option") option: Int
+    ): BoardPhotoListResponseDto
+
+    // 게시글 상세 정보 가져오기
+    @GET("board/view")
+    suspend fun getPost(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("postUid") postUid: Int,
+        @Query("needUpdateHit") needUpdateHit: Int,
+        @Query("latestLimit") latestLimit: Int
+    ): BoardViewResponseDto
+
+    // 상대방과 나눈 최근 메시지들 기록 가져오기
+    @GET("chat/history")
+    suspend fun getChatHistory(
+        @Header("Authorization") authorization: String,
+        @Query("targetUserUid") targetUserUid: Int,
+        @Query("limit") limit: Int
+    ): ChatHistoryListResponseDto
+
+    // 상대방에게 메시지 보내기
+    @FormUrlEncoded
+    @POST("chat/save")
+    suspend fun sendChatMessage(
+        @Header("Authorization") authorization: String,
+        @Field("targetUserUid") targetUserUid: Int,
+        @Field("message") message: String
+    ): SendChatResponseDto
+
     // 댓글에 좋아요 누르기
     @PATCH("comment/like")
     suspend fun likeComment(
@@ -144,27 +185,6 @@ interface TsboardGoapi {
         @Field("content") content: String
     ): CommentWriteResponseDto
 
-    // 갤러리 목록 가져오기
-    @GET("board/photo/list")
-    suspend fun getPhotos(
-        @Header("Authorization") authorization: String,
-        @Query("id") id: String,
-        @Query("page") page: Int,
-        @Query("pagingDirection") pagingDirection: Int,
-        @Query("sinceUid") sinceUid: Int,
-        @Query("option") option: Int
-    ): BoardPhotoListResponseDto
-
-    // 게시글 상세 정보 가져오기
-    @GET("board/view")
-    suspend fun getPost(
-        @Header("Authorization") authorization: String,
-        @Query("id") id: String,
-        @Query("postUid") postUid: Int,
-        @Query("needUpdateHit") needUpdateHit: Int,
-        @Query("latestLimit") latestLimit: Int
-    ): BoardViewResponseDto
-
     // 댓글 목록 가져오기
     @GET("comment/list")
     suspend fun getComments(
@@ -190,7 +210,7 @@ interface TsboardGoapi {
     suspend fun getUserNotifications(
         @Header("Authorization") authorization: String,
         @Query("limit") limit: Int,
-    ): NotificationDto
+    ): NotificationListResponseDto
 
     // 사용자에게 온 개별 알림 내역 확인 처리하기
     @PATCH("noti/checked/{notiUid}")
@@ -204,4 +224,10 @@ interface TsboardGoapi {
     suspend fun checkAllNotifications(
         @Header("Authorization") authorization: String,
     ): ResponseNothingDto
+
+    // 다른 사용자의 기본 정보 가져오기
+    @GET("user/load/info")
+    suspend fun getOtherUserInfo(
+        @Query("targetUserUid") targetUserUid: Int
+    ): OtherUserInfoDto
 }

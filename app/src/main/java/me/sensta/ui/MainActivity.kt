@@ -66,14 +66,17 @@ class MainActivity : ComponentActivity() {
             .build()
 
         val request = PeriodicWorkRequestBuilder<NotificationCheckWorker>(
-            repeatInterval = 30,
+            repeatInterval = 15,
             repeatIntervalTimeUnit = java.util.concurrent.TimeUnit.MINUTES
-        ).setConstraints(constraints).build()
-
-        WorkManager.getInstance(applicationContext).enqueueUniquePeriodicWork(
-            "sensta_notification_check",
-            ExistingPeriodicWorkPolicy.KEEP,
-            request
         )
+            .setConstraints(constraints).build()
+
+        WorkManager
+            .getInstance(this)
+            .enqueueUniquePeriodicWork(
+                "sensta_notification_check",
+                ExistingPeriodicWorkPolicy.KEEP,
+                request
+            )
     }
 }

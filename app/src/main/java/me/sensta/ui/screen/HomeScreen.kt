@@ -23,6 +23,10 @@ fun HomeScreen() {
     val uncheckedNotification by notiViewModel.hasUncheckedNotification
     val photos by homeViewModel.photos
 
+    LaunchedEffect(Unit) {
+        authViewModel.refresh()
+    }
+
     LaunchedEffect(user) {
         homeViewModel.refresh(true)
 

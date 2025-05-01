@@ -10,7 +10,7 @@ import java.time.ZoneOffset
 
 // 알림 내역 가져오기에 대한 JSON 응답
 @Serializable
-data class NotificationDto(
+data class NotificationListResponseDto(
     val success: Boolean,
     val error: String,
     val code: Int,
@@ -31,12 +31,13 @@ data class NotificationResultDto(
 )
 
 // 알림 내역 가져오기에 대한 응답을 엔티티로 변환하는 매퍼
-fun NotificationDto.toEntity(): TsboardNotificationResponse = TsboardNotificationResponse(
-    success = success,
-    error = error,
-    code = code,
-    result = result?.map { it.toEntity() } ?: emptyList()
-)
+fun NotificationListResponseDto.toEntity(): TsboardNotificationResponse =
+    TsboardNotificationResponse(
+        success = success,
+        error = error,
+        code = code,
+        result = result?.map { it.toEntity() } ?: emptyList()
+    )
 
 // 알림 항목에 대해 엔티티로 변환하는 매퍼
 fun NotificationResultDto.toEntity(): TsboardNotification = TsboardNotification(

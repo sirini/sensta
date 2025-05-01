@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.domain.model.home.TsboardNotification
 import me.domain.repository.TsboardResponse
+import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.home.CheckAllNotificationUseCase
 import me.domain.usecase.home.CheckNotificationUseCase
@@ -46,9 +47,6 @@ class NotificationViewModel @Inject constructor(
         loadNotifications()
     }
 
-    // 사용자 정보 가져오기 헬퍼 함수
-    suspend fun getUserInfo() = getUserInfoUseCase().first()
-
     // 알림 가져오기 헬퍼 함수
     suspend fun getNotification(token: String, limit: Int) =
         getNotificationUseCase(token, limit).first()
@@ -57,23 +55,24 @@ class NotificationViewModel @Inject constructor(
     fun loadNotifications(context: Context? = null) {
         _isLoading.value = true
         viewModelScope.launch {
-            val user = getUserInfo()
-            if (user.token.isEmpty()) {
-                _notifications.value = TsboardResponse.Success(emptyList())
-                _hasUncheckedNotification.value = false
-                _isLoading.value = false
-                return@launch
-            }
+            getUserInfoUseCase().collect { user ->
+                if (user.token.isEmpty()) {
+                    _notifications.value = TsboardResponse.Success(emptyList())
+                    _hasUncheckedNotification.value = false
+                    _isLoading.value = false
+                    return@collect
+                }
 
-            val noti = getNotification(user.token, 20)
-            val notiResponse = (noti as TsboardResponse.Success)
-            _notifications.value = notiResponse
-            _hasUncheckedNotification.value = notiResponse.data.count { !it.checked } > 0
+                _notifications.value = getNotification(user.token, 20)
+                _notifications.value.handle(context) { resp ->
+                    _hasUncheckedNotification.value = resp.count { !it.checked } > 0
+
+                    context?.let {
+                        Toast.makeText(context, "알림 목록을 업데이트 하였습니다", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
             _isLoading.value = false
-
-            context?.let {
-                Toast.makeText(context, "알림 목록을 업데이트 하였습니다", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -91,14 +90,15 @@ class NotificationViewModel @Inject constructor(
     // 개별 알림 확인 처리하기
     fun checkNotification(notiUid: Int) {
         viewModelScope.launch {
-            val user = getUserInfo()
-            if (user.token.isEmpty()) {
-                return@launch
-            }
+            getUserInfoUseCase().collect { user ->
+                if (user.token.isEmpty()) {
+                    return@collect
+                }
 
-            checkNotificationUseCase(user.token, notiUid).collect {
-                if (it is TsboardResponse.Success) {
-                    loadNotifications()
+                checkNotificationUseCase(user.token, notiUid).collect {
+                    it.handle(null) {
+                        loadNotifications()
+                    }
                 }
             }
         }
@@ -107,20 +107,20 @@ class NotificationViewModel @Inject constructor(
     // 전체 알림 확인 처리하기
     fun checkAllNotifications(context: Context? = null) {
         viewModelScope.launch {
-            val user = getUserInfo()
-            if (user.token.isEmpty()) {
-                return@launch
-            }
-            
-            checkAllNotificationUseCase(user.token).collect {
-                if (it is TsboardResponse.Success) {
-                    loadNotifications()
-                    context?.let {
-                        Toast.makeText(context, "모든 알림을 확인하였습니다", Toast.LENGTH_SHORT).show()
+            getUserInfoUseCase().collect { user ->
+                if (user.token.isEmpty()) {
+                    return@collect
+                }
+
+                checkAllNotificationUseCase(user.token).collect {
+                    it.handle(context) {
+                        loadNotifications()
+                        context?.let {
+                            Toast.makeText(context, "모든 알림을 확인하였습니다", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
         }
-
     }
 }

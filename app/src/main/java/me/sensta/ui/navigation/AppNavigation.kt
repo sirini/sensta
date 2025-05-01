@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Home
@@ -44,6 +45,7 @@ import me.sensta.ui.screen.NotificationScreen
 import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.SignupScreen
 import me.sensta.ui.screen.UploadScreen
+import me.sensta.ui.screen.UserScreen
 import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.home.post.PostCardFullScreen
@@ -53,11 +55,13 @@ import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.CommonViewModel
 import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
+import me.sensta.viewmodel.UserViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalUserViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Config : Screen("config", "설정", Icons.Default.Settings)
@@ -68,6 +72,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
     data object Signup : Screen("signup", "회원가입", Icons.Default.GroupAdd)
     data object Upload : Screen("upload", "업로드", Icons.Default.Upload)
+    data object User : Screen("user", "사용자", Icons.Default.AccountBox)
     data object View : Screen("view", "게시글", Icons.AutoMirrored.Default.Article)
     data object Version : Screen("version", "버전", Icons.Default.Verified)
 }
@@ -82,6 +87,7 @@ fun AppNavigation(startDestination: String) {
     val commentViewModel: CommentViewModel = hiltViewModel()
     val homeViewModel: HomeViewModel = hiltViewModel()
     val notiViewModel: NotificationViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val showFullScreen by commonViewModel.showFullScreen
     val showCommentDialog by commonViewModel.showCommentDialog
@@ -93,6 +99,7 @@ fun AppNavigation(startDestination: String) {
         LocalCommonViewModel provides commonViewModel,
         LocalCommentViewModel provides commentViewModel,
         LocalHomeViewModel provides homeViewModel,
+        LocalUserViewModel provides userViewModel,
         LocalNotificationViewModel provides notiViewModel,
         LocalScrollBehavior provides scrollBehavior,
     ) {
@@ -117,6 +124,7 @@ fun AppNavigation(startDestination: String) {
                     composable(Screen.Profile.route) { ProfileScreen() }
                     composable(Screen.Signup.route) { SignupScreen() }
                     composable(Screen.Upload.route) { UploadScreen() }
+                    composable(Screen.User.route) { UserScreen() }
                     composable(Screen.View.route) { ViewScreen() }
                     composable(Screen.Version.route) { VersionScreen() }
                 }

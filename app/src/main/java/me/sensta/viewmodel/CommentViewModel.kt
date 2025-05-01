@@ -10,9 +10,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import me.data.env.Env
 import me.domain.model.board.TsboardComment
-import me.domain.model.board.TsboardCommentWriteResponse
-import me.domain.model.common.TsboardResponseNothing
 import me.domain.repository.TsboardResponse
+import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.RemoveCommentUseCase
 import me.domain.usecase.board.UpdateLikeCommentUseCase
@@ -59,12 +58,15 @@ class CommentViewModel @Inject constructor(
                     liked = liked,
                     token = it.token
                 ).collect { result ->
-                    val data = (result as TsboardResponse.Success<TsboardResponseNothing>).data
-                    if (data.success && null != context) {
-                        if (liked) {
-                            Toast.makeText(context, "이 댓글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(context, "이 댓글에 좋아요를 취소했습니다", Toast.LENGTH_SHORT).show()
+                    result.handle(context) { resp ->
+                        if (resp.success && null != context) {
+                            if (liked) {
+                                Toast.makeText(context, "이 댓글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                Toast.makeText(context, "이 댓글에 좋아요를 취소했습니다", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         }
                     }
                 }
@@ -88,12 +90,13 @@ class CommentViewModel @Inject constructor(
                     removeTargetUid = removeTargetUid,
                     token = it.token
                 ).collect { result ->
-                    val data = (result as TsboardResponse.Success<TsboardResponseNothing>).data
-                    if (data.success) {
-                        refresh(postUid)
-                        Toast.makeText(context, "댓글을 삭제했습니다", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "댓글 삭제에 실패했습니다", Toast.LENGTH_SHORT).show()
+                    result.handle(context) { resp ->
+                        if (resp.success) {
+                            refresh(postUid)
+                            Toast.makeText(context, "댓글을 삭제했습니다", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "댓글 삭제에 실패했습니다", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -112,9 +115,10 @@ class CommentViewModel @Inject constructor(
                     content = content,
                     token = it.token
                 ).collect { result ->
-                    val data = (result as TsboardResponse.Success<TsboardCommentWriteResponse>).data
-                    if (data.success) {
-                        Toast.makeText(context, "댓글을 작성했습니다", Toast.LENGTH_SHORT).show()
+                    result.handle(context) { resp ->
+                        if (resp.success) {
+                            Toast.makeText(context, "댓글을 작성했습니다", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }

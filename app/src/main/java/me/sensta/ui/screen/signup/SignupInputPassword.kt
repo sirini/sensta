@@ -137,7 +137,5 @@ fun SignupInputPassword() {
                 Text(text = "다음 단계로 이동하기")
             }
         }
-
-
     }
 }

@@ -21,16 +21,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.data.util.Upload
-import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
-import me.domain.model.auth.TsboardSignup
-import me.domain.model.auth.TsboardUpdateAccessToken
-import me.domain.model.auth.TsboardUpdateUserInfo
 import me.domain.model.auth.TsboardUpdateUserInfoParam
 import me.domain.model.auth.TsboardVerifyCodeParam
 import me.domain.model.auth.emptyUser
 import me.domain.model.common.TsboardResponseNothing
-import me.domain.repository.TsboardResponse
+import me.domain.repository.handle
 import me.domain.usecase.auth.CheckEmailUseCase
 import me.domain.usecase.auth.CheckNameUseCase
 import me.domain.usecase.auth.CheckVerificationCodeUseCase
@@ -174,10 +170,11 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             checkEmailUseCase(_id.value).collect {
-                val checkEmailData = (it as TsboardResponse.Success<TsboardResponseNothing>).data
-                when (isSignup) {
-                    true -> checkIDForSignup(context, checkEmailData)
-                    false -> checkIDForLogin(context, checkEmailData)
+                it.handle(context) { resp ->
+                    when (isSignup) {
+                        true -> checkIDForSignup(context, resp)
+                        false -> checkIDForLogin(context, resp)
+                    }
                 }
                 _isLoading.value = false
             }
@@ -194,11 +191,12 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             checkNameUseCase(_name.value).collect {
-                val checkNameData = (it as TsboardResponse.Success<TsboardResponseNothing>).data
-                if (checkNameData.code == ID_REGISTERED) {
-                    Toast.makeText(context, "이미 존재하는 이름입니다", Toast.LENGTH_SHORT).show()
-                } else {
-                    signUp(context) // 회원가입 진행
+                it.handle(context) { resp ->
+                    if (resp.code == ID_REGISTERED) {
+                        Toast.makeText(context, "이미 존재하는 이름입니다", Toast.LENGTH_SHORT).show()
+                    } else {
+                        signUp(context) // 회원가입 진행
+                    }
                 }
                 _isLoading.value = false
             }
@@ -247,11 +245,12 @@ class AuthViewModel @Inject constructor(
                     name = _name.value
                 )
             ).collect {
-                val verifyCodeData = (it as TsboardResponse.Success<TsboardResponseNothing>).data
-                if (!verifyCodeData.success) {
-                    Toast.makeText(context, "인증 코드가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
-                } else {
-                    _signupState.value = SignupState.SignupCompleted
+                it.handle(context) { resp ->
+                    if (!resp.success) {
+                        Toast.makeText(context, "인증 코드가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
+                    } else {
+                        _signupState.value = SignupState.SignupCompleted
+                    }
                 }
             }
             _isLoading.value = false
@@ -264,13 +263,13 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             signInUseCase(_id.value, _pw.value).collect {
-                val signInData = (it as TsboardResponse.Success<TsboardSignin>).data
-
-                if (null == signInData.result) {
-                    Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG).show()
-                } else {
-                    _user.value = signInData.result!!
-                    _loginState.value = LoginState.LoginCompleted
+                it.handle(context) { resp ->
+                    if (null == resp.result) {
+                        Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG).show()
+                    } else {
+                        _user.value = resp.result!!
+                        _loginState.value = LoginState.LoginCompleted
+                    }
                 }
                 _isLoading.value = false
             }
@@ -289,7 +288,9 @@ class AuthViewModel @Inject constructor(
     // 로그인 세션 갱신
     fun refresh(context: Context? = null) {
         viewModelScope.launch {
-            updateAccessToken(context)
+            if (_user.value.token.isNotEmpty()) {
+                updateAccessToken(context)
+            }
         }
     }
 
@@ -347,15 +348,15 @@ class AuthViewModel @Inject constructor(
                             val idToken = googleIdTokenCredential.idToken
 
                             signInWithGoogleUseCase(idToken).collect {
-                                val signInData = (it as TsboardResponse.Success<TsboardSignin>).data
-
-                                if (null == signInData.result) {
-                                    Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG).show()
-                                } else {
-                                    _user.value = signInData.result!!
-                                    _loginState.value = LoginState.LoginCompleted
+                                it.handle(context) { resp ->
+                                    if (null == resp.result) {
+                                        Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG)
+                                            .show()
+                                    } else {
+                                        _user.value = resp.result!!
+                                        _loginState.value = LoginState.LoginCompleted
+                                    }
                                 }
-
                             }
                         }
                     }
@@ -379,25 +380,23 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             signUpUseCase(_id.value, _pw.value, _name.value).collect {
-                val signUpData = (it as TsboardResponse.Success<TsboardSignup>).data
-                if (!signUpData.success) {
-                    Toast.makeText(context, "회원가입에 실패했습니다 (${signUpData.error})", Toast.LENGTH_LONG)
-                        .show()
-                    return@collect
-                }
-                if (signUpData.result.sendmail) {
-                    _targetUserUid.intValue = signUpData.result.target
-                    _signupState.value = SignupState.InputCode
+                it.handle(context) { resp ->
+                    if (!resp.success) {
+                        Toast.makeText(context, "회원가입에 실패했습니다 (${resp.error})", Toast.LENGTH_LONG)
+                            .show()
+                        return@handle
+                    }
+                    if (resp.result.sendmail) {
+                        _targetUserUid.intValue = resp.result.target
+                        _signupState.value = SignupState.InputCode
 
-                    Toast.makeText(
-                        context,
-                        "인증 코드 6자리를 ${_id.value}로 발송했습니다.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    _signupState.value = SignupState.SignupCompleted
-
-                    Toast.makeText(context, "회원가입이 완료되었습니다", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context, "인증 코드 6자리를 ${_id.value}로 발송했습니다.", Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        _signupState.value = SignupState.SignupCompleted
+                        Toast.makeText(context, "회원가입이 완료되었습니다", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -422,14 +421,16 @@ class AuthViewModel @Inject constructor(
             )
 
             updateUserInfoUseCase(param).collect {
-                val data = (it as TsboardResponse.Success<TsboardUpdateUserInfo>).data
-                if (data.success) {
-                    _user.value = _user.value.copy(name = name)
-                    saveUserInfoUseCase(_user.value)
-                    Toast.makeText(context, "이름이 변경되었습니다", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "이름 변경에 실패했습니다 (${data.error})", Toast.LENGTH_SHORT)
-                        .show()
+                it.handle(context) { resp ->
+                    if (resp.success) {
+                        _user.value = _user.value.copy(name = name)
+                        saveUserInfoUseCase(_user.value)
+                        Toast.makeText(context, "이름이 변경되었습니다", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            context, "이름 변경에 실패했습니다 (${resp.error})", Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
                 _isLoading.value = false
             }
@@ -451,14 +452,15 @@ class AuthViewModel @Inject constructor(
             )
 
             updateUserInfoUseCase(param).collect {
-                val data = (it as TsboardResponse.Success<TsboardUpdateUserInfo>).data
-                if (data.success) {
-                    _user.value = _user.value.copy(signature = signature)
-                    saveUserInfoUseCase(_user.value)
-                    Toast.makeText(context, "서명이 변경되었습니다", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "서명 변경에 실패했습니다 (${data.error})", Toast.LENGTH_LONG)
-                        .show()
+                it.handle(context) { resp ->
+                    if (resp.success) {
+                        _user.value = _user.value.copy(signature = signature)
+                        saveUserInfoUseCase(_user.value)
+                        Toast.makeText(context, "서명이 변경되었습니다", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "서명 변경에 실패했습니다 (${resp.error})", Toast.LENGTH_LONG)
+                            .show()
+                    }
                 }
                 _isLoading.value = false
             }
@@ -470,21 +472,26 @@ class AuthViewModel @Inject constructor(
         if (_user.value.uid < 1) return
 
         updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
-            val token = (it as TsboardResponse.Success<TsboardUpdateAccessToken>).data
-            if (null != token.result) {
-                _user.emit(
-                    _user.value.copy(token = token.result!!, signin = CustomTime.now())
-                )
-                saveUserInfoUseCase(_user.value)
-                context?.let {
-                    Toast.makeText(context, "로그인 세션이 갱신되었습니다", Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                _user.emit(emptyUser)
-                clearUserInfoUseCase()
-                context?.let {
-                    Toast.makeText(context, "로그인 세션이 만료되었습니다. 다시 로그인을 해주세요.", Toast.LENGTH_SHORT)
-                        .show()
+            it.handle(context) { resp ->
+                if (null != resp.result) {
+                    _user.emit(
+                        _user.value.copy(token = resp.result!!, signin = CustomTime.now())
+                    )
+                    saveUserInfoUseCase(_user.value)
+                    context?.let {
+                        Toast.makeText(context, "로그인 세션이 갱신되었습니다", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    _user.emit(emptyUser)
+                    clearUserInfoUseCase()
+                    context?.let {
+                        Toast.makeText(
+                            context,
+                            "로그인 세션이 만료되었습니다. 다시 로그인을 해주세요.",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
                 }
             }
         }
@@ -505,20 +512,21 @@ class AuthViewModel @Inject constructor(
             )
 
             updateUserInfoUseCase(param).collect {
-                val data = (it as TsboardResponse.Success<TsboardUpdateUserInfo>).data
-                if (data.success) {
-                    getUserInfoUseCase().collect { user ->
-                        _user.value = user
-                        saveUserInfoUseCase(user)
+                it.handle(context) { resp ->
+                    if (resp.success) {
+                        getUserInfoUseCase().collect { user ->
+                            _user.value = user
+                            saveUserInfoUseCase(user)
 
+                            Toast.makeText(
+                                context, "프로필 이미지를 업데이트 하였습니다", Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } else {
                         Toast.makeText(
-                            context, "프로필 이미지를 업데이트 하였습니다", Toast.LENGTH_SHORT
+                            context, "프로필 변경에 실패했습니다 (${resp.error})", Toast.LENGTH_LONG
                         ).show()
                     }
-                } else {
-                    Toast.makeText(
-                        context, "프로필 변경에 실패했습니다 (${data.error})", Toast.LENGTH_LONG
-                    ).show()
                 }
                 _isLoading.value = false
             }

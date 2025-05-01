@@ -14,9 +14,11 @@ import me.data.remote.api.TsboardGoapi
 import me.data.repository.TsboardAuthRepositoryImpl
 import me.data.repository.TsboardBoardRepositoryImpl
 import me.data.repository.TsboardNotificationRepositoryImpl
+import me.data.repository.TsboardUserRepositoryImpl
 import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardBoardRepository
 import me.domain.repository.TsboardNotificationRepository
+import me.domain.repository.TsboardUserRepository
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -61,4 +63,11 @@ object TsboardDataModule {
     fun provideTsboardNotificationRepository(
         api: TsboardGoapi
     ): TsboardNotificationRepository = TsboardNotificationRepositoryImpl(api)
+
+    // 다른 사용자와의 상호작용을 위한 리포지토리 구현체 생성
+    @Provides
+    @Singleton
+    fun provideTsboardUserRepository(
+        api: TsboardGoapi
+    ): TsboardUserRepository = TsboardUserRepositoryImpl(api)
 }
