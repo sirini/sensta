@@ -53,12 +53,14 @@ import me.sensta.ui.screen.view.ViewPostCommentDialog
 import me.sensta.viewmodel.AuthViewModel
 import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.CommonViewModel
+import me.sensta.viewmodel.ExplorerViewModel
 import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
 import me.sensta.viewmodel.UserViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalExplorerViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
 import me.sensta.viewmodel.local.LocalUserViewModel
@@ -85,6 +87,7 @@ fun AppNavigation(startDestination: String) {
     val authViewModel: AuthViewModel = hiltViewModel()
     val commonViewModel: CommonViewModel = hiltViewModel()
     val commentViewModel: CommentViewModel = hiltViewModel()
+    val explorerViewmodel: ExplorerViewModel = hiltViewModel()
     val homeViewModel: HomeViewModel = hiltViewModel()
     val notiViewModel: NotificationViewModel = hiltViewModel()
     val userViewModel: UserViewModel = hiltViewModel()
@@ -98,6 +101,7 @@ fun AppNavigation(startDestination: String) {
         LocalAuthViewModel provides authViewModel,
         LocalCommonViewModel provides commonViewModel,
         LocalCommentViewModel provides commentViewModel,
+        LocalExplorerViewModel provides explorerViewmodel,
         LocalHomeViewModel provides homeViewModel,
         LocalUserViewModel provides userViewModel,
         LocalNotificationViewModel provides notiViewModel,

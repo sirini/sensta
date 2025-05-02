@@ -16,12 +16,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import me.domain.repository.TsboardResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.explorer.GridImage
 import me.sensta.ui.screen.explorer.SearchBox
-import me.sensta.viewmodel.ExplorerViewModel
+import me.sensta.viewmodel.local.LocalExplorerViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
@@ -29,7 +28,7 @@ import me.sensta.viewmodel.local.LocalNotificationViewModel
 fun ExplorerScreen() {
     val notiViewModel = LocalNotificationViewModel.current
     val scrollBehavior = LocalScrollBehavior.current
-    val explorerViewModel: ExplorerViewModel = hiltViewModel()
+    val explorerViewModel = LocalExplorerViewModel.current
     val isLoading by remember { mutableStateOf(false) }
     val posts by explorerViewModel.posts
     val pullRefreshState = rememberPullRefreshState(

@@ -23,14 +23,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import me.sensta.viewmodel.ExplorerViewModel
+import me.sensta.viewmodel.local.LocalExplorerViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchBox() {
-    val explorerViewModel: ExplorerViewModel = hiltViewModel()
+    val context = LocalContext.current
+    val explorerViewModel = LocalExplorerViewModel.current
     val options = listOf("제목", "내용", "작성자", "태그")
 
     var selectedOption by remember { mutableStateOf(options[0]) }
@@ -63,7 +64,8 @@ fun SearchBox() {
                 IconButton(onClick = {
                     explorerViewModel.search(
                         option = options.indexOf(selectedOption),
-                        keyword = searchQuery
+                        keyword = searchQuery,
+                        context = context
                     )
                 }) {
                     Icon(
