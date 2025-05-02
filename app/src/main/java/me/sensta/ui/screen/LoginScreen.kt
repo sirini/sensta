@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import me.sensta.ui.screen.login.LoginCompleted
 import me.sensta.ui.screen.login.LoginInputEmail
 import me.sensta.ui.screen.login.LoginInputPassword
-import me.sensta.viewmodel.LoginState
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.state.LoginState
 
 @Composable
 fun LoginScreen() {

@@ -5,6 +5,7 @@ object Env {
     const val domain = "https://sensta.me"
     const val boardId = "photo"
     const val boardUid = 2
+    const val maxUploadCount = 9
 
     const val version = "v1.0.0"
     const val minTsboardVersion = "≥ v1.0.5"

@@ -56,6 +56,7 @@ import me.sensta.viewmodel.CommonViewModel
 import me.sensta.viewmodel.ExplorerViewModel
 import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
+import me.sensta.viewmodel.UploadViewModel
 import me.sensta.viewmodel.UserViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
@@ -63,6 +64,7 @@ import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalUploadViewModel
 import me.sensta.viewmodel.local.LocalUserViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
@@ -91,6 +93,7 @@ fun AppNavigation(startDestination: String) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val notiViewModel: NotificationViewModel = hiltViewModel()
     val userViewModel: UserViewModel = hiltViewModel()
+    val uploadViewModel: UploadViewModel = hiltViewModel()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val showFullScreen by commonViewModel.showFullScreen
     val showCommentDialog by commonViewModel.showCommentDialog
@@ -104,6 +107,7 @@ fun AppNavigation(startDestination: String) {
         LocalExplorerViewModel provides explorerViewmodel,
         LocalHomeViewModel provides homeViewModel,
         LocalUserViewModel provides userViewModel,
+        LocalUploadViewModel provides uploadViewModel,
         LocalNotificationViewModel provides notiViewModel,
         LocalScrollBehavior provides scrollBehavior,
     ) {

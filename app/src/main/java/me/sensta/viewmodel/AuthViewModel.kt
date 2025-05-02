@@ -41,27 +41,11 @@ import me.domain.usecase.auth.UpdateUserInfoUseCase
 import me.sensta.R
 import me.sensta.util.CustomTime
 import me.sensta.util.now
+import me.sensta.viewmodel.state.ID_INVALID
+import me.sensta.viewmodel.state.ID_REGISTERED
+import me.sensta.viewmodel.state.LoginState
+import me.sensta.viewmodel.state.SignupState
 import javax.inject.Inject
-
-// 로그인 단계 정의
-sealed class LoginState {
-    object InputEmail : LoginState()
-    object InputPassword : LoginState()
-    object LoginCompleted : LoginState()
-}
-
-// 회원가입 단계 정의
-sealed class SignupState {
-    object InputEmail : SignupState()
-    object InputPassword : SignupState()
-    object InputName : SignupState()
-    object InputCode : SignupState()
-    object SignupCompleted : SignupState()
-}
-
-// 아이디 체크 코드 확인
-const val ID_INVALID = 3
-const val ID_REGISTERED = 5
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(

@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import me.sensta.ui.theme.robotoSlabFontFamily
-import me.sensta.viewmodel.SignupState
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.state.SignupState
 
 @Composable
 fun SignupInputName() {

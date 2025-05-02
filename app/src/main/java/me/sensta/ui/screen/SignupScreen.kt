@@ -28,8 +28,8 @@ import me.sensta.ui.screen.signup.SignupInputCode
 import me.sensta.ui.screen.signup.SignupInputEmail
 import me.sensta.ui.screen.signup.SignupInputName
 import me.sensta.ui.screen.signup.SignupInputPassword
-import me.sensta.viewmodel.SignupState
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.state.SignupState
 
 @Composable
 fun SignupScreen() {
