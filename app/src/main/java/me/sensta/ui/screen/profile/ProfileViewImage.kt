@@ -100,7 +100,7 @@ fun ProfileViewImage() {
             )
         } else {
             AsyncImage(
-                model = Env.domain + user.profile,
+                model = Env.DOMAIN + user.profile,
                 contentDescription = user.name,
                 modifier = Modifier
                     .size(160.dp)

@@ -2,8 +2,12 @@ package me.domain.repository
 
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
-import me.domain.model.board.TsboardCommentWriteResponse
+import me.domain.model.board.TsboardGetPostsParam
 import me.domain.model.board.TsboardPost
+import me.domain.model.board.TsboardUpdateLikeParam
+import me.domain.model.board.TsboardWriteCommentParam
+import me.domain.model.board.TsboardWritePostParam
+import me.domain.model.board.TsboardWriteResponse
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.home.TsboardLatestPost
 import me.domain.model.photo.TsboardPhoto
@@ -16,14 +20,14 @@ interface TsboardBoardRepository {
         accessUserUid: Int = 0
     ): TsboardResponse<List<TsboardLatestPost>>
 
-    suspend fun getPosts(
-        sinceUid: Int,
-        option: Int,
-        keyword: String,
-        token: String
-    ): TsboardResponse<List<TsboardPost>>
+    suspend fun getPosts(param: TsboardGetPostsParam): TsboardResponse<List<TsboardPost>>
 
-    suspend fun getPost(postUid: Int, token: String): TsboardResponse<TsboardBoardViewResponse>
+    suspend fun getPost(
+        postUid: Int,
+        token: String,
+        needUpdateHit: Boolean = false
+    ): TsboardResponse<TsboardBoardViewResponse>
+
     suspend fun getPhotos(sinceUid: Int, token: String): TsboardResponse<List<TsboardPhoto>>
     suspend fun removeComment(
         boardUid: Int,
@@ -31,24 +35,14 @@ interface TsboardBoardRepository {
         token: String
     ): TsboardResponse<TsboardResponseNothing>
 
-    suspend fun updateLikePost(
+    suspend fun removePost(
         boardUid: Int,
         postUid: Int,
-        liked: Int,
         token: String
     ): TsboardResponse<TsboardResponseNothing>
 
-    suspend fun updateLikeComment(
-        boardUid: Int,
-        commentUid: Int,
-        liked: Int,
-        token: String
-    ): TsboardResponse<TsboardResponseNothing>
-
-    suspend fun writeComment(
-        boardUid: Int,
-        postUid: Int,
-        content: String,
-        token: String
-    ): TsboardResponse<TsboardCommentWriteResponse>
+    suspend fun updateLikePost(param: TsboardUpdateLikeParam): TsboardResponse<TsboardResponseNothing>
+    suspend fun updateLikeComment(param: TsboardUpdateLikeParam): TsboardResponse<TsboardResponseNothing>
+    suspend fun writeComment(param: TsboardWriteCommentParam): TsboardResponse<TsboardWriteResponse>
+    suspend fun writePost(param: TsboardWritePostParam): TsboardResponse<TsboardWriteResponse>
 }

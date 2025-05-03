@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.domain.model.home.NotificationType
@@ -38,20 +37,19 @@ import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NotificationList(notifications: List<TsboardNotification>) {
-    val context = LocalContext.current
     val navController = LocalNavController.current
     val notiViewModel = LocalNotificationViewModel.current
-    val userViewModel = LocalUserViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     val isLoading by notiViewModel.isLoading
     val commonViewModel = LocalCommonViewModel.current
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
-        onRefresh = { notiViewModel.loadNotifications(context) }
+        onRefresh = { notiViewModel.loadNotifications() }
     )
 
     Box(
@@ -102,7 +100,6 @@ fun NotificationList(notifications: List<TsboardNotification>) {
                                     .padding(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-
                                 val translated =
                                     notiViewModel.translateNotification(notification.type)
 
@@ -132,7 +129,7 @@ fun NotificationList(notifications: List<TsboardNotification>) {
                 }
 
                 Button(
-                    onClick = { notiViewModel.checkAllNotifications(context) },
+                    onClick = { notiViewModel.checkAllNotifications() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp),

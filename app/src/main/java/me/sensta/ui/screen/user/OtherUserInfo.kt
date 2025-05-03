@@ -29,11 +29,11 @@ import coil.compose.AsyncImage
 import me.data.env.Env
 import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.util.CustomTime
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @Composable
 fun OtherUserInfo() {
-    val userViewModel = LocalUserViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     val otherUser by userViewModel.otherUser
     val isLoading by userViewModel.isLoadingInfo
 
@@ -59,7 +59,7 @@ fun OtherUserInfo() {
         ) {
             Row {
                 AsyncImage(
-                    model = Env.domain + otherUser.profile,
+                    model = Env.DOMAIN + otherUser.profile,
                     contentDescription = otherUser.name,
                     modifier = Modifier
                         .size(40.dp)

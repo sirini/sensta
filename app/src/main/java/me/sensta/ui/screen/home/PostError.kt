@@ -21,7 +21,7 @@ fun PhotoError(viewModel: HomeViewModel, modifier: Modifier = Modifier) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "사진 목록을 가져오지 못했습니다.")
             Text(
-                text = Env.domain,
+                text = Env.DOMAIN,
                 fontFamily = robotoSlabFontFamily,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)

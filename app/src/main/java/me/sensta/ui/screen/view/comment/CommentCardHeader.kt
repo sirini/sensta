@@ -38,7 +38,7 @@ fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: 
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (comment.writer.profile.isNotEmpty()) {
                 AsyncImage(
-                    model = Env.domain + comment.writer.profile,
+                    model = Env.DOMAIN + comment.writer.profile,
                     contentDescription = comment.writer.name,
                     modifier = Modifier
                         .size(40.dp)

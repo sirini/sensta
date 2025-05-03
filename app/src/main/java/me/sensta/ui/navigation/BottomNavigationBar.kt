@@ -53,7 +53,7 @@ fun BottomNavigationBar() {
                     )
                 } else {
                     AsyncImage(
-                        model = Env.domain + user.profile,
+                        model = Env.DOMAIN + user.profile,
                         contentDescription = user.name,
                         modifier = Modifier
                             .size(24.dp)

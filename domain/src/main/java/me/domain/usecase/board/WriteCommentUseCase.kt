@@ -1,10 +1,8 @@
 package me.domain.usecase.board
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import me.domain.model.board.TsboardCommentWriteResponse
+import me.domain.model.board.TsboardWriteCommentParam
 import me.domain.repository.TsboardBoardRepository
-import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
 // 댓글 작성하기
@@ -16,7 +14,7 @@ class WriteCommentUseCase @Inject constructor(
         postUid: Int,
         content: String,
         token: String
-    ): Flow<TsboardResponse<TsboardCommentWriteResponse>> = flow {
-        emit(repository.writeComment(boardUid, postUid, content, token))
+    ) = flow {
+        emit(repository.writeComment(TsboardWriteCommentParam(boardUid, postUid, content, token)))
     }
 }

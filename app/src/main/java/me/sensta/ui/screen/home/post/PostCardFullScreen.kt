@@ -77,7 +77,7 @@ fun PostCardFullScreen() {
             }
     ) {
         AsyncImage(
-            model = Env.domain + fullImagePath,
+            model = Env.DOMAIN + fullImagePath,
             contentDescription = "uploaded image",
             contentScale = ContentScale.Fit,
             modifier = Modifier

@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.domain.model.photo.TsboardPhoto
@@ -37,7 +36,6 @@ import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @Composable
 fun PostCardFooter(photo: TsboardPhoto) {
-    val context = LocalContext.current
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
     val homeViewModel = LocalHomeViewModel.current
@@ -49,7 +47,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
     // 좋아요 클릭
     val doLike: () -> Unit = {
         likeState = !likeState
-        homeViewModel.like(photo.uid, likeState, context)
+        homeViewModel.like(photo.uid, likeState)
 
         if (likeState) {
             likeCount++

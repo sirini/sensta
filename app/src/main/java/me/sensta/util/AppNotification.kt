@@ -32,7 +32,7 @@ object AppNotification {
             var uncheckedNotiText = ""
 
             val inboxStyle = NotificationCompat.InboxStyle()
-            noti.handle(context) { resp ->
+            noti.handle { resp ->
                 resp.forEach { noti ->
                     if (!noti.checked) {
                         val notiText = "${noti.fromUser.name}님이 ${

@@ -7,6 +7,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -22,20 +23,23 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.common.LocalNavController
+import me.sensta.ui.navigation.common.LocalSnackbar
 import me.sensta.ui.navigation.topbar.TopBar
 import me.sensta.ui.screen.ConfigScreen
 import me.sensta.ui.screen.ExplorerScreen
@@ -45,7 +49,7 @@ import me.sensta.ui.screen.NotificationScreen
 import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.SignupScreen
 import me.sensta.ui.screen.UploadScreen
-import me.sensta.ui.screen.UserScreen
+import me.sensta.ui.screen.UserChatScreen
 import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.home.post.PostCardFullScreen
@@ -56,16 +60,18 @@ import me.sensta.viewmodel.CommonViewModel
 import me.sensta.viewmodel.ExplorerViewModel
 import me.sensta.viewmodel.HomeViewModel
 import me.sensta.viewmodel.NotificationViewModel
+import me.sensta.viewmodel.PostViewViewModel
 import me.sensta.viewmodel.UploadViewModel
-import me.sensta.viewmodel.UserViewModel
+import me.sensta.viewmodel.UserChatViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
+import me.sensta.viewmodel.local.LocalPostViewViewModel
 import me.sensta.viewmodel.local.LocalUploadViewModel
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Config : Screen("config", "설정", Icons.Default.Settings)
@@ -84,7 +90,6 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(startDestination: String) {
-    val context = LocalContext.current
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val commonViewModel: CommonViewModel = hiltViewModel()
@@ -92,9 +97,11 @@ fun AppNavigation(startDestination: String) {
     val explorerViewmodel: ExplorerViewModel = hiltViewModel()
     val homeViewModel: HomeViewModel = hiltViewModel()
     val notiViewModel: NotificationViewModel = hiltViewModel()
-    val userViewModel: UserViewModel = hiltViewModel()
+    val postViewViewModel: PostViewViewModel = hiltViewModel()
+    val userChatViewModel: UserChatViewModel = hiltViewModel()
     val uploadViewModel: UploadViewModel = hiltViewModel()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
     val showFullScreen by commonViewModel.showFullScreen
     val showCommentDialog by commonViewModel.showCommentDialog
     val postUid by commonViewModel.postUid
@@ -106,16 +113,24 @@ fun AppNavigation(startDestination: String) {
         LocalCommentViewModel provides commentViewModel,
         LocalExplorerViewModel provides explorerViewmodel,
         LocalHomeViewModel provides homeViewModel,
-        LocalUserViewModel provides userViewModel,
-        LocalUploadViewModel provides uploadViewModel,
         LocalNotificationViewModel provides notiViewModel,
+        LocalPostViewViewModel provides postViewViewModel,
+        LocalSnackbar provides snackbarHostState,
+        LocalUserChatViewModel provides userChatViewModel,
+        LocalUploadViewModel provides uploadViewModel,
         LocalScrollBehavior provides scrollBehavior,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
 
             Scaffold(
                 topBar = { TopBar() },
-                bottomBar = { BottomNavigationBar() }
+                bottomBar = { BottomNavigationBar() },
+                snackbarHost = {
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        modifier = Modifier.imePadding()
+                    )
+                },
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
@@ -132,7 +147,7 @@ fun AppNavigation(startDestination: String) {
                     composable(Screen.Profile.route) { ProfileScreen() }
                     composable(Screen.Signup.route) { SignupScreen() }
                     composable(Screen.Upload.route) { UploadScreen() }
-                    composable(Screen.User.route) { UserScreen() }
+                    composable(Screen.User.route) { UserChatScreen() }
                     composable(Screen.View.route) { ViewScreen() }
                     composable(Screen.Version.route) { VersionScreen() }
                 }
@@ -142,7 +157,7 @@ fun AppNavigation(startDestination: String) {
                     ViewPostCommentDialog(
                         onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
                     ) { content ->
-                        commentViewModel.write(postUid = postUid, content.trim(), context)
+                        commentViewModel.write(postUid = postUid, content.trim())
                         commonViewModel.closeWriteCommentDialog()
                     }
                 }

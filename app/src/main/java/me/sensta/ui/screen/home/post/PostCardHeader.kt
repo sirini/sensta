@@ -27,12 +27,12 @@ import me.data.env.Env
 import me.domain.model.common.TsboardWriter
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @Composable
 fun PostCardHeader(writer: TsboardWriter) {
     val navController = LocalNavController.current
-    val userViewModel = LocalUserViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     var expanded by remember { mutableStateOf(false) }
 
     HorizontalDivider(
@@ -49,7 +49,7 @@ fun PostCardHeader(writer: TsboardWriter) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
-                model = Env.domain + writer.profile,
+                model = Env.DOMAIN + writer.profile,
                 contentDescription = writer.name,
                 modifier = Modifier
                     .size(40.dp)

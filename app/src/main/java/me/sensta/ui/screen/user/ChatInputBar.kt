@@ -16,14 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @Composable
 fun ChatInputBar() {
-    val context = LocalContext.current
-    val userViewModel = LocalUserViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     val chatMessage by userViewModel.chatMessage
 
     Surface(
@@ -42,7 +40,7 @@ fun ChatInputBar() {
                 singleLine = true,
             )
             Spacer(modifier = Modifier.width(8.dp))
-            IconButton(onClick = { userViewModel.sendMessage(context) }) {
+            IconButton(onClick = { userViewModel.sendMessage() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
                     contentDescription = "Send"

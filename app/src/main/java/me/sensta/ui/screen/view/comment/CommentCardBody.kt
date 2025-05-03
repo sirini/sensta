@@ -79,8 +79,7 @@ fun CommentCardBody(comment: TsboardComment, likeCount: Int) {
                     IconButton(onClick = {
                         commentViewModel.remove(
                             removeTargetUid = comment.uid,
-                            postUid = postUid,
-                            context = context
+                            postUid = postUid
                         )
                     }) {
                         Icon(

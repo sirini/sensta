@@ -92,7 +92,7 @@ fun LoginInputEmail() {
             }
 
             Row {
-                Button(onClick = { authViewModel.checkValidID(context = context) }) {
+                Button(onClick = { authViewModel.checkValidID() }) {
                     Text(text = "다음")
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(

@@ -1,7 +1,6 @@
 package me.sensta.ui.screen.view.content
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +20,6 @@ import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
 import java.util.Locale
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ViewPostContent(result: TsboardBoardViewResult) {
     val text = result.post.content.parseAsHtml(

@@ -35,6 +35,7 @@ fun LoginScreen() {
     val density = LocalDensity.current
     val authViewModel = LocalAuthViewModel.current
     val isLoading by authViewModel.isLoading
+    val loginState by authViewModel.loginState
 
     // 가상 키보드 높이 절반 계산
     val halfKeyboardPadding by remember {
@@ -67,7 +68,7 @@ fun LoginScreen() {
                 }
 
                 AnimatedContent(
-                    targetState = authViewModel.loginState,
+                    targetState = loginState,
                     transitionSpec = {
                         slideInHorizontally(
                             animationSpec = tween(300),
@@ -77,10 +78,9 @@ fun LoginScreen() {
                             targetOffsetX = { width -> -width }
                         )
                     },
-                    label = "ConditionTransition"
+                    label = "LoginTransition"
                 ) { currentLoginState ->
-                    val state by currentLoginState
-                    when (state) {
+                    when (currentLoginState) {
                         LoginState.InputEmail -> LoginInputEmail()
                         LoginState.InputPassword -> LoginInputPassword()
                         LoginState.LoginCompleted -> LoginCompleted()

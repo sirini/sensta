@@ -50,7 +50,7 @@ fun ChatMyMessage(message: String) {
         }
         Spacer(modifier = Modifier.width(8.dp))
         AsyncImage(
-            model = Env.domain + my.profile,
+            model = Env.DOMAIN + my.profile,
             contentDescription = my.name,
             modifier = Modifier
                 .size(40.dp)

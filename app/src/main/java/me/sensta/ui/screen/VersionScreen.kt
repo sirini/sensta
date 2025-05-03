@@ -65,7 +65,7 @@ fun VersionScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "앱 버전")
-                    Text(text = Env.version)
+                    Text(text = Env.VERSION)
                 }
 
                 HorizontalDivider(
@@ -81,7 +81,7 @@ fun VersionScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "TSBOARD 권장 버전")
-                    Text(text = Env.minTsboardVersion)
+                    Text(text = Env.MIN_TSBOARD_VER)
                 }
 
                 HorizontalDivider(
@@ -97,7 +97,7 @@ fun VersionScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "안드로이드 권장 버전")
-                    Text(text = Env.minAndroidVersion)
+                    Text(text = Env.MIN_ANDROID_VER)
                 }
             }
 
@@ -105,7 +105,7 @@ fun VersionScreen() {
 
             Button(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Env.domain.toUri())
+                    val intent = Intent(Intent.ACTION_VIEW, Env.DOMAIN.toUri())
                     context.startActivity(intent)
                 },
                 modifier = Modifier
@@ -124,7 +124,7 @@ fun VersionScreen() {
 
             TextButton(
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Env.githubUrl.toUri())
+                    val intent = Intent(Intent.ACTION_VIEW, Env.GITHUB_URL.toUri())
                     context.startActivity(intent)
                 },
                 modifier = Modifier

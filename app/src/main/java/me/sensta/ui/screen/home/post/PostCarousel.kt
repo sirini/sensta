@@ -55,7 +55,7 @@ fun PostCarousel(images: List<TsboardImage>) {
                 .fillMaxWidth()
         ) { page ->
             AsyncImage(
-                model = Env.domain + images[page].thumbnail.large,
+                model = Env.DOMAIN + images[page].thumbnail.large,
                 contentDescription = "Image ${page + 1}",
                 modifier = Modifier
                     .fillMaxSize()

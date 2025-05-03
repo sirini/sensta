@@ -1,12 +1,14 @@
 package me.sensta.viewmodel
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.domain.model.common.TsboardWriter
 import me.domain.model.user.TsboardChatHistory
@@ -16,11 +18,12 @@ import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.user.GetChatHistoryUseCase
 import me.domain.usecase.user.GetOtherUserInfoUseCase
 import me.domain.usecase.user.SendChatUseCase
+import me.sensta.viewmodel.uievent.ChatUiEvent
 import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
-class UserViewModel @Inject constructor(
+class UserChatViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val getOtherUserInfoUseCase: GetOtherUserInfoUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
@@ -54,22 +57,24 @@ class UserViewModel @Inject constructor(
     private val _isLoadingChat = mutableStateOf(false)
     val isLoadingChat: State<Boolean> get() = _isLoadingChat
 
+    private val _uiEvent = MutableSharedFlow<ChatUiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
     // 상대방과의 대화 목록 가져오기
-    fun loadChatHistory(context: Context) {
+    fun loadChatHistory() {
         _isLoadingChat.value = true
 
         viewModelScope.launch {
-            getUserInfoUseCase().collect { user ->
-                if (user.token.isEmpty()) return@collect
+            val token = getUserInfoUseCase().first().token
+            if (token.isEmpty()) return@launch
 
-                getChatHistoryUseCase(
-                    targetUserUid = _otherUser.value.uid,
-                    limit = 100,
-                    token = user.token
-                ).collect {
-                    it.handle(context) { resp ->
-                        _chatHistory.value = resp.result.reversed()
-                    }
+            getChatHistoryUseCase(
+                targetUserUid = _otherUser.value.uid,
+                limit = 100,
+                token = token
+            ).collect {
+                it.handle { resp ->
+                    _chatHistory.value = resp.result.reversed()
                 }
             }
             _isLoadingChat.value = false
@@ -88,7 +93,7 @@ class UserViewModel @Inject constructor(
 
         viewModelScope.launch {
             getOtherUserInfoUseCase(user.uid).collect {
-                it.handle(null) { resp ->
+                it.handle { resp ->
                     _otherUser.value = resp
                 }
             }
@@ -102,27 +107,30 @@ class UserViewModel @Inject constructor(
     }
 
     // 메시지 보내기
-    fun sendMessage(context: Context) {
+    fun sendMessage() {
         viewModelScope.launch {
-            getUserInfoUseCase().collect { user ->
-                if (user.token.isEmpty()) return@collect
+            val userInfo = getUserInfoUseCase().first()
+            if (userInfo.token.isEmpty()) return@launch
 
-                sendChatUseCase(
-                    targetUserUid = _otherUser.value.uid,
-                    message = _chatMessage.value,
-                    token = user.token
-                ).collect {
-                    it.handle(context) {
+            sendChatUseCase(
+                targetUserUid = _otherUser.value.uid,
+                message = _chatMessage.value,
+                token = userInfo.token
+            ).collect {
+                it.handle { resp ->
+                    if (resp.success) {
                         val updated = _chatHistory.value.toMutableList()
                         updated.add(
                             TsboardChatHistory(
                                 uid = 0,
-                                userUid = user.uid,
+                                userUid = userInfo.uid,
                                 message = _chatMessage.value,
                                 timestamp = LocalDateTime.now()
                             )
                         )
                         _chatHistory.value = updated
+                    } else {
+                        _uiEvent.emit(ChatUiEvent.FailedToSendChat)
                     }
                 }
             }

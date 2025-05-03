@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 fun ConfigScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = "설정 화면입니다",
+            text = "설정 화면입니다 (추후 업데이트)",
         )
     }
 }

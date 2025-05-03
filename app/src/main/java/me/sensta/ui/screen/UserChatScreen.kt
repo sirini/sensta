@@ -1,5 +1,6 @@
 package me.sensta.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,28 +21,41 @@ import me.sensta.ui.screen.user.ChatMyMessage
 import me.sensta.ui.screen.user.ChatOtherUserMessage
 import me.sensta.ui.screen.user.LatestMessageDivider
 import me.sensta.ui.screen.user.OtherUserInfo
+import me.sensta.util.convertHtmlToText
 import me.sensta.viewmodel.local.LocalAuthViewModel
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
+import me.sensta.viewmodel.uievent.ChatUiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserScreen() {
+fun UserChatScreen() {
     val context = LocalContext.current
     val scrollBehavior = LocalScrollBehavior.current
-    val userViewModel = LocalUserViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     val authViewModel = LocalAuthViewModel.current
     val listState = rememberLazyListState()
     val chatHistory by userViewModel.chatHistory.collectAsState()
     val my by authViewModel.user.collectAsState()
     val isLoadingChat by userViewModel.isLoadingChat
 
-    // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
-    LaunchedEffect(Unit) {
-        scrollBehavior.state.heightOffset = 0f
-        userViewModel.loadChatHistory(context)
 
+    LaunchedEffect(Unit) {
+        // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
+        scrollBehavior.state.heightOffset = 0f
+
+        // 대화 내역 가져와서 제일 하단으로 스크롤해주기
+        userViewModel.loadChatHistory()
         if (chatHistory.isNotEmpty()) {
             listState.animateScrollToItem(chatHistory.lastIndex)
+        }
+
+        // UserViewModel에서 전달된 이벤트들에 따라 메시지 출력하기
+        userViewModel.uiEvent.collect { event ->
+            when (event) {
+                is ChatUiEvent.FailedToSendChat -> {
+                    Toast.makeText(context, "메시지 전송에 실패했습니다", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -67,10 +81,11 @@ fun UserScreen() {
                     LatestMessageDivider()
                 }
                 items(chatHistory) { chat ->
+                    val message = convertHtmlToText(chat.message)
                     if (chat.userUid == my.uid) {
-                        ChatMyMessage(message = chat.message)
+                        ChatMyMessage(message = message)
                     } else {
-                        ChatOtherUserMessage(message = chat.message)
+                        ChatOtherUserMessage(message = message)
                     }
                 }
                 item {

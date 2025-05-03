@@ -1,23 +1,23 @@
 package me.sensta.viewmodel
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.env.Env
 import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardResponse
 import me.domain.repository.handle
-import me.domain.usecase.GetPhotoListUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
+import me.domain.usecase.board.GetPhotoListUseCase
 import me.domain.usecase.board.UpdateLikePostUseCase
+import me.sensta.viewmodel.uievent.HomeUiEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,7 +39,9 @@ class HomeViewModel @Inject constructor(
     private val _bunch = mutableIntStateOf(0)
     val bunch: State<Int> get() = _bunch
 
-    private var _lastPostUid by mutableIntStateOf(0)
+    private val _lastPostUid = mutableIntStateOf(0)
+    private val _uiEvent = MutableSharedFlow<HomeUiEvent>()
+    val uiEvent get() = _uiEvent.asSharedFlow()
 
     init {
         loadPhotos()
@@ -50,20 +52,16 @@ class HomeViewModel @Inject constructor(
         if (_isLoadingMore.value) return
 
         viewModelScope.launch {
-            if (_lastPostUid == 0) {
+            if (_lastPostUid.intValue == 0) {
                 _photos.value = TsboardResponse.Loading
                 _page.intValue = 1
             }
             _isLoadingMore.value = true
 
-            var token = ""
-            getUserInfoUseCase().collect {
-                token = it.token
-            }
-
-            getPhotoListUseCase(sinceUid = _lastPostUid, token = token).collect {
-                it.handle(null) { resp ->
-                    if (_lastPostUid == 0) {
+            val token = getUserInfoUseCase().first().token
+            getPhotoListUseCase(sinceUid = _lastPostUid.intValue, token = token).collect {
+                it.handle { resp ->
+                    if (_lastPostUid.intValue == 0) {
                         _photos.value = TsboardResponse.Success(resp)
                         _bunch.intValue = resp.size
 
@@ -78,7 +76,7 @@ class HomeViewModel @Inject constructor(
                         _photos.value = TsboardResponse.Success(currentPhotos + resp)
                         _page.intValue++
                     }
-                    _lastPostUid = resp.last().uid
+                    _lastPostUid.intValue = resp.last().uid
                 }
             }
             _isLoadingMore.value = false
@@ -88,32 +86,29 @@ class HomeViewModel @Inject constructor(
     // 갤러리 목록 업데이트
     fun refresh(resetLastUid: Boolean = false) {
         if (resetLastUid) {
-            _lastPostUid = 0
+            _lastPostUid.intValue = 0
         }
         loadPhotos()
     }
 
     // 게시글에 좋아요 누르기
-    fun like(postUid: Int, liked: Boolean, context: Context? = null) {
+    fun like(postUid: Int, liked: Boolean) {
         viewModelScope.launch {
-            getUserInfoUseCase().collect {
-                if (it.token.isEmpty()) return@collect
+            val token = getUserInfoUseCase().first().token
+            if (token.isEmpty()) return@launch
 
-                updateLikePostUseCase(
-                    boardUid = Env.boardUid,
-                    postUid = postUid,
-                    liked = liked,
-                    token = it.token
-                ).collect { result ->
-                    result.handle(context) { resp ->
-                        if (resp.success && null != context) {
-                            if (liked) {
-                                Toast.makeText(context, "이 게시글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT)
-                                    .show()
-                            } else {
-                                Toast.makeText(context, "이 게시글의 좋아요를 취소했습니다", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
+            updateLikePostUseCase(
+                boardUid = Env.BOARD_UID,
+                postUid = postUid,
+                liked = liked,
+                token = token
+            ).collect { result ->
+                result.handle { resp ->
+                    if (resp.success) {
+                        if (liked) {
+                            _uiEvent.emit(HomeUiEvent.LikePost)
+                        } else {
+                            _uiEvent.emit(HomeUiEvent.CancelLikePost)
                         }
                     }
                 }

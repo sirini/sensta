@@ -7,7 +7,7 @@ import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
-import me.data.remote.dto.board.CommentWriteResponseDto
+import me.data.remote.dto.board.WriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.home.NotificationListResponseDto
@@ -131,6 +131,14 @@ interface TsboardGoapi {
         @Query("option") option: Int
     ): BoardPhotoListResponseDto
 
+    // 게시글 삭제하기
+    @DELETE("board/remove/post")
+    suspend fun removePost(
+        @Header("Authorization") authorization: String,
+        @Query("boardUid") boardUid: Int,
+        @Query("postUid") postUid: Int
+    ): ResponseNothingDto
+
     // 게시글 상세 정보 가져오기
     @GET("board/view")
     suspend fun getPost(
@@ -183,7 +191,7 @@ interface TsboardGoapi {
         @Field("boardUid") boardUid: Int,
         @Field("postUid") postUid: Int,
         @Field("content") content: String
-    ): CommentWriteResponseDto
+    ): WriteResponseDto
 
     // 댓글 목록 가져오기
     @GET("comment/list")
@@ -196,6 +204,21 @@ interface TsboardGoapi {
         @Query("bunch") bunch: Int,
         @Query("sinceUid") sinceUid: Int
     ): CommentListResponseDto
+
+    // 게시글 작성하기
+    @Multipart
+    @POST("editor/write")
+    suspend fun writePost(
+        @Header("Authorization") authorization: String,
+        @Part("boardUid") boardUid: RequestBody,
+        @Part("categoryUid") categoryUid: RequestBody,
+        @Part("isNotice") isNotice: RequestBody,
+        @Part("isSecret") isSecret: RequestBody,
+        @Part("title") title: RequestBody,
+        @Part("content") content: RequestBody,
+        @Part("tags") tags: RequestBody,
+        @Part attachments: List<MultipartBody.Part>
+    ): WriteResponseDto
 
     // 최신글 목록 가져오기 (탐색 페이지 초기 로딩용)
     @GET("home/latest/post")

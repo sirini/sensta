@@ -1,10 +1,8 @@
-package me.domain.usecase
+package me.domain.usecase.board
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.TsboardGetPostsParam
 import me.domain.repository.TsboardBoardRepository
-import me.domain.repository.TsboardResponse
 import javax.inject.Inject
 
 // 게시글 목록 가져오기
@@ -16,13 +14,15 @@ class GetPostListUseCase @Inject constructor(
         option: Int,
         keyword: String,
         token: String
-    ): Flow<TsboardResponse<List<TsboardPost>>> = flow {
+    ) = flow {
         emit(
             repository.getPosts(
-                sinceUid = sinceUid,
-                option = option,
-                keyword = keyword,
-                token = token
+                TsboardGetPostsParam(
+                    sinceUid = sinceUid,
+                    option = option,
+                    keyword = keyword,
+                    token = token
+                )
             )
         )
     }

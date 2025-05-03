@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
@@ -23,25 +22,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchBox() {
-    val context = LocalContext.current
     val explorerViewModel = LocalExplorerViewModel.current
+    val keyword by explorerViewModel.keyword
     val options = listOf("제목", "내용", "작성자", "태그")
-
     var selectedOption by remember { mutableStateOf(options[0]) }
-    var searchQuery by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)) {
         OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
+            value = keyword,
+            onValueChange = { explorerViewModel.setKeyword(it) },
             label = { Text("검색어를 입력하세요") },
             singleLine = true,
             maxLines = 1,
@@ -64,8 +59,7 @@ fun SearchBox() {
                 IconButton(onClick = {
                     explorerViewModel.search(
                         option = options.indexOf(selectedOption),
-                        keyword = searchQuery,
-                        context = context
+                        keyword = keyword
                     )
                 }) {
                     Icon(

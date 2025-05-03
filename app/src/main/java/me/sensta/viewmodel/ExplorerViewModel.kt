@@ -1,19 +1,21 @@
 package me.sensta.viewmodel
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.domain.model.board.TsboardPost
 import me.domain.repository.TsboardResponse
 import me.domain.repository.handle
-import me.domain.usecase.GetPostListUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
+import me.domain.usecase.board.GetPostListUseCase
+import me.sensta.viewmodel.uievent.ExplorerUiEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +30,8 @@ class ExplorerViewModel @Inject constructor(
     private val _isLoadingMore = mutableStateOf(false)
     private val _option = mutableIntStateOf(0)
     private val _keyword = mutableStateOf("")
+    val keyword: State<String> get() = _keyword
+
     private val _lastPostUid = mutableIntStateOf(0)
 
     private val _page = mutableIntStateOf(1)
@@ -36,12 +40,15 @@ class ExplorerViewModel @Inject constructor(
     private val _bunch = mutableIntStateOf(0)
     val bunch: State<Int> get() = _bunch
 
+    private val _uiEvent = MutableSharedFlow<ExplorerUiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
     init {
         loadPosts()
     }
 
     // 게시글 목록 가져오기
-    private fun loadPosts(context: Context? = null) {
+    private fun loadPosts() {
         if (_isLoadingMore.value) return
 
         viewModelScope.launch {
@@ -52,22 +59,16 @@ class ExplorerViewModel @Inject constructor(
             }
             _isLoadingMore.value = true
 
-            var token = ""
-            getUserInfoUseCase().collect {
-                token = it.token
-            }
-
+            val token = getUserInfoUseCase().first().token
             getPostListUseCase(
                 sinceUid = _lastPostUid.intValue,
                 option = _option.intValue,
                 keyword = _keyword.value,
                 token = token
             ).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (resp.isEmpty()) {
-                        context?.let {
-                            Toast.makeText(context, "게시글을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
-                        }
+                        _uiEvent.emit(ExplorerUiEvent.UnableToFindPosts)
                         return@handle
                     }
 
@@ -94,18 +95,23 @@ class ExplorerViewModel @Inject constructor(
     }
 
     // 게시글 목록 업데이트
-    fun refresh(resetLastUid: Boolean = false, context: Context? = null) {
+    fun refresh(resetLastUid: Boolean = false) {
         if (resetLastUid) {
             _lastPostUid.intValue = 0
         }
-        loadPosts(context)
+        loadPosts()
     }
 
     // 게시글 검색 옵션 업데이트
-    fun search(option: Int, keyword: String, context: Context? = null) {
+    fun search(option: Int, keyword: String) {
         _option.intValue = option
         _keyword.value = keyword
 
-        refresh(resetLastUid = true, context = context)
+        refresh(resetLastUid = true)
+    }
+
+    // 검색어 업데이트
+    fun setKeyword(keyword: String) {
+        _keyword.value = keyword
     }
 }

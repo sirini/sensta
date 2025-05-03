@@ -10,7 +10,7 @@ import java.io.File
 
 object Upload {
     // 선택한 파일을 업로드 가능한 형태로 변홚하여 반환
-    fun uriToMultipart(context: Context, uri: Uri): MultipartBody.Part? {
+    fun uriToMultipart(context: Context, uri: Uri, name: String): MultipartBody.Part? {
         val contentResolver = context.contentResolver
         val inputStream = contentResolver.openInputStream(uri) ?: return null
         val fileName = getFileNameFromUri(context, uri) ?: "${System.currentTimeMillis()}.jpg"
@@ -18,7 +18,7 @@ object Upload {
         file.outputStream().use { output -> inputStream.copyTo(output) }
 
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        return MultipartBody.Part.createFormData("profile", file.name, requestFile)
+        return MultipartBody.Part.createFormData(name, file.name, requestFile)
     }
 
     // Uri에서 파일 이름 가져오기

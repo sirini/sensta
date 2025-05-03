@@ -21,9 +21,9 @@ import androidx.compose.ui.unit.dp
 import me.domain.model.common.TsboardTag
 
 @Composable
-fun ViewPostTag(tag: TsboardTag) {
+fun ViewPostTag(tag: TsboardTag, onTagClick: () -> Unit = {}) {
     Button(
-        onClick = {/* TODO */ },
+        onClick = onTagClick,
         contentPadding = PaddingValues(0.dp),
         modifier = Modifier.height(24.dp),
         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f))

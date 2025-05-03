@@ -48,7 +48,7 @@ fun GridImage(posts: List<TsboardPost>) {
             .collect { index ->
                 index?.let {
                     if (index >= (bunch * page) - 1) {
-                        explorerViewModel.refresh(resetLastUid = false, context = context)
+                        explorerViewModel.refresh(resetLastUid = false)
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -65,7 +65,7 @@ fun GridImage(posts: List<TsboardPost>) {
     ) {
         items(posts) { post ->
             AsyncImage(
-                model = Env.domain + post.cover,
+                model = Env.DOMAIN + post.cover,
                 contentDescription = post.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

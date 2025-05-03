@@ -6,12 +6,12 @@ import me.domain.model.user.TsboardChatHistoryResponse
 import me.domain.model.user.TsboardOtherUserInfoResult
 import me.domain.model.user.TsboardSendChatResponse
 import me.domain.repository.TsboardResponse
-import me.domain.repository.TsboardUserRepository
+import me.domain.repository.TsboardUserChatRepository
 import javax.inject.Inject
 
-class TsboardUserRepositoryImpl @Inject constructor(
+class TsboardUserChatRepositoryImpl @Inject constructor(
     private val api: TsboardGoapi
-) : TsboardUserRepository {
+) : TsboardUserChatRepository {
 
     // 다른 사용자의 기본 정보 가져오기
     override suspend fun getOtherUserInfo(

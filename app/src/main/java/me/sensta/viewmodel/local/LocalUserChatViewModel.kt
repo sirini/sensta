@@ -1,8 +1,8 @@
 package me.sensta.viewmodel.local
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import me.sensta.viewmodel.UserViewModel
+import me.sensta.viewmodel.UserChatViewModel
 
-val LocalUserViewModel = staticCompositionLocalOf<UserViewModel> {
+val LocalUserChatViewModel = staticCompositionLocalOf<UserChatViewModel> {
     error("No UserViewModel provided")
 }

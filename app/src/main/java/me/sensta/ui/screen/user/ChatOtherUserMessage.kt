@@ -21,11 +21,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
-import me.sensta.viewmodel.local.LocalUserViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @Composable
 fun ChatOtherUserMessage(message: String) {
-    val userViewModel = LocalUserViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     val otherUser by userViewModel.otherUser
 
     Row(
@@ -34,7 +34,7 @@ fun ChatOtherUserMessage(message: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = Env.domain + otherUser.profile,
+            model = Env.DOMAIN + otherUser.profile,
             contentDescription = otherUser.name,
             modifier = Modifier
                 .size(40.dp)

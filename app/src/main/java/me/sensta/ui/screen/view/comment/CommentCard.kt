@@ -41,7 +41,7 @@ fun CommentCard(comment: TsboardComment) {
     ) {
         CommentCardHeader(comment, likeState) {
             likeState = !likeState
-            commentViewModel.like(comment.uid, likeState, context)
+            commentViewModel.like(comment.uid, likeState)
 
             if (likeState) {
                 likeCount++

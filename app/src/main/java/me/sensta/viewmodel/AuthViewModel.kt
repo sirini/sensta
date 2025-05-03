@@ -4,7 +4,6 @@ import android.content.Context
 import android.credentials.GetCredentialException
 import android.net.Uri
 import android.util.Patterns
-import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -16,9 +15,12 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.util.Upload
 import me.domain.model.auth.TsboardSigninResult
@@ -45,6 +47,7 @@ import me.sensta.viewmodel.state.ID_INVALID
 import me.sensta.viewmodel.state.ID_REGISTERED
 import me.sensta.viewmodel.state.LoginState
 import me.sensta.viewmodel.state.SignupState
+import me.sensta.viewmodel.uievent.AuthUiEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,17 +94,16 @@ class AuthViewModel @Inject constructor(
     private val _otp = mutableStateOf("")
     val otp: State<String> get() = _otp
 
+    private val _uiEvent = MutableSharedFlow<AuthUiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
     // 생성 시점에 기존에 로그인했던 정보가 있다면 가져오기
     init {
         _isLoading.value = true
         viewModelScope.launch {
-            getUserInfoUseCase().collect { user ->
-                if (user.uid > 0) {
-                    _user.value = user
-                }
-                _loginState.value = LoginState.InputEmail
-                _isLoading.value = false
-            }
+            _user.value = getUserInfoUseCase().first()
+            _loginState.value = LoginState.InputEmail
+            _isLoading.value = false
         }
     }
 
@@ -111,115 +113,108 @@ class AuthViewModel @Inject constructor(
     }
 
     // 회원가입 시 아이디 확인
-    private fun checkIDForSignup(context: Context, checkEmailData: TsboardResponseNothing) {
-        when (checkEmailData.code) {
-            ID_REGISTERED -> {
-                Toast.makeText(context, "이미 존재하는 아이디입니다", Toast.LENGTH_SHORT).show()
-            }
-
-            ID_INVALID -> {
-                Toast.makeText(context, "유효하지 않은 메일 주소입니다", Toast.LENGTH_SHORT).show()
-            }
-
-            else -> {
-                _signupState.value = SignupState.InputPassword
+    private fun checkIDForSignup(checkEmailData: TsboardResponseNothing) {
+        viewModelScope.launch {
+            when (checkEmailData.code) {
+                ID_REGISTERED -> _uiEvent.emit(AuthUiEvent.AlreadyUsedID)
+                ID_INVALID -> _uiEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                else -> {
+                    _signupState.value = SignupState.InputPassword
+                }
             }
         }
     }
 
     // 로그인 시 아이디 확인
-    private fun checkIDForLogin(context: Context, checkEmailData: TsboardResponseNothing) {
-        when (checkEmailData.code) {
-            ID_INVALID -> {
-                Toast.makeText(context, "유효하지 않은 메일 주소입니다", Toast.LENGTH_SHORT).show()
-            }
+    private fun checkIDForLogin(checkEmailData: TsboardResponseNothing) {
+        viewModelScope.launch {
+            when (checkEmailData.code) {
+                ID_INVALID -> _uiEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                ID_REGISTERED -> {
+                    _loginState.value = LoginState.InputPassword
+                }
 
-            ID_REGISTERED -> {
-                _loginState.value = LoginState.InputPassword
-            }
-
-            else -> {
-                Toast.makeText(context, "존재하지 않는 아이디입니다", Toast.LENGTH_SHORT).show()
+                else -> _uiEvent.emit(AuthUiEvent.IDNotFound)
             }
         }
     }
 
     // 아이디(이메일)가 존재하는지 확인 후 비밀번호 입력란으로 이동
-    fun checkValidID(context: Context, isSignup: Boolean = false) {
-        if (_id.value.isEmpty() || !_isEmailValid.value) {
-            Toast.makeText(context, "올바른 이메일 주소를 입력해주세요", Toast.LENGTH_SHORT).show()
-            return
-        }
-        _isLoading.value = true
-
+    fun checkValidID(isSignup: Boolean = false) {
         viewModelScope.launch {
+            if (_id.value.isEmpty() || !_isEmailValid.value) {
+                _uiEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                return@launch
+            }
+
+            _isLoading.value = true
             checkEmailUseCase(_id.value).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     when (isSignup) {
-                        true -> checkIDForSignup(context, resp)
-                        false -> checkIDForLogin(context, resp)
+                        true -> checkIDForSignup(resp)
+                        false -> checkIDForLogin(resp)
                     }
                 }
-                _isLoading.value = false
             }
+            _isLoading.value = false
         }
     }
 
     // 회원 가입시 유효한 이름인지 확인하고, 확인되면 인증 코드 입력으로 이동 혹은 가입 완료
     fun checkValidName(context: Context) {
-        if (_name.value.isEmpty() || _name.value.length < 2) {
-            Toast.makeText(context, "올바른 이름을 입력해주세요", Toast.LENGTH_SHORT).show()
-            return
-        }
-        _isLoading.value = true
-
         viewModelScope.launch {
+            if (_name.value.isEmpty() || _name.value.length < 2) {
+                _uiEvent.emit(AuthUiEvent.InvalidName)
+                return@launch
+            }
+
+            _isLoading.value = true
             checkNameUseCase(_name.value).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (resp.code == ID_REGISTERED) {
-                        Toast.makeText(context, "이미 존재하는 이름입니다", Toast.LENGTH_SHORT).show()
+                        _uiEvent.emit(AuthUiEvent.AlreadyUsedName)
                     } else {
-                        signUp(context) // 회원가입 진행
+                        signUp() // 회원가입 진행
                     }
                 }
-                _isLoading.value = false
             }
+            _isLoading.value = false
         }
     }
 
     // 회원 가입시 제대로된 비밀번호를 입력했는지 확인 후 (유효할 시) 닉네임 작성으로 이동
     fun checkValidPW(context: Context, pwAgain: String) {
-        if (pw.value != pwAgain) {
-            Toast.makeText(context, "비밀번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
-            return
+        viewModelScope.launch {
+            if (pw.value != pwAgain) {
+                _uiEvent.emit(AuthUiEvent.DifferentPassword)
+                return@launch
+            }
+            if (pw.value.length < 8) {
+                _uiEvent.emit(AuthUiEvent.AtLeast8Characters)
+                return@launch
+            }
+            val regex = Regex("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).+$")
+            if (!regex.matches(pw.value)) {
+                _uiEvent.emit(AuthUiEvent.RemindPasswordRule)
+                return@launch
+            }
+            _signupState.value = SignupState.InputName
         }
-        if (pw.value.length < 8) {
-            Toast.makeText(context, "비밀번호는 8자 이상이어야 합니다", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val regex = Regex("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).+$")
-        if (!regex.matches(pw.value)) {
-            Toast.makeText(
-                context, "비밀번호는 알파벳 대소문자, 숫자, 특수문자를 모두 포함해야 합니다", Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-        _signupState.value = SignupState.InputName
     }
 
     // 회원 가입 시 인증 코드 입력이 필요한 경우 인증 코드 유효성 확인하고, 확인되면 가입 절차 완료
     fun checkVerificationCode(context: Context) {
-        if (_targetUserUid.intValue == 0) {
-            Toast.makeText(context, "죄송합니다. 인증 대상 번호를 확인할 수 없습니다", Toast.LENGTH_SHORT).show()
-            return
-        }
-        if (otp.value.length != 6) {
-            Toast.makeText(context, "인증 코드를 입력해주세요", Toast.LENGTH_SHORT).show()
-            return
-        }
-        _isLoading.value = true
-
         viewModelScope.launch {
+            if (_targetUserUid.intValue == 0) {
+                _uiEvent.emit(AuthUiEvent.InvalidTargetUser)
+                return@launch
+            }
+            if (otp.value.length != 6) {
+                _uiEvent.emit(AuthUiEvent.EnterVerificationCode)
+                return@launch
+            }
+
+            _isLoading.value = true
             verifyCodeUseCase(
                 TsboardVerifyCodeParam(
                     target = _targetUserUid.intValue,
@@ -229,9 +224,9 @@ class AuthViewModel @Inject constructor(
                     name = _name.value
                 )
             ).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (!resp.success) {
-                        Toast.makeText(context, "인증 코드가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
+                        _uiEvent.emit(AuthUiEvent.WrongVerificationCode)
                     } else {
                         _signupState.value = SignupState.SignupCompleted
                     }
@@ -247,16 +242,16 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             signInUseCase(_id.value, _pw.value).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (null == resp.result) {
-                        Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG).show()
+                        _uiEvent.emit(AuthUiEvent.FailedToLogin)
                     } else {
                         _user.value = resp.result!!
                         _loginState.value = LoginState.LoginCompleted
                     }
                 }
-                _isLoading.value = false
             }
+            _isLoading.value = false
         }
     }
 
@@ -270,10 +265,10 @@ class AuthViewModel @Inject constructor(
     }
 
     // 로그인 세션 갱신
-    fun refresh(context: Context? = null) {
+    fun refresh() {
         viewModelScope.launch {
             if (_user.value.token.isNotEmpty()) {
-                updateAccessToken(context)
+                updateAccessToken()
             }
         }
     }
@@ -307,6 +302,8 @@ class AuthViewModel @Inject constructor(
 
     // 구글 계정으로 로그인하기
     fun signInWithGoogle(context: Context) {
+        _isLoading.value = true
+
         val credentialManager = CredentialManager.create(context)
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
@@ -319,7 +316,6 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                _isLoading.value = true
                 val result = credentialManager.getCredential(
                     request = request,
                     context = context
@@ -332,10 +328,9 @@ class AuthViewModel @Inject constructor(
                             val idToken = googleIdTokenCredential.idToken
 
                             signInWithGoogleUseCase(idToken).collect {
-                                it.handle(context) { resp ->
+                                it.handle { resp ->
                                     if (null == resp.result) {
-                                        Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_LONG)
-                                            .show()
+                                        _uiEvent.emit(AuthUiEvent.FailedToLogin)
                                     } else {
                                         _user.value = resp.result!!
                                         _loginState.value = LoginState.LoginCompleted
@@ -345,41 +340,35 @@ class AuthViewModel @Inject constructor(
                         }
                     }
                 }
-                _isLoading.value = false
-
             } catch (e: GetCredentialException) {
-                Toast.makeText(
-                    context, "구글 계정으로 로그인을 하지 못했습니다: ${e.message}", Toast.LENGTH_LONG
-                ).show()
+                _uiEvent.emit(AuthUiEvent.FailedToLoginByGoogle)
+            } finally {
+                _isLoading.value = false
             }
         }
     }
 
     // 회원정보 등록 및 필요시 이메일로 전달된 인증 코드 받기
-    private fun signUp(context: Context) {
-        if (_id.value.isEmpty() || _pw.value.isEmpty() || _name.value.isEmpty()) {
-            Toast.makeText(context, "모든 정보를 입력해주세요", Toast.LENGTH_SHORT).show()
-            return
-        }
-
+    private fun signUp() {
         viewModelScope.launch {
+            if (_id.value.isEmpty() || _pw.value.isEmpty() || _name.value.isEmpty()) {
+                _uiEvent.emit(AuthUiEvent.EnterAllInfo)
+                return@launch
+            }
+
             signUpUseCase(_id.value, _pw.value, _name.value).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (!resp.success) {
-                        Toast.makeText(context, "회원가입에 실패했습니다 (${resp.error})", Toast.LENGTH_LONG)
-                            .show()
+                        _uiEvent.emit(AuthUiEvent.FailedToSignUp)
                         return@handle
                     }
                     if (resp.result.sendmail) {
                         _targetUserUid.intValue = resp.result.target
                         _signupState.value = SignupState.InputCode
-
-                        Toast.makeText(
-                            context, "인증 코드 6자리를 ${_id.value}로 발송했습니다.", Toast.LENGTH_LONG
-                        ).show()
+                        _uiEvent.emit(AuthUiEvent.SentVerificationCode(_id.value))
                     } else {
                         _signupState.value = SignupState.SignupCompleted
-                        Toast.makeText(context, "회원가입이 완료되었습니다", Toast.LENGTH_SHORT).show()
+                        _uiEvent.emit(AuthUiEvent.SignupCompleted)
                     }
                 }
             }
@@ -387,15 +376,15 @@ class AuthViewModel @Inject constructor(
     }
 
     // 사용자의 이름 업데이트하기
-    fun updateName(name: String, context: Context) {
-        if (name.length < 2) {
-            Toast.makeText(context, "이름은 2자 이상이어야 합니다", Toast.LENGTH_SHORT).show()
-            return
-        }
-        _isLoading.value = true
-
+    fun updateName(name: String) {
         viewModelScope.launch {
-            updateAccessToken(context)
+            if (name.length < 2) {
+                _uiEvent.emit(AuthUiEvent.InvalidName)
+                return@launch
+            }
+            _isLoading.value = true
+
+            updateAccessToken()
             val param = TsboardUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = name,
@@ -405,28 +394,26 @@ class AuthViewModel @Inject constructor(
             )
 
             updateUserInfoUseCase(param).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (resp.success) {
                         _user.value = _user.value.copy(name = name)
                         saveUserInfoUseCase(_user.value)
-                        Toast.makeText(context, "이름이 변경되었습니다", Toast.LENGTH_SHORT).show()
+                        _uiEvent.emit(AuthUiEvent.ChangedName)
                     } else {
-                        Toast.makeText(
-                            context, "이름 변경에 실패했습니다 (${resp.error})", Toast.LENGTH_SHORT
-                        ).show()
+                        _uiEvent.emit(AuthUiEvent.FailedToChangeName)
                     }
                 }
-                _isLoading.value = false
             }
+            _isLoading.value = false
         }
     }
 
     // 사용자의 서명 업데이트하기
-    fun updateSignature(signature: String, context: Context) {
+    fun updateSignature(signature: String) {
         _isLoading.value = true
 
         viewModelScope.launch {
-            updateAccessToken(context)
+            updateAccessToken()
             val param = TsboardUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
@@ -436,46 +423,36 @@ class AuthViewModel @Inject constructor(
             )
 
             updateUserInfoUseCase(param).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (resp.success) {
                         _user.value = _user.value.copy(signature = signature)
                         saveUserInfoUseCase(_user.value)
-                        Toast.makeText(context, "서명이 변경되었습니다", Toast.LENGTH_SHORT).show()
+                        _uiEvent.emit(AuthUiEvent.ChangedSignature)
                     } else {
-                        Toast.makeText(context, "서명 변경에 실패했습니다 (${resp.error})", Toast.LENGTH_LONG)
-                            .show()
+                        _uiEvent.emit(AuthUiEvent.FailedToChangeSignature)
                     }
                 }
-                _isLoading.value = false
             }
+            _isLoading.value = false
         }
     }
 
     // 사용자의 리프레시 토큰으로 새 액세스 토큰 발급받기
-    private suspend fun updateAccessToken(context: Context? = null) {
+    private suspend fun updateAccessToken() {
         if (_user.value.uid < 1) return
 
         updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
-            it.handle(context) { resp ->
+            it.handle { resp ->
                 if (null != resp.result) {
                     _user.emit(
                         _user.value.copy(token = resp.result!!, signin = CustomTime.now())
                     )
                     saveUserInfoUseCase(_user.value)
-                    context?.let {
-                        Toast.makeText(context, "로그인 세션이 갱신되었습니다", Toast.LENGTH_SHORT).show()
-                    }
+                    _uiEvent.emit(AuthUiEvent.AccessTokenUpdated)
                 } else {
                     _user.emit(emptyUser)
                     clearUserInfoUseCase()
-                    context?.let {
-                        Toast.makeText(
-                            context,
-                            "로그인 세션이 만료되었습니다. 다시 로그인을 해주세요.",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                    }
+                    _uiEvent.emit(AuthUiEvent.ExpiredAccessToken)
                 }
             }
         }
@@ -486,34 +463,28 @@ class AuthViewModel @Inject constructor(
         _isLoading.value = true
 
         viewModelScope.launch {
-            updateAccessToken(context)
+            updateAccessToken()
             val param = TsboardUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
                 signature = _user.value.signature,
                 password = "",
-                profile = Upload.uriToMultipart(context, uri)
+                profile = Upload.uriToMultipart(context, uri, "profile")
             )
 
             updateUserInfoUseCase(param).collect {
-                it.handle(context) { resp ->
+                it.handle { resp ->
                     if (resp.success) {
-                        getUserInfoUseCase().collect { user ->
-                            _user.value = user
-                            saveUserInfoUseCase(user)
-
-                            Toast.makeText(
-                                context, "프로필 이미지를 업데이트 하였습니다", Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        val userInfo = getUserInfoUseCase().first()
+                        _user.value = userInfo
+                        saveUserInfoUseCase(userInfo)
+                        _uiEvent.emit(AuthUiEvent.ProfileImageUpdated)
                     } else {
-                        Toast.makeText(
-                            context, "프로필 변경에 실패했습니다 (${resp.error})", Toast.LENGTH_LONG
-                        ).show()
+                        _uiEvent.emit(AuthUiEvent.FailedToUpdateProfileImage)
                     }
                 }
-                _isLoading.value = false
             }
+            _isLoading.value = false
         }
     }
 }

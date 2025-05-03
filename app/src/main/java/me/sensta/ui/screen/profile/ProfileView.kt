@@ -163,7 +163,7 @@ fun ProfileView() {
             }
 
             Button(
-                onClick = { authViewModel.refresh(context) },
+                onClick = { authViewModel.refresh() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 32.dp)
@@ -190,7 +190,7 @@ fun ProfileView() {
             ProfileViewEditNameDialog(
                 onDismissRequest = { isEditNameDialog = !isEditNameDialog },
                 onConfirm = {
-                    authViewModel.updateName(it, context)
+                    authViewModel.updateName(it)
                     isEditNameDialog = !isEditNameDialog
                 }
             )
@@ -200,7 +200,7 @@ fun ProfileView() {
             ProfileViewEditSignatureDialog(
                 onDismissRequest = { isEditSignatureDialog = !isEditSignatureDialog },
                 onConfirm = {
-                    authViewModel.updateSignature(it, context)
+                    authViewModel.updateSignature(it)
                     isEditSignatureDialog = !isEditSignatureDialog
                 }
             )

@@ -14,11 +14,11 @@ import me.data.remote.api.TsboardGoapi
 import me.data.repository.TsboardAuthRepositoryImpl
 import me.data.repository.TsboardBoardRepositoryImpl
 import me.data.repository.TsboardNotificationRepositoryImpl
-import me.data.repository.TsboardUserRepositoryImpl
+import me.data.repository.TsboardUserChatRepositoryImpl
 import me.domain.repository.TsboardAuthRepository
 import me.domain.repository.TsboardBoardRepository
 import me.domain.repository.TsboardNotificationRepository
-import me.domain.repository.TsboardUserRepository
+import me.domain.repository.TsboardUserChatRepository
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import javax.inject.Singleton
@@ -69,5 +69,5 @@ object TsboardDataModule {
     @Singleton
     fun provideTsboardUserRepository(
         api: TsboardGoapi
-    ): TsboardUserRepository = TsboardUserRepositoryImpl(api)
+    ): TsboardUserChatRepository = TsboardUserChatRepositoryImpl(api)
 }

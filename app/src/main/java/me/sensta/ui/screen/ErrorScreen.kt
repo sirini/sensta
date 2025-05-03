@@ -28,13 +28,13 @@ fun ErrorScreen() {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = "내부 오류 발생: 데이터를 가져오지 못했습니다.")
             Text(
-                text = Env.domain,
+                text = Env.DOMAIN,
                 fontFamily = robotoSlabFontFamily,
                 fontSize = 12.sp,
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
             )
             Button(onClick = {
-                val intent = Intent(Intent.ACTION_VIEW, Env.domain.toUri())
+                val intent = Intent(Intent.ACTION_VIEW, Env.DOMAIN.toUri())
                 context.startActivity(intent)
             }) {
                 Text(text = "사이트 열어보기")

@@ -38,7 +38,7 @@ fun TopBar() {
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = Env.title,
+                    text = Env.TITLE,
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.clickable {
                         navController.navigate(Screen.Home.route) {
@@ -64,7 +64,7 @@ fun TopBar() {
                         }
                 ) {
                     Text(
-                        text = Env.version,
+                        text = Env.VERSION,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
