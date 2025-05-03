@@ -1,0 +1,98 @@
+package me.sensta.ui.screen.view.content
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import me.domain.model.board.TsboardPost
+import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalHomeViewModel
+
+@Composable
+fun ViewPostLikeButton(post: TsboardPost) {
+    val homeViewModel = LocalHomeViewModel.current
+    val authViewModel = LocalAuthViewModel.current
+    val userInfo by authViewModel.user.collectAsState()
+    var likeState by remember { mutableStateOf(post.liked) }
+    var likeCount by remember { mutableIntStateOf(post.like) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Column(verticalArrangement = Arrangement.Center) {
+                IconButton(onClick = {
+                    likeState = !likeState
+                    homeViewModel.like(post.uid, likeState)
+
+                    if (likeState) {
+                        likeCount++
+                    } else {
+                        likeCount--
+                    }
+                }) {
+                    if (likeState) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "like",
+                            modifier = Modifier
+                                .size(40.dp),
+                            tint = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "like",
+                            modifier = Modifier
+                                .size(40.dp)
+                        )
+                    }
+                }
+                Text(text = "${likeCount}개 좋아요", style = MaterialTheme.typography.bodySmall)
+            }
+
+            if (userInfo.uid == post.writer.uid) {
+                Column(modifier = Modifier.padding(start = 12.dp)) {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = "Remove",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Text(
+                        text = "삭제하기",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 2.dp)
+                    )
+                }
+            }
+        }
+    }
+}
