@@ -1,18 +1,24 @@
 package me.sensta.ui.screen
 
 import android.widget.Toast
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import me.sensta.ui.common.LocalScrollBehavior
@@ -26,7 +32,7 @@ import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.ChatUiEvent
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun UserChatScreen() {
     val context = LocalContext.current
@@ -37,7 +43,13 @@ fun UserChatScreen() {
     val chatHistory by userViewModel.chatHistory.collectAsState()
     val my by authViewModel.user.collectAsState()
     val isLoadingChat by userViewModel.isLoadingChat
-
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoadingChat,
+        onRefresh = {
+            userViewModel.loadChatHistory()
+            Toast.makeText(context, "대화 내역을 불러왔습니다.", Toast.LENGTH_SHORT).show()
+        }
+    )
 
     LaunchedEffect(Unit) {
         // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
@@ -69,28 +81,44 @@ fun UserChatScreen() {
     Scaffold(
         bottomBar = { ChatInputBar() },
     ) {
-        if (isLoadingChat) {
-            LoadingScreen()
-        } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item {
-                    OtherUserInfo()
-                    LatestMessageDivider()
-                }
-                items(chatHistory) { chat ->
-                    val message = convertHtmlToText(chat.message)
-                    if (chat.userUid == my.uid) {
-                        ChatMyMessage(message = message)
-                    } else {
-                        ChatOtherUserMessage(message = message)
+        Crossfade(targetState = !isLoadingChat) { visible ->
+            if (visible) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullRefresh(pullRefreshState)
+                ) {
+                    // 상대와의 대화 내역 보여주기
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        item {
+                            OtherUserInfo()
+                            LatestMessageDivider()
+                        }
+                        items(chatHistory) { chat ->
+                            val message = convertHtmlToText(chat.message)
+                            if (chat.userUid == my.uid) {
+                                ChatMyMessage(message = message)
+                            } else {
+                                ChatOtherUserMessage(message = message)
+                            }
+                        }
+                        item {
+                            Box(modifier = Modifier.padding(it))
+                        }
                     }
+
+                    // 당겨서 새로고침 중일 때 로딩 화면 제공
+                    PullRefreshIndicator(
+                        refreshing = isLoadingChat,
+                        state = pullRefreshState,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    )
                 }
-                item {
-                    Box(modifier = Modifier.padding(it))
-                }
+            } else {
+                LoadingScreen()
             }
         }
     }
