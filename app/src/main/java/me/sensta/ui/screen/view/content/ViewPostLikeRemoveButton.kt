@@ -25,16 +25,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.domain.model.board.TsboardPost
+import me.sensta.ui.common.CommonDialog
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
+import me.sensta.viewmodel.local.LocalPostViewViewModel
 
 @Composable
 fun ViewPostLikeButton(post: TsboardPost) {
+    val navController = LocalNavController.current
     val homeViewModel = LocalHomeViewModel.current
     val authViewModel = LocalAuthViewModel.current
+    val postViewViewModel = LocalPostViewViewModel.current
     val userInfo by authViewModel.user.collectAsState()
     var likeState by remember { mutableStateOf(post.liked) }
     var likeCount by remember { mutableIntStateOf(post.like) }
+    var isReallyRemove by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -79,7 +86,9 @@ fun ViewPostLikeButton(post: TsboardPost) {
 
             if (userInfo.uid == post.writer.uid) {
                 Column(modifier = Modifier.padding(start = 12.dp)) {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        isReallyRemove = true
+                    }) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
                             contentDescription = "Remove",
@@ -94,5 +103,26 @@ fun ViewPostLikeButton(post: TsboardPost) {
                 }
             }
         }
+    }
+
+    if (isReallyRemove) {
+        CommonDialog(
+            onDismissRequest = { isReallyRemove = false },
+            onConfirm = {
+                postViewViewModel.remove(post.uid)
+                isReallyRemove = false
+                navController.navigate(Screen.Home.route) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            icon = Icons.Outlined.Delete,
+            content = {
+                Text(
+                    text = "작성하신 게시글을 정말로 삭제 할까요?",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        )
     }
 }
