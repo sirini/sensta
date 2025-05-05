@@ -47,7 +47,7 @@ fun VersionScreen() {
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "App Icon",
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(160.dp)
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.height(32.dp))
