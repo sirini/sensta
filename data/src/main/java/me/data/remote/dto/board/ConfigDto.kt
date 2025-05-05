@@ -50,7 +50,7 @@ data class PointDto(
 )
 
 // Config 응답을 엔티티로 변환하는 매퍼
-fun ConfigDto.toEntity(): TsboardConfig = TsboardConfig(
+fun ConfigDto.toEntity() = TsboardConfig(
     uid = uid,
     id = id,
     type = type,
@@ -63,7 +63,7 @@ fun ConfigDto.toEntity(): TsboardConfig = TsboardConfig(
 )
 
 // Level 응답을 엔티티로 변환하는 매퍼
-fun LevelDto.toEntity(): TsboardLevel = TsboardLevel(
+fun LevelDto.toEntity() = TsboardLevel(
     view = view,
     write = write,
     comment = comment,
@@ -72,7 +72,7 @@ fun LevelDto.toEntity(): TsboardLevel = TsboardLevel(
 )
 
 // Point 응답을 엔티티로 변환하는 매퍼
-fun PointDto.toEntity(): TsboardPoint = TsboardPoint(
+fun PointDto.toEntity() = TsboardPoint(
     view = view,
     write = write,
     comment = comment,

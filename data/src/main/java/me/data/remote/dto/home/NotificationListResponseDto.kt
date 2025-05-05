@@ -31,16 +31,15 @@ data class NotificationResultDto(
 )
 
 // 알림 내역 가져오기에 대한 응답을 엔티티로 변환하는 매퍼
-fun NotificationListResponseDto.toEntity(): TsboardNotificationResponse =
-    TsboardNotificationResponse(
-        success = success,
-        error = error,
-        code = code,
-        result = result?.map { it.toEntity() } ?: emptyList()
-    )
+fun NotificationListResponseDto.toEntity() = TsboardNotificationResponse(
+    success = success,
+    error = error,
+    code = code,
+    result = result?.map { it.toEntity() } ?: emptyList()
+)
 
 // 알림 항목에 대해 엔티티로 변환하는 매퍼
-fun NotificationResultDto.toEntity(): TsboardNotification = TsboardNotification(
+fun NotificationResultDto.toEntity() = TsboardNotification(
     uid = uid,
     fromUser = fromUser.toEntity(),
     type = type,

@@ -10,25 +10,38 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import me.data.env.Env
 import me.domain.model.board.TsboardPost
+import me.domain.model.board.TsboardRecentHashtag
 import me.domain.repository.TsboardResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
+import me.domain.usecase.board.GetRecentHashtagListUseCase
 import me.sensta.viewmodel.uievent.ExplorerUiEvent
 import javax.inject.Inject
 
 @HiltViewModel
 class ExplorerViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
-    private val getPostListUseCase: GetPostListUseCase
+    private val getPostListUseCase: GetPostListUseCase,
+    private val getRecentHashtagListUseCase: GetRecentHashtagListUseCase
 ) : ViewModel() {
+    val aiDescOption = 12
+    val hashtagOption = 3
+    val writerOption = 2
+    val titleOption = 0
+    val contentOption = 1
+
     private var _posts =
         mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
     val posts: State<TsboardResponse<List<TsboardPost>>> get() = _posts
 
     private val _isLoadingMore = mutableStateOf(false)
-    private val _option = mutableIntStateOf(0)
+
+    private val _option = mutableIntStateOf(aiDescOption)
+    val option: State<Int> get() = _option
+
     private val _keyword = mutableStateOf("")
     val keyword: State<String> get() = _keyword
 
@@ -39,6 +52,9 @@ class ExplorerViewModel @Inject constructor(
 
     private val _bunch = mutableIntStateOf(0)
     val bunch: State<Int> get() = _bunch
+
+    private val _recentHashtags = mutableStateOf<List<TsboardRecentHashtag>>(emptyList())
+    val recentHashtags: State<List<TsboardRecentHashtag>> get() = _recentHashtags
 
     private val _uiEvent = MutableSharedFlow<ExplorerUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
@@ -68,7 +84,9 @@ class ExplorerViewModel @Inject constructor(
             ).collect {
                 it.handle { resp ->
                     if (resp.isEmpty()) {
-                        _uiEvent.emit(ExplorerUiEvent.UnableToFindPosts)
+                        if (_keyword.value.isEmpty()) {
+                            _uiEvent.emit(ExplorerUiEvent.UnableToFindPosts)
+                        }
                         return@handle
                     }
 
@@ -94,6 +112,21 @@ class ExplorerViewModel @Inject constructor(
         }
     }
 
+    // 최근 해시태그 목록 가져오기
+    fun loadRecentHashtags(limit: Int = 10) {
+        viewModelScope.launch {
+            getRecentHashtagListUseCase(boardUid = Env.BOARD_UID, limit = limit).collect {
+                it.handle { resp ->
+                    if (resp.success) {
+                        _recentHashtags.value = resp.result
+                    } else {
+                        _uiEvent.emit(ExplorerUiEvent.UnableToFindRecentHashtags(resp.error))
+                    }
+                }
+            }
+        }
+    }
+
     // 게시글 목록 업데이트
     fun refresh(resetLastUid: Boolean = false) {
         if (resetLastUid) {
@@ -108,6 +141,11 @@ class ExplorerViewModel @Inject constructor(
         _keyword.value = keyword
 
         refresh(resetLastUid = true)
+    }
+
+    // 검색 옵션 업데이트
+    fun setOption(option: Int) {
+        _option.intValue = option
     }
 
     // 검색어 업데이트

@@ -20,7 +20,7 @@ data class ExifDto(
 )
 
 // EXIF를 엔티티로 변환하는 매퍼
-fun ExifDto.toEntity(): TsboardExif = TsboardExif(
+fun ExifDto.toEntity() = TsboardExif(
     make = make,
     model = model,
     aperture = aperture,

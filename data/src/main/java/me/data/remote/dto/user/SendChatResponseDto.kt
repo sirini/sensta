@@ -13,7 +13,7 @@ data class SendChatResponseDto(
 )
 
 // 응답을 엔티티로 변환하는 매퍼
-fun SendChatResponseDto.toEntity(): TsboardSendChatResponse = TsboardSendChatResponse(
+fun SendChatResponseDto.toEntity() = TsboardSendChatResponse(
     success = success,
     error = error,
     code = code,

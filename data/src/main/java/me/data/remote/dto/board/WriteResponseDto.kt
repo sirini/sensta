@@ -13,7 +13,7 @@ data class WriteResponseDto(
 )
 
 // 댓글 작성 후 JSON 응답을 엔티티로 변환하는 매퍼
-fun WriteResponseDto.toEntity(): TsboardWriteResponse = TsboardWriteResponse(
+fun WriteResponseDto.toEntity() = TsboardWriteResponse(
     success = success,
     error = error,
     code = code,

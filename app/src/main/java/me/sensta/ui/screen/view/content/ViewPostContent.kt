@@ -16,12 +16,17 @@ import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
 import com.google.accompanist.flowlayout.FlowRow
 import me.domain.model.board.TsboardBoardViewResult
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
+import me.sensta.viewmodel.local.LocalExplorerViewModel
 import java.util.Locale
 
 @Composable
 fun ViewPostContent(result: TsboardBoardViewResult) {
+    val navController = LocalNavController.current
+    val explorerViewModel = LocalExplorerViewModel.current
     val text = result.post.content.parseAsHtml(
         HtmlCompat.FROM_HTML_MODE_LEGACY,
         null,
@@ -46,9 +51,17 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
                 .fillMaxWidth()
                 .padding(12.dp),
             mainAxisSpacing = 8.dp,
-            crossAxisSpacing = 8.dp
+            crossAxisSpacing = 16.dp
         ) {
-            result.tags.forEach { tag -> ViewPostTag(tag) }
+            result.tags.forEach { tag ->
+                ViewPostTag(tag) {
+                    explorerViewModel.search(explorerViewModel.hashtagOption, tag.name)
+                    navController.navigate(Screen.Explorer.route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

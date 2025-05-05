@@ -25,7 +25,7 @@ data class ChatHistoryResultDto(
 )
 
 // 상대방과의 최근 대화 기록 응답을 엔티티로 변환하는 매퍼
-fun ChatHistoryListResponseDto.toEntity(): TsboardChatHistoryResponse = TsboardChatHistoryResponse(
+fun ChatHistoryListResponseDto.toEntity() = TsboardChatHistoryResponse(
     success = success,
     error = error,
     code = code,
@@ -33,7 +33,7 @@ fun ChatHistoryListResponseDto.toEntity(): TsboardChatHistoryResponse = TsboardC
 )
 
 // 상대방과의 대화 내용을 엔티티로 변환하는 매퍼
-fun ChatHistoryResultDto.toEntity(): TsboardChatHistory = TsboardChatHistory(
+fun ChatHistoryResultDto.toEntity() = TsboardChatHistory(
     uid = uid,
     userUid = userUid,
     message = message,

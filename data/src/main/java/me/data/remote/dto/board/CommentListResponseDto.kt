@@ -23,7 +23,7 @@ data class CommentListResultDto(
 )
 
 // 댓글 목록 JSON 응답을 엔티티로 변환하는 매퍼
-fun CommentListResponseDto.toEntity(): TsboardCommentListResponse = TsboardCommentListResponse(
+fun CommentListResponseDto.toEntity() = TsboardCommentListResponse(
     success = success,
     error = error,
     code = code,
@@ -31,7 +31,7 @@ fun CommentListResponseDto.toEntity(): TsboardCommentListResponse = TsboardComme
 )
 
 // 댓글 목록 Result 엔티티
-fun CommentListResultDto.toEntity(): TsboardCommentListResult = TsboardCommentListResult(
+fun CommentListResultDto.toEntity() = TsboardCommentListResult(
     boardUid = boardUid,
     sinceUid = sinceUid,
     totalCommentCount = totalCommentCount,

@@ -25,7 +25,7 @@ data class BoardListResultDto(
 )
 
 // 게시글 목록 가져오기 전체 응답을 엔티티로 변환하는 매퍼
-fun BoardListResponseDto.toEntity(): TsboardBoardListResponse = TsboardBoardListResponse(
+fun BoardListResponseDto.toEntity() = TsboardBoardListResponse(
     success = success,
     error = error,
     code = code,
@@ -33,7 +33,7 @@ fun BoardListResponseDto.toEntity(): TsboardBoardListResponse = TsboardBoardList
 )
 
 // Result 응답을 엔티티로 변환하는 매퍼
-fun BoardListResultDto.toEntity(): TsboardBoardListResult = TsboardBoardListResult(
+fun BoardListResultDto.toEntity() = TsboardBoardListResult(
     totalPostCount = totalPostCount,
     config = config.toEntity(),
     notices = notices.map { it.toEntity() },

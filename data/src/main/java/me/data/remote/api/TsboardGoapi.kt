@@ -7,6 +7,7 @@ import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentListResponseDto
+import me.data.remote.dto.board.RecentHashtagResponseDto
 import me.data.remote.dto.board.WriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.home.HomeLatestResponseDto
@@ -130,6 +131,13 @@ interface TsboardGoapi {
         @Query("sinceUid") sinceUid: Int,
         @Query("option") option: Int
     ): BoardPhotoListResponseDto
+
+    // 최근 사용된 해시태그들 목록 가져오기
+    @GET("board/tag/recent")
+    suspend fun getRecentHashtags(
+        @Query("boardUid") boardUid: Int,
+        @Query("limit") limit: Int
+    ): RecentHashtagResponseDto
 
     // 게시글 삭제하기
     @DELETE("board/remove/post")

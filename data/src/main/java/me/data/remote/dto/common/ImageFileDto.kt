@@ -11,7 +11,7 @@ data class ImageFileDto(
 )
 
 // 첨부파일을 엔티티로 변환하는 매퍼
-fun ImageFileDto.toEntity(): TsboardImageFile = TsboardImageFile(
+fun ImageFileDto.toEntity() = TsboardImageFile(
     uid = uid,
     path = path
 )

@@ -58,7 +58,7 @@ data class BoardViewWriterLatestCommentDto(
 )
 
 // 게시글 열람하기 결과를 엔티티로 변환하는 매퍼
-fun BoardViewResponseDto.toEntity(): TsboardBoardViewResponse = TsboardBoardViewResponse(
+fun BoardViewResponseDto.toEntity() = TsboardBoardViewResponse(
     success = success,
     error = error,
     code = code,
@@ -66,7 +66,7 @@ fun BoardViewResponseDto.toEntity(): TsboardBoardViewResponse = TsboardBoardView
 )
 
 // 게시글 보기 Result 응답을 엔티티로 변환하는 매퍼
-fun BoardViewResultDto.toEntity(): TsboardBoardViewResult = TsboardBoardViewResult(
+fun BoardViewResultDto.toEntity() = TsboardBoardViewResult(
     config = config.toEntity(),
     post = post.toEntity(),
     images = images.map { it.toEntity() },
@@ -79,22 +79,20 @@ fun BoardViewResultDto.toEntity(): TsboardBoardViewResult = TsboardBoardViewResu
 )
 
 // 게시글 작성자의 최근글 응답을 엔티티로 변환하는 매퍼
-fun BoardViewWriterLatestPostDto.toEntity(): TsboardBoardViewWriterLatestPost =
-    TsboardBoardViewWriterLatestPost(
-        board = board.toEntity(),
-        postUid = postUid,
-        like = like,
-        submitted = Instant.ofEpochMilli(submitted).atZone(ZoneOffset.UTC).toLocalDateTime(),
-        comment = comment,
-        title = title
-    )
+fun BoardViewWriterLatestPostDto.toEntity() = TsboardBoardViewWriterLatestPost(
+    board = board.toEntity(),
+    postUid = postUid,
+    like = like,
+    submitted = Instant.ofEpochMilli(submitted).atZone(ZoneOffset.UTC).toLocalDateTime(),
+    comment = comment,
+    title = title
+)
 
 // 게시글 작성자의 최근 댓글 응답을 엔티티로 변환하는 매퍼
-fun BoardViewWriterLatestCommentDto.toEntity(): TsboardBoardViewWriterLatestComment =
-    TsboardBoardViewWriterLatestComment(
-        board = board.toEntity(),
-        postUid = postUid,
-        like = like,
-        submitted = Instant.ofEpochMilli(submitted).atZone(ZoneOffset.UTC).toLocalDateTime(),
-        content = content
-    )
+fun BoardViewWriterLatestCommentDto.toEntity() = TsboardBoardViewWriterLatestComment(
+    board = board.toEntity(),
+    postUid = postUid,
+    like = like,
+    submitted = Instant.ofEpochMilli(submitted).atZone(ZoneOffset.UTC).toLocalDateTime(),
+    content = content
+)

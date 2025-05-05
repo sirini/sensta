@@ -11,7 +11,7 @@ data class TagDto(
 )
 
 // 해시태그에 응답에 대한 엔티티 변환 매퍼
-fun TagDto.toEntity(): TsboardTag = TsboardTag(
+fun TagDto.toEntity() = TsboardTag(
     uid = uid,
     name = name
 )

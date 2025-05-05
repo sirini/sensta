@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import me.domain.repository.TsboardResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.explorer.GridImage
+import me.sensta.ui.screen.explorer.RecentHashtag
 import me.sensta.ui.screen.explorer.SearchBox
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 import me.sensta.viewmodel.uievent.ExplorerUiEvent
@@ -60,6 +61,14 @@ fun ExplorerScreen() {
                     Toast.makeText(context, "게시글을 더 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
                     notFound = true
                 }
+
+                is ExplorerUiEvent.UnableToFindRecentHashtags -> {
+                    Toast.makeText(
+                        context,
+                        "최근 해시태그를 조회하지 못했습니다 (${event.message})",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -75,6 +84,7 @@ fun ExplorerScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SearchBox()
+            RecentHashtag()
 
             when (val postResponse = posts) {
                 is TsboardResponse.Loading -> {

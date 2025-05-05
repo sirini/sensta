@@ -34,7 +34,7 @@ data class CategoryDto(
 )
 
 // 게시글 JSON 응답을 엔티티로 변환하는 매퍼
-fun PostDto.toEntity(): TsboardPost = TsboardPost(
+fun PostDto.toEntity() = TsboardPost(
     uid = uid,
     title = title,
     content = content,
@@ -50,7 +50,7 @@ fun PostDto.toEntity(): TsboardPost = TsboardPost(
 )
 
 // 게시글 카테고리 JSON 응답을 엔티티로 변환하는 매퍼
-fun CategoryDto.toEntity(): TsboardCategory = TsboardCategory(
+fun CategoryDto.toEntity() = TsboardCategory(
     uid = uid,
     name = name
 )

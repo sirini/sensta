@@ -30,7 +30,7 @@ data class OtherUserInfoResultDto(
 )
 
 // 다른 사용자의 기본 정보 응답을 엔티티로 변환하는 매퍼
-fun OtherUserInfoDto.toEntity(): TsboardOtherUserInfo = TsboardOtherUserInfo(
+fun OtherUserInfoDto.toEntity() = TsboardOtherUserInfo(
     success = success,
     error = error,
     code = code,
@@ -38,7 +38,7 @@ fun OtherUserInfoDto.toEntity(): TsboardOtherUserInfo = TsboardOtherUserInfo(
 )
 
 // 다른 사용자의 기본 정보를 엔티티로 변환하는 매퍼
-fun OtherUserInfoResultDto.toEntity(): TsboardOtherUserInfoResult = TsboardOtherUserInfoResult(
+fun OtherUserInfoResultDto.toEntity() = TsboardOtherUserInfoResult(
     uid = uid,
     name = name,
     profile = profile,

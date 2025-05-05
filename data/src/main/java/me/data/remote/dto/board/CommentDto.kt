@@ -23,7 +23,7 @@ data class CommentDto(
 )
 
 // 댓글 JSON 응답을 엔티티로 변환하는 매퍼
-fun CommentDto.toEntity(): TsboardComment = TsboardComment(
+fun CommentDto.toEntity() = TsboardComment(
     uid = uid,
     replyUid = replyUid,
     postUid = postUid,

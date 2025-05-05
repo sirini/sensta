@@ -15,7 +15,7 @@ data class ImageDto(
 )
 
 // 갤러리의 개별 게시글에 대한 첨부 이미지를 엔티티로 변환하는 매퍼
-fun ImageDto.toEntity(): TsboardImage = TsboardImage(
+fun ImageDto.toEntity() = TsboardImage(
     file = file.toEntity(),
     thumbnail = thumbnail.toEntity(),
     exif = exif.toEntity(),

@@ -23,7 +23,7 @@ data class HomeLatestResultDto(
 )
 
 // 지정된 게시판의 최신글을 엔티티로 변환하는 매퍼
-fun HomeLatestResponseDto.toEntity(): TsboardHomeLatestResponse = TsboardHomeLatestResponse(
+fun HomeLatestResponseDto.toEntity() = TsboardHomeLatestResponse(
     success = success,
     error = error,
     code = code,
@@ -31,7 +31,7 @@ fun HomeLatestResponseDto.toEntity(): TsboardHomeLatestResponse = TsboardHomeLat
 )
 
 // 지정된 게시판의 최신글 결과를 엔티티로 변환하는 매퍼
-fun HomeLatestResultDto.toEntity(): TsboardHomeLatestResult = TsboardHomeLatestResult(
+fun HomeLatestResultDto.toEntity() = TsboardHomeLatestResult(
     items = items.map { it.toEntity() },
     config = config.toEntity()
 )

@@ -12,7 +12,7 @@ data class WriterSimpleDto(
 )
 
 // 게시글 작성자 JSON 응답을 엔티티로 변환하는 매퍼
-fun WriterSimpleDto.toEntity(): TsboardWriter = TsboardWriter(
+fun WriterSimpleDto.toEntity() = TsboardWriter(
     uid = uid,
     name = name,
     profile = profile,

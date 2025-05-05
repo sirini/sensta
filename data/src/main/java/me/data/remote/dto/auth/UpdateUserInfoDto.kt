@@ -13,7 +13,7 @@ data class UpdateUserInfoDto(
 )
 
 // 사용자의 정보 업데이트 요청에 대한 응답 DTO를 엔티티로 변환
-fun UpdateUserInfoDto.toEntity(): TsboardUpdateUserInfo = TsboardUpdateUserInfo(
+fun UpdateUserInfoDto.toEntity() = TsboardUpdateUserInfo(
     success = success,
     error = error,
     code = code,

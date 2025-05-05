@@ -26,7 +26,7 @@ data class PhotoImageThumbnailDto(
 )
 
 // 갤러리 리스트의 JSON 응답을 엔티티로 변환하는 매퍼
-fun PhotoDto.toEntity(): TsboardPhoto = TsboardPhoto(
+fun PhotoDto.toEntity() = TsboardPhoto(
     uid = uid,
     like = like,
     liked = liked,
@@ -37,7 +37,7 @@ fun PhotoDto.toEntity(): TsboardPhoto = TsboardPhoto(
 )
 
 // 썸네일을 엔티티로 변환하는 매퍼
-fun PhotoImageThumbnailDto.toEntity(): TsboardThumbnail = TsboardThumbnail(
+fun PhotoImageThumbnailDto.toEntity() = TsboardThumbnail(
     large = large,
     small = small
 )

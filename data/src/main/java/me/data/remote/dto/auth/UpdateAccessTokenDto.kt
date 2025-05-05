@@ -13,7 +13,7 @@ data class UpdateAccessTokenDto(
 )
 
 // 액세스 토큰 응답 엔티티로 변환하는 매퍼
-fun UpdateAccessTokenDto.toEntity(): TsboardUpdateAccessToken = TsboardUpdateAccessToken(
+fun UpdateAccessTokenDto.toEntity() = TsboardUpdateAccessToken(
     success = success,
     error = error,
     code = code,

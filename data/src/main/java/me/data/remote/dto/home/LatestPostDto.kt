@@ -31,7 +31,7 @@ data class LatestPostDto(
 )
 
 // 최근글 응답을 엔티티로 변환
-fun LatestPostDto.toEntity(): TsboardLatestPost = TsboardLatestPost(
+fun LatestPostDto.toEntity() = TsboardLatestPost(
     uid = uid,
     title = title,
     content = content,

@@ -13,7 +13,7 @@ data class ResponseNothingDto(
 )
 
 // result에 값이 있을 때 사용하는 엔티티 매퍼
-fun ResponseNothingDto.toEntity(): TsboardResponseNothing = TsboardResponseNothing(
+fun ResponseNothingDto.toEntity() = TsboardResponseNothing(
     success = success,
     error = error,
     code = code,

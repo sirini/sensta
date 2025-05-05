@@ -13,7 +13,7 @@ data class VerifyCodeDto(
 )
 
 // 인증코드 JSON 응답을 엔티티로 변환하는 매퍼
-fun VerifyCodeDto.toEntity(): TsboardVerifyCode = TsboardVerifyCode(
+fun VerifyCodeDto.toEntity() = TsboardVerifyCode(
     success = success,
     error = error,
     code = code,

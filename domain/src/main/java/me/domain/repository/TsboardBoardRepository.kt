@@ -4,6 +4,7 @@ import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
 import me.domain.model.board.TsboardGetPostsParam
 import me.domain.model.board.TsboardPost
+import me.domain.model.board.TsboardRecentHashtagResponse
 import me.domain.model.board.TsboardUpdateLikeParam
 import me.domain.model.board.TsboardWriteCommentParam
 import me.domain.model.board.TsboardWritePostParam
@@ -29,6 +30,11 @@ interface TsboardBoardRepository {
     ): TsboardResponse<TsboardBoardViewResponse>
 
     suspend fun getPhotos(sinceUid: Int, token: String): TsboardResponse<List<TsboardPhoto>>
+    suspend fun getRecentHashtags(
+        boardUid: Int,
+        limit: Int
+    ): TsboardResponse<TsboardRecentHashtagResponse>
+
     suspend fun removeComment(
         boardUid: Int,
         removeTargetUid: Int,

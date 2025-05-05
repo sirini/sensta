@@ -34,7 +34,7 @@ data class SigninResultDto(
 )
 
 // 로그인 후에 받을 전체 응답을 엔티티로 변환하는 매퍼
-fun SigninDto.toEntity(): TsboardSignin = TsboardSignin(
+fun SigninDto.toEntity() = TsboardSignin(
     success = success,
     error = error,
     code = code,
@@ -42,7 +42,7 @@ fun SigninDto.toEntity(): TsboardSignin = TsboardSignin(
 )
 
 // 로그인 후에 받을 결과를 엔티티로 변환하는 매퍼
-fun SigninResultDto.toEntity(): TsboardSigninResult = TsboardSigninResult(
+fun SigninResultDto.toEntity() = TsboardSigninResult(
     uid = uid,
     name = name,
     profile = profile,

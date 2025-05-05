@@ -12,7 +12,7 @@ data class BasicConfigDto(
 )
 
 // 게시판 기본 정보를 엔티티로 변환하는 매퍼
-fun BasicConfigDto.toEntity(): TsboardBasicConfig = TsboardBasicConfig(
+fun BasicConfigDto.toEntity() = TsboardBasicConfig(
     id = id,
     type = type,
     name = name

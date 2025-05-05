@@ -21,7 +21,7 @@ data class SignupResultDto(
 )
 
 // 회원가입 시 받을 응답을 엔티티로 변환하는 매퍼
-fun SignupDto.toEntity(): TsboardSignup = TsboardSignup(
+fun SignupDto.toEntity() = TsboardSignup(
     success = success,
     error = error,
     code = code,
@@ -29,7 +29,7 @@ fun SignupDto.toEntity(): TsboardSignup = TsboardSignup(
 )
 
 // 회원가입 시 메일 인증 여부를 포함한 결과를 엔티티로 변환하는 매퍼
-fun SignupResultDto.toEntity(): TsboardSignupResult = TsboardSignupResult(
+fun SignupResultDto.toEntity() = TsboardSignupResult(
     sendmail = sendmail,
     target = target
 )

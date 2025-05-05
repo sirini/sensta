@@ -24,16 +24,15 @@ data class BoardPhotoListResultDto(
 )
 
 // 갤러리 목록 가져오기 엔티티
-fun BoardPhotoListResponseDto.toEntity(): TsboardBoardPhotoListResponse =
-    TsboardBoardPhotoListResponse(
-        success = success,
-        error = error,
-        code = code,
-        result = result.toEntity()
-    )
+fun BoardPhotoListResponseDto.toEntity() = TsboardBoardPhotoListResponse(
+    success = success,
+    error = error,
+    code = code,
+    result = result.toEntity()
+)
 
 // Result 엔티티
-fun BoardPhotoListResultDto.toEntity(): TsboardBoardPhotoListResult = TsboardBoardPhotoListResult(
+fun BoardPhotoListResultDto.toEntity() = TsboardBoardPhotoListResult(
     totalPostCount = totalPostCount,
     config = config.toEntity(),
     images = images.map { it.toEntity() }

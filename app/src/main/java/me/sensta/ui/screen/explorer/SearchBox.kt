@@ -29,8 +29,14 @@ import me.sensta.viewmodel.local.LocalExplorerViewModel
 fun SearchBox() {
     val explorerViewModel = LocalExplorerViewModel.current
     val keyword by explorerViewModel.keyword
-    val options = listOf("제목", "내용", "작성자", "태그")
-    var selectedOption by remember { mutableStateOf(options[0]) }
+    val options = listOf(
+        explorerViewModel.aiDescOption to "AI 설명",
+        explorerViewModel.hashtagOption to "태그",
+        explorerViewModel.writerOption to "작성자",
+        explorerViewModel.titleOption to "제목",
+        explorerViewModel.contentOption to "내용",
+    )
+    val option by explorerViewModel.option
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)) {
@@ -48,7 +54,7 @@ fun SearchBox() {
                         .padding(start = 16.dp, end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = selectedOption)
+                    Text(text = options.first { it.first == option }.second)
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "option"
@@ -58,7 +64,7 @@ fun SearchBox() {
             trailingIcon = {
                 IconButton(onClick = {
                     explorerViewModel.search(
-                        option = options.indexOf(selectedOption),
+                        option = option,
                         keyword = keyword
                     )
                 }) {
@@ -77,12 +83,12 @@ fun SearchBox() {
             modifier = Modifier.fillMaxWidth(0.3f),
             containerColor = MaterialTheme.colorScheme.background
         ) {
-            options.forEach { option ->
+            options.forEach { opt ->
                 DropdownMenuItem(
                     onClick = {
-                        selectedOption = option
+                        explorerViewModel.setOption(opt.first)
                         expanded = false
-                    }, text = { Text(text = option) }
+                    }, text = { Text(text = opt.second) }
                 )
             }
         }

@@ -11,6 +11,7 @@ import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
 import me.domain.model.board.TsboardGetPostsParam
 import me.domain.model.board.TsboardPost
+import me.domain.model.board.TsboardRecentHashtagResponse
 import me.domain.model.board.TsboardUpdateLikeParam
 import me.domain.model.board.TsboardWriteCommentParam
 import me.domain.model.board.TsboardWritePostParam
@@ -118,6 +119,22 @@ class TsboardBoardRepositoryImpl @Inject constructor(
                 option = 0
             )
             TsboardResponse.Success(response.toEntity().result.images)
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        }
+    }
+
+    // 최근 사용된 해시태그들 목록 가져오기
+    override suspend fun getRecentHashtags(
+        boardUid: Int,
+        limit: Int
+    ): TsboardResponse<TsboardRecentHashtagResponse> {
+        return try {
+            val response = api.getRecentHashtags(
+                boardUid = boardUid,
+                limit = limit
+            )
+            TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
