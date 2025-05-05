@@ -32,7 +32,7 @@ fun RecentHashtag() {
     val horizontalScrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
-        explorerViewModel.loadRecentHashtags()
+        explorerViewModel.loadRecentHashtags(20)
     }
 
     Box(
@@ -44,7 +44,7 @@ fun RecentHashtag() {
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(horizontalScrollState)
-                .padding(12.dp),
+                .padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             recentHashtags.forEach { t ->
