@@ -106,7 +106,7 @@ fun SignupInputPassword() {
         Spacer(modifier = Modifier.height(32.dp))
 
         SignupBottomRow(onBack = { authViewModel.setSignupState(SignupState.InputEmail) }) {
-            authViewModel.checkValidPW(context, pwAgain)
+            authViewModel.checkValidPW(pwAgain)
         }
     }
 }

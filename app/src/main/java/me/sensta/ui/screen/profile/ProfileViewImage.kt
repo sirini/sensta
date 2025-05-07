@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +38,7 @@ import java.io.File
 fun ProfileViewImage() {
     val authViewModel = LocalAuthViewModel.current
     val context = LocalContext.current
-    val user by authViewModel.user.collectAsState()
+    val user by authViewModel.user
 
     // 선택한 이미지를 편집한 결과를 받는 런처
     val cropLauncher = rememberLauncherForActivityResult(

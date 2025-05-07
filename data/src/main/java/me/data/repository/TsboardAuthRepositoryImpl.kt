@@ -172,7 +172,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     override suspend fun updateUserInfo(param: TsboardUpdateUserInfoParam): TsboardResponse<TsboardUpdateUserInfo> {
         return try {
             val response = api.updateUserInfo(
-                authorization = param.authorization,
+                authorization = "Bearer ${param.authorization}",
                 name = param.name.toRequestBody(),
                 signature = param.signature.toRequestBody(),
                 password = if (param.password.length > 3) {

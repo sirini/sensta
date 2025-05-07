@@ -100,7 +100,7 @@ fun SignupInputCode() {
         }
 
         SignupBottomRow(onBack = { authViewModel.setSignupState(SignupState.InputName) }) {
-            authViewModel.checkVerificationCode(context)
+            authViewModel.checkVerificationCode()
         }
     }
 }

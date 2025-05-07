@@ -27,6 +27,7 @@ class CommonViewModel @Inject constructor() : ViewModel() {
 
     // 이미 목록에서 가져왔던 사진 정보들 저장하기
     fun updatePostUid(postUid: Int) {
+        _pagerIndex.intValue = 0
         _postUid.intValue = postUid
     }
 

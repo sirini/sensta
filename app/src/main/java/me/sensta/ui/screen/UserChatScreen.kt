@@ -41,7 +41,7 @@ fun UserChatScreen() {
     val authViewModel = LocalAuthViewModel.current
     val listState = rememberLazyListState()
     val chatHistory by userViewModel.chatHistory.collectAsState()
-    val my by authViewModel.user.collectAsState()
+    val my by authViewModel.user
     val isLoadingChat by userViewModel.isLoadingChat
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoadingChat,

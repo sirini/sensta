@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import me.domain.repository.TsboardResponse
@@ -25,7 +24,7 @@ fun NotificationScreen() {
     val authViewModel = LocalAuthViewModel.current
     val scrollBehavior = LocalScrollBehavior.current
     val isLoading by authViewModel.isLoading
-    val user by authViewModel.user.collectAsState()
+    val user by authViewModel.user
     val notis by notiViewModel.notifications
 
     LaunchedEffect(Unit) {

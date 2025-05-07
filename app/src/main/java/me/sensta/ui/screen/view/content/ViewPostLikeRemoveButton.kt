@@ -15,7 +15,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +37,7 @@ fun ViewPostLikeButton(post: TsboardPost) {
     val homeViewModel = LocalHomeViewModel.current
     val authViewModel = LocalAuthViewModel.current
     val postViewViewModel = LocalPostViewViewModel.current
-    val userInfo by authViewModel.user.collectAsState()
+    val userInfo by authViewModel.user
     var likeState by remember { mutableStateOf(post.liked) }
     var likeCount by remember { mutableIntStateOf(post.like) }
     var isReallyRemove by remember { mutableStateOf(false) }

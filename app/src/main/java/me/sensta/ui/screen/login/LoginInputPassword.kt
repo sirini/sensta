@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -38,7 +37,6 @@ import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun LoginInputPassword() {
-    val context = LocalContext.current
     val authViewModel = LocalAuthViewModel.current
     val pw by authViewModel.pw
     var isPwVisible by remember { mutableStateOf(false) }
@@ -84,7 +82,7 @@ fun LoginInputPassword() {
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { authViewModel.login(context = context) },
+            onClick = { authViewModel.login() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "로그인 하기", style = MaterialTheme.typography.titleMedium)

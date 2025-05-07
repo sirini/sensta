@@ -16,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +37,7 @@ fun CommentCardBody(comment: TsboardComment, likeCount: Int) {
     val commentViewModel = LocalCommentViewModel.current
     val commonViewModel = LocalCommonViewModel.current
     val postUid by commonViewModel.postUid
-    val user by authViewModel.user.collectAsState()
+    val user by authViewModel.user
 
     Column(
         modifier = Modifier

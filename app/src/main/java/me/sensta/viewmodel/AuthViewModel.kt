@@ -16,10 +16,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.util.Upload
@@ -48,6 +45,8 @@ import me.sensta.viewmodel.state.ID_REGISTERED
 import me.sensta.viewmodel.state.LoginState
 import me.sensta.viewmodel.state.SignupState
 import me.sensta.viewmodel.uievent.AuthUiEvent
+import me.sensta.viewmodel.uievent.LoginUiEvent
+import me.sensta.viewmodel.uievent.ProfileUiEvent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -76,8 +75,8 @@ class AuthViewModel @Inject constructor(
     private val _name = mutableStateOf("")
     val name: State<String> get() = _name
 
-    private val _user = MutableStateFlow(emptyUser)
-    val user: StateFlow<TsboardSigninResult> = _user.asStateFlow()
+    private val _user = mutableStateOf(emptyUser)
+    val user: State<TsboardSigninResult> get() = _user
 
     private val _loginState = mutableStateOf<LoginState>(LoginState.InputEmail)
     val loginState: State<LoginState> get() = _loginState
@@ -94,8 +93,14 @@ class AuthViewModel @Inject constructor(
     private val _otp = mutableStateOf("")
     val otp: State<String> get() = _otp
 
-    private val _uiEvent = MutableSharedFlow<AuthUiEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
+    private val _uiAuthEvent = MutableSharedFlow<AuthUiEvent>()
+    val uiAuthEvent = _uiAuthEvent.asSharedFlow()
+
+    private val _uiLoginEvent = MutableSharedFlow<LoginUiEvent>()
+    val uiLoginEvent = _uiLoginEvent.asSharedFlow()
+
+    private val _uiProfileEvent = MutableSharedFlow<ProfileUiEvent>()
+    val uiProfileEvent = _uiProfileEvent.asSharedFlow()
 
     // 생성 시점에 기존에 로그인했던 정보가 있다면 가져오기
     init {
@@ -116,8 +121,8 @@ class AuthViewModel @Inject constructor(
     private fun checkIDForSignup(checkEmailData: TsboardResponseNothing) {
         viewModelScope.launch {
             when (checkEmailData.code) {
-                ID_REGISTERED -> _uiEvent.emit(AuthUiEvent.AlreadyUsedID)
-                ID_INVALID -> _uiEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                ID_REGISTERED -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedID)
+                ID_INVALID -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
                 else -> {
                     _signupState.value = SignupState.InputPassword
                 }
@@ -129,12 +134,12 @@ class AuthViewModel @Inject constructor(
     private fun checkIDForLogin(checkEmailData: TsboardResponseNothing) {
         viewModelScope.launch {
             when (checkEmailData.code) {
-                ID_INVALID -> _uiEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                ID_INVALID -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
                 ID_REGISTERED -> {
                     _loginState.value = LoginState.InputPassword
                 }
 
-                else -> _uiEvent.emit(AuthUiEvent.IDNotFound)
+                else -> _uiLoginEvent.emit(LoginUiEvent.IDNotFound(checkEmailData.error))
             }
         }
     }
@@ -143,7 +148,7 @@ class AuthViewModel @Inject constructor(
     fun checkValidID(isSignup: Boolean = false) {
         viewModelScope.launch {
             if (_id.value.isEmpty() || !_isEmailValid.value) {
-                _uiEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
                 return@launch
             }
 
@@ -161,10 +166,10 @@ class AuthViewModel @Inject constructor(
     }
 
     // 회원 가입시 유효한 이름인지 확인하고, 확인되면 인증 코드 입력으로 이동 혹은 가입 완료
-    fun checkValidName(context: Context) {
+    fun checkValidName() {
         viewModelScope.launch {
             if (_name.value.isEmpty() || _name.value.length < 2) {
-                _uiEvent.emit(AuthUiEvent.InvalidName)
+                _uiAuthEvent.emit(AuthUiEvent.InvalidName)
                 return@launch
             }
 
@@ -172,7 +177,7 @@ class AuthViewModel @Inject constructor(
             checkNameUseCase(_name.value).collect {
                 it.handle { resp ->
                     if (resp.code == ID_REGISTERED) {
-                        _uiEvent.emit(AuthUiEvent.AlreadyUsedName)
+                        _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedName)
                     } else {
                         signUp() // 회원가입 진행
                     }
@@ -183,19 +188,19 @@ class AuthViewModel @Inject constructor(
     }
 
     // 회원 가입시 제대로된 비밀번호를 입력했는지 확인 후 (유효할 시) 닉네임 작성으로 이동
-    fun checkValidPW(context: Context, pwAgain: String) {
+    fun checkValidPW(pwAgain: String) {
         viewModelScope.launch {
             if (pw.value != pwAgain) {
-                _uiEvent.emit(AuthUiEvent.DifferentPassword)
+                _uiAuthEvent.emit(AuthUiEvent.DifferentPassword)
                 return@launch
             }
             if (pw.value.length < 8) {
-                _uiEvent.emit(AuthUiEvent.AtLeast8Characters)
+                _uiAuthEvent.emit(AuthUiEvent.AtLeast8Characters)
                 return@launch
             }
             val regex = Regex("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).+$")
             if (!regex.matches(pw.value)) {
-                _uiEvent.emit(AuthUiEvent.RemindPasswordRule)
+                _uiAuthEvent.emit(AuthUiEvent.RemindPasswordRule)
                 return@launch
             }
             _signupState.value = SignupState.InputName
@@ -203,14 +208,14 @@ class AuthViewModel @Inject constructor(
     }
 
     // 회원 가입 시 인증 코드 입력이 필요한 경우 인증 코드 유효성 확인하고, 확인되면 가입 절차 완료
-    fun checkVerificationCode(context: Context) {
+    fun checkVerificationCode() {
         viewModelScope.launch {
             if (_targetUserUid.intValue == 0) {
-                _uiEvent.emit(AuthUiEvent.InvalidTargetUser)
+                _uiAuthEvent.emit(AuthUiEvent.InvalidTargetUser)
                 return@launch
             }
             if (otp.value.length != 6) {
-                _uiEvent.emit(AuthUiEvent.EnterVerificationCode)
+                _uiAuthEvent.emit(AuthUiEvent.EnterVerificationCode)
                 return@launch
             }
 
@@ -226,7 +231,7 @@ class AuthViewModel @Inject constructor(
             ).collect {
                 it.handle { resp ->
                     if (!resp.success) {
-                        _uiEvent.emit(AuthUiEvent.WrongVerificationCode)
+                        _uiAuthEvent.emit(AuthUiEvent.WrongVerificationCode)
                     } else {
                         _signupState.value = SignupState.SignupCompleted
                     }
@@ -237,14 +242,14 @@ class AuthViewModel @Inject constructor(
     }
 
     // 입력된 아이디와 비밀번호가 유효한지 확인 후 (유효할 시) 홈 화면으로 이동
-    fun login(context: Context) {
+    fun login() {
         _isLoading.value = true
 
         viewModelScope.launch {
             signInUseCase(_id.value, _pw.value).collect {
                 it.handle { resp ->
                     if (null == resp.result) {
-                        _uiEvent.emit(AuthUiEvent.FailedToLogin)
+                        _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                     } else {
                         _user.value = resp.result!!
                         _loginState.value = LoginState.LoginCompleted
@@ -287,7 +292,6 @@ class AuthViewModel @Inject constructor(
     // 인증코드 6자리 입력 받기
     fun setOTP(otp: String) {
         _otp.value = otp.trim()
-        //
     }
 
     // 비밀번호 입력 받기
@@ -330,7 +334,7 @@ class AuthViewModel @Inject constructor(
                             signInWithGoogleUseCase(idToken).collect {
                                 it.handle { resp ->
                                     if (null == resp.result) {
-                                        _uiEvent.emit(AuthUiEvent.FailedToLogin)
+                                        _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                                     } else {
                                         _user.value = resp.result!!
                                         _loginState.value = LoginState.LoginCompleted
@@ -341,7 +345,11 @@ class AuthViewModel @Inject constructor(
                     }
                 }
             } catch (e: GetCredentialException) {
-                _uiEvent.emit(AuthUiEvent.FailedToLoginByGoogle)
+                _uiLoginEvent.emit(
+                    LoginUiEvent.FailedToLoginByGoogle(
+                        e.message ?: "Failed to get credential from Google"
+                    )
+                )
             } finally {
                 _isLoading.value = false
             }
@@ -352,23 +360,23 @@ class AuthViewModel @Inject constructor(
     private fun signUp() {
         viewModelScope.launch {
             if (_id.value.isEmpty() || _pw.value.isEmpty() || _name.value.isEmpty()) {
-                _uiEvent.emit(AuthUiEvent.EnterAllInfo)
+                _uiAuthEvent.emit(AuthUiEvent.EnterAllInfo)
                 return@launch
             }
 
             signUpUseCase(_id.value, _pw.value, _name.value).collect {
                 it.handle { resp ->
                     if (!resp.success) {
-                        _uiEvent.emit(AuthUiEvent.FailedToSignUp)
+                        _uiAuthEvent.emit(AuthUiEvent.FailedToSignUp)
                         return@handle
                     }
                     if (resp.result.sendmail) {
                         _targetUserUid.intValue = resp.result.target
                         _signupState.value = SignupState.InputCode
-                        _uiEvent.emit(AuthUiEvent.SentVerificationCode(_id.value))
+                        _uiAuthEvent.emit(AuthUiEvent.SentVerificationCode(_id.value))
                     } else {
                         _signupState.value = SignupState.SignupCompleted
-                        _uiEvent.emit(AuthUiEvent.SignupCompleted)
+                        _uiAuthEvent.emit(AuthUiEvent.SignupCompleted)
                     }
                 }
             }
@@ -379,7 +387,7 @@ class AuthViewModel @Inject constructor(
     fun updateName(name: String) {
         viewModelScope.launch {
             if (name.length < 2) {
-                _uiEvent.emit(AuthUiEvent.InvalidName)
+                _uiAuthEvent.emit(AuthUiEvent.InvalidName)
                 return@launch
             }
             _isLoading.value = true
@@ -398,9 +406,9 @@ class AuthViewModel @Inject constructor(
                     if (resp.success) {
                         _user.value = _user.value.copy(name = name)
                         saveUserInfoUseCase(_user.value)
-                        _uiEvent.emit(AuthUiEvent.ChangedName)
+                        _uiProfileEvent.emit(ProfileUiEvent.ChangedName)
                     } else {
-                        _uiEvent.emit(AuthUiEvent.FailedToChangeName)
+                        _uiProfileEvent.emit(ProfileUiEvent.FailedToChangeName(resp.error))
                     }
                 }
             }
@@ -413,7 +421,6 @@ class AuthViewModel @Inject constructor(
         _isLoading.value = true
 
         viewModelScope.launch {
-            updateAccessToken()
             val param = TsboardUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
@@ -427,9 +434,9 @@ class AuthViewModel @Inject constructor(
                     if (resp.success) {
                         _user.value = _user.value.copy(signature = signature)
                         saveUserInfoUseCase(_user.value)
-                        _uiEvent.emit(AuthUiEvent.ChangedSignature)
+                        _uiProfileEvent.emit(ProfileUiEvent.ChangedSignature)
                     } else {
-                        _uiEvent.emit(AuthUiEvent.FailedToChangeSignature)
+                        _uiProfileEvent.emit(ProfileUiEvent.FailedToChangeSignature(resp.error))
                     }
                 }
             }
@@ -443,16 +450,14 @@ class AuthViewModel @Inject constructor(
 
         updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
             it.handle { resp ->
-                if (null != resp.result) {
-                    _user.emit(
-                        _user.value.copy(token = resp.result!!, signin = CustomTime.now())
-                    )
+                if (resp.success) {
+                    _user.value = _user.value.copy(token = resp.result!!, signin = CustomTime.now())
                     saveUserInfoUseCase(_user.value)
-                    _uiEvent.emit(AuthUiEvent.AccessTokenUpdated)
+                    _uiAuthEvent.emit(AuthUiEvent.AccessTokenUpdated)
                 } else {
-                    _user.emit(emptyUser)
+                    _user.value = emptyUser
                     clearUserInfoUseCase()
-                    _uiEvent.emit(AuthUiEvent.ExpiredAccessToken)
+                    _uiAuthEvent.emit(AuthUiEvent.ExpiredAccessToken)
                 }
             }
         }
@@ -478,9 +483,9 @@ class AuthViewModel @Inject constructor(
                         val userInfo = getUserInfoUseCase().first()
                         _user.value = userInfo
                         saveUserInfoUseCase(userInfo)
-                        _uiEvent.emit(AuthUiEvent.ProfileImageUpdated)
+                        _uiProfileEvent.emit(ProfileUiEvent.ProfileImageUpdated)
                     } else {
-                        _uiEvent.emit(AuthUiEvent.FailedToUpdateProfileImage)
+                        _uiProfileEvent.emit(ProfileUiEvent.FailedToUpdateProfileImage(resp.error))
                     }
                 }
             }

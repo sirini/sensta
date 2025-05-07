@@ -3,7 +3,6 @@ package me.sensta.ui.screen
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import me.domain.repository.TsboardResponse
@@ -21,7 +20,7 @@ fun HomeScreen() {
     val authViewModel = LocalAuthViewModel.current
     val homeViewModel = LocalHomeViewModel.current
     val notiViewModel = LocalNotificationViewModel.current
-    val user by authViewModel.user.collectAsState()
+    val user by authViewModel.user
     val uncheckedNotification by notiViewModel.hasUncheckedNotification
     val photos by homeViewModel.photos
 

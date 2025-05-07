@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +38,7 @@ import java.util.Locale
 fun ProfileView() {
     val context = LocalContext.current
     val authViewModel = LocalAuthViewModel.current
-    val user by authViewModel.user.collectAsState()
+    val user by authViewModel.user
 
     var isEditNameDialog by remember { mutableStateOf(false) }
     var isEditSignatureDialog by remember { mutableStateOf(false) }

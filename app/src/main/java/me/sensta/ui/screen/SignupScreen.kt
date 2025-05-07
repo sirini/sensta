@@ -49,8 +49,12 @@ fun SignupScreen() {
 
     // ViewModel에서 전달된 이벤트에 맞춰 메시지 출력
     LaunchedEffect(Unit) {
-        authViewModel.uiEvent.collect { event ->
+        authViewModel.uiAuthEvent.collect { event ->
             when (event) {
+                is AuthUiEvent.AccessTokenUpdated -> {
+                    Toast.makeText(context, "토큰이 갱신되었습니다", Toast.LENGTH_SHORT).show()
+                }
+
                 is AuthUiEvent.AlreadyUsedID -> {
                     Toast.makeText(context, "이미 사용중인 아이디입니다", Toast.LENGTH_SHORT).show()
                 }
@@ -61,14 +65,6 @@ fun SignupScreen() {
 
                 is AuthUiEvent.AtLeast8Characters -> {
                     Toast.makeText(context, "비밀번호는 8자 이상이어야 합니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.ChangedName -> {
-                    Toast.makeText(context, "닉네임이 변경되었습니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.ChangedSignature -> {
-                    Toast.makeText(context, "서명이 변경되었습니다", Toast.LENGTH_SHORT).show()
                 }
 
                 is AuthUiEvent.DifferentPassword -> {
@@ -87,36 +83,12 @@ fun SignupScreen() {
                     Toast.makeText(context, "토큰이 만료되었습니다", Toast.LENGTH_SHORT).show()
                 }
 
-                is AuthUiEvent.FailedToChangeSignature -> {
-                    Toast.makeText(context, "서명 변경에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.FailedToChangeName -> {
-                    Toast.makeText(context, "닉네임 변경에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.FailedToLogin -> {
-                    Toast.makeText(context, "로그인에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.FailedToLoginByGoogle -> {
-                    Toast.makeText(context, "구글 로그인에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-
                 is AuthUiEvent.FailedToSignUp -> {
                     Toast.makeText(context, "회원가입에 실패했습니다", Toast.LENGTH_SHORT).show()
                 }
 
-                is AuthUiEvent.FailedToUpdateProfileImage -> {
-                    Toast.makeText(context, "프로필 이미지 변경에 실패했습니다", Toast.LENGTH_SHORT).show()
-                }
-
                 is AuthUiEvent.InvalidEmailAddress -> {
                     Toast.makeText(context, "올바르지 않은 이메일 형식입니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.IDNotFound -> {
-                    Toast.makeText(context, "아이디를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
                 }
 
                 is AuthUiEvent.InvalidName -> {
@@ -145,14 +117,6 @@ fun SignupScreen() {
 
                 is AuthUiEvent.SignupCompleted -> {
                     snackbar.showSnackbar("회원가입이 완료되었습니다", "확인", duration = SnackbarDuration.Short)
-                }
-
-                is AuthUiEvent.AccessTokenUpdated -> {
-                    Toast.makeText(context, "토큰이 갱신되었습니다", Toast.LENGTH_SHORT).show()
-                }
-
-                is AuthUiEvent.ProfileImageUpdated -> {
-                    Toast.makeText(context, "프로필 이미지가 변경되었습니다", Toast.LENGTH_SHORT).show()
                 }
 
                 is AuthUiEvent.WrongVerificationCode -> {

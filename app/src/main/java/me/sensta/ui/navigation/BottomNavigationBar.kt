@@ -7,7 +7,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,7 +23,7 @@ fun BottomNavigationBar() {
     val screens = listOf(Screen.Home, Screen.Explorer, Screen.Upload)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val authViewModel = LocalAuthViewModel.current
-    val user by authViewModel.user.collectAsState()
+    val user by authViewModel.user
 
     NavigationBar {
         screens.forEach { screen ->

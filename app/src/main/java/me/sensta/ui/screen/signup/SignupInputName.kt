@@ -47,7 +47,7 @@ fun SignupInputName() {
         Spacer(modifier = Modifier.height(32.dp))
 
         SignupBottomRow(onBack = { authViewModel.setSignupState(SignupState.InputPassword) }) {
-            authViewModel.checkValidName(context)
+            authViewModel.checkValidName()
         }
     }
 }
