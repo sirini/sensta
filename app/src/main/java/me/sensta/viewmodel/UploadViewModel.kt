@@ -51,7 +51,7 @@ class UploadViewModel @Inject constructor(
 
     private val _uiEvent = MutableSharedFlow<UploadUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
-    
+
     // 사진에 대한 태그 입력 받기
     fun addTag(hashtag: String, context: Context) {
         val tag = hashtag.trim().lowercase()
@@ -73,8 +73,12 @@ class UploadViewModel @Inject constructor(
     }
 
     // 업로드가 완료되면 uris를 비워주기
-    fun clearUris() {
+    fun clearPreviousUpload() {
+        _uploadState.value = UploadState.SelectImage
         _uris.value = emptyList()
+        _title.value = ""
+        _content.value = ""
+        _tags.value = emptyList()
     }
 
     // 입력 받았던 태그를 제거하기

@@ -68,7 +68,7 @@ fun UploadScreen() {
         }
 
         // 이전에 업로드 했던 uris 비우기
-        uploadViewModel.clearUris()
+        uploadViewModel.clearPreviousUpload()
 
         // 로그인 했으면 이미지 선택하는 런처 실행
         pickerLauncher.launch(
