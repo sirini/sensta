@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
     id("com.google.dagger.hilt.android")
     kotlin("kapt")
 }
@@ -15,19 +14,31 @@ android {
         applicationId = "me.sensta"
         minSdk = 34
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        compose = true
+        buildConfig = false
+    }
+
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            isDebuggable = true
+            resValue("string", "version", defaultConfig.versionName ?: "1.0.0")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            resValue("string", "version", defaultConfig.versionName ?: "1.0.0")
         }
     }
     compileOptions {
@@ -64,7 +75,6 @@ dependencies {
     implementation(libs.androidx.activity.compose.v190)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.accompanist.flowlayout)
 
     // ViewModel & StateFlow
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -81,9 +91,8 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.ui)
 
-    // Pager
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.pager.indicators)
+    // Foundation layout
+    implementation("androidx.compose.foundation:foundation-layout:1.7.8")
 
     // uCrop
     implementation(libs.ucrop)

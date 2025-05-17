@@ -8,16 +8,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +35,7 @@ import me.sensta.ui.screen.explorer.SearchBox
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 import me.sensta.viewmodel.uievent.ExplorerUiEvent
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExplorerScreen() {
     val context = LocalContext.current
@@ -44,10 +43,7 @@ fun ExplorerScreen() {
     val explorerViewModel = LocalExplorerViewModel.current
     val isLoading by remember { mutableStateOf(false) }
     val posts by explorerViewModel.posts
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isLoading,
-        onRefresh = { explorerViewModel.search(0, "") }
-    )
+    val pullToRefreshState = rememberPullToRefreshState()
     var notFound by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -76,7 +72,11 @@ fun ExplorerScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pullRefresh(pullRefreshState)
+            .pullToRefresh(
+                state = pullToRefreshState,
+                isRefreshing = isLoading,
+                onRefresh = { explorerViewModel.search(0, "") }
+            )
     ) {
         Column(
             modifier = Modifier
@@ -119,10 +119,8 @@ fun ExplorerScreen() {
         }
 
         // 당겨서 새로고침 중일 때 로딩 화면 제공
-        PullRefreshIndicator(
-            refreshing = isLoading,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+        if (isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
 }

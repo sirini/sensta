@@ -1,6 +1,9 @@
 package me.sensta.ui.screen.view.content
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
-import com.google.accompanist.flowlayout.FlowRow
 import me.domain.model.board.TsboardBoardViewResult
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
@@ -23,6 +25,7 @@ import me.sensta.util.NewlineTagHandler
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 import java.util.Locale
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ViewPostContent(result: TsboardBoardViewResult) {
     val navController = LocalNavController.current
@@ -50,8 +53,7 @@ fun ViewPostContent(result: TsboardBoardViewResult) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            mainAxisSpacing = 8.dp,
-            crossAxisSpacing = 16.dp
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             result.tags.forEach { tag ->
                 ViewPostTag(tag) {

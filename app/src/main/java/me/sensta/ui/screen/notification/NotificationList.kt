@@ -12,19 +12,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Checklist
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,7 +39,7 @@ import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationList(notifications: List<TsboardNotification>) {
     val navController = LocalNavController.current
@@ -47,15 +47,16 @@ fun NotificationList(notifications: List<TsboardNotification>) {
     val userViewModel = LocalUserChatViewModel.current
     val isLoading by notiViewModel.isLoading
     val commonViewModel = LocalCommonViewModel.current
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isLoading,
-        onRefresh = { notiViewModel.loadNotifications() }
-    )
+    val pullToRefreshScreen = rememberPullToRefreshState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pullRefresh(pullRefreshState)
+            .pullToRefresh(
+                state = pullToRefreshScreen,
+                isRefreshing = isLoading,
+                onRefresh = { notiViewModel.loadNotifications() }
+            )
     ) {
         if (notifications.isEmpty()) {
             NotificationEmpty()
@@ -150,10 +151,8 @@ fun NotificationList(notifications: List<TsboardNotification>) {
         }
 
         // 당겨서 새로고침 중일 때 로딩 화면 제공
-        PullRefreshIndicator(
-            refreshing = isLoading,
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
+        if (isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
     }
 }

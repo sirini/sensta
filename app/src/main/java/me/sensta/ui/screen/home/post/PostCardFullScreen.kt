@@ -25,12 +25,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
-import com.google.accompanist.pager.ExperimentalPagerApi
 import me.data.env.Env
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import kotlin.math.max
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun PostCardFullScreen() {
     val context = LocalContext.current

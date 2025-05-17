@@ -4,21 +4,20 @@ import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import me.sensta.ui.common.LocalScrollBehavior
@@ -32,7 +31,7 @@ import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.ChatUiEvent
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserChatScreen() {
     val context = LocalContext.current
@@ -43,13 +42,7 @@ fun UserChatScreen() {
     val chatHistory by userViewModel.chatHistory.collectAsState()
     val my by authViewModel.user
     val isLoadingChat by userViewModel.isLoadingChat
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isLoadingChat,
-        onRefresh = {
-            userViewModel.loadChatHistory()
-            Toast.makeText(context, "대화 내역을 불러왔습니다.", Toast.LENGTH_SHORT).show()
-        }
-    )
+    val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(Unit) {
         // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
@@ -86,7 +79,14 @@ fun UserChatScreen() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .pullRefresh(pullRefreshState)
+                        .pullToRefresh(
+                            state = pullToRefreshState,
+                            isRefreshing = isLoadingChat,
+                            onRefresh = {
+                                userViewModel.loadChatHistory()
+                                Toast.makeText(context, "대화 내역을 불러왔습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        )
                 ) {
                     // 상대와의 대화 내역 보여주기
                     LazyColumn(
@@ -111,11 +111,9 @@ fun UserChatScreen() {
                     }
 
                     // 당겨서 새로고침 중일 때 로딩 화면 제공
-                    PullRefreshIndicator(
-                        refreshing = isLoadingChat,
-                        state = pullRefreshState,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
+                    if (isLoadingChat) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    }
                 }
             } else {
                 LoadingScreen()

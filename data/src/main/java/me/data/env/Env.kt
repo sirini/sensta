@@ -9,7 +9,6 @@ object Env {
     const val MAX_UPLOAD_COUNT = 9                  // 한 번에 9장까지 업로드 가능
     const val MAX_UPLOAD_SIZE = 100L * 1024 * 1024  // 한 번에 최대 100MB까지 업로드 가능
 
-    const val VERSION = "v1.0.1"
     const val MIN_TSBOARD_VER = "≥ v1.0.5"          // 이 앱은 운용중인 서버의 TSBOARD가 v1.0.5 이상이어야 동작합니다
     const val MIN_ANDROID_VER = "≥ 14"              // 안드로이드 14 (Samsung Galaxy S23 시리즈 이후) 이상 버전 필요
     const val GITHUB_URL = "https://github.com/sirini/sensta" // 이 앱의 전체 소스코드 GitHub 주소

@@ -65,7 +65,7 @@ fun VersionScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "앱 버전")
-                    Text(text = Env.VERSION)
+                    Text(text = context.getString(R.string.version))
                 }
 
                 HorizontalDivider(

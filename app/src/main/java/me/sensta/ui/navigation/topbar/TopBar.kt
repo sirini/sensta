@@ -15,9 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import me.data.env.Env
+import me.sensta.R
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
@@ -26,6 +28,7 @@ import me.sensta.viewmodel.local.LocalNotificationViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar() {
+    val context = LocalContext.current
     val navController = LocalNavController.current
     val notiViewModel = LocalNotificationViewModel.current
     val scrollBehavior = LocalScrollBehavior.current
@@ -64,7 +67,7 @@ fun TopBar() {
                         }
                 ) {
                     Text(
-                        text = Env.VERSION,
+                        text = context.getString(R.string.version),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
