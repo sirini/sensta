@@ -51,12 +51,7 @@ class UploadViewModel @Inject constructor(
 
     private val _uiEvent = MutableSharedFlow<UploadUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
-
-    // 사진에 대한 설명 입력 받기
-    fun setContent(content: String) {
-        _content.value = content
-    }
-
+    
     // 사진에 대한 태그 입력 받기
     fun addTag(hashtag: String, context: Context) {
         val tag = hashtag.trim().lowercase()
@@ -77,6 +72,11 @@ class UploadViewModel @Inject constructor(
         _tags.value = newTags
     }
 
+    // 업로드가 완료되면 uris를 비워주기
+    fun clearUris() {
+        _uris.value = emptyList()
+    }
+
     // 입력 받았던 태그를 제거하기
     fun removeTag(hashtag: String) {
         val newTags = _tags.value.toMutableList()
@@ -84,6 +84,11 @@ class UploadViewModel @Inject constructor(
         _tags.value = newTags
 
         viewModelScope.launch { _uiEvent.emit(UploadUiEvent.HashtagRemoved(hashtag)) }
+    }
+
+    // 사진에 대한 설명 입력 받기
+    fun setContent(content: String) {
+        _content.value = content
     }
 
     // 사진 제목 입력 받기

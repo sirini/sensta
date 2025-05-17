@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -312,7 +313,7 @@ class AuthViewModel @Inject constructor(
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(context.getString(R.string.google_web_client_id))
-            .setAutoSelectEnabled(true)
+            .setAutoSelectEnabled(false)
             .build()
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
@@ -348,6 +349,12 @@ class AuthViewModel @Inject constructor(
                 _uiLoginEvent.emit(
                     LoginUiEvent.FailedToLoginByGoogle(
                         e.message ?: "Failed to get credential from Google"
+                    )
+                )
+            } catch (e: NoCredentialException) {
+                _uiLoginEvent.emit(
+                    LoginUiEvent.FailedToLoginByGoogle(
+                        e.message ?: "No credential found"
                     )
                 )
             } finally {
