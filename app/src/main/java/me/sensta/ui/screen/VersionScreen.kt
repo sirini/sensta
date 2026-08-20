@@ -80,8 +80,8 @@ fun VersionScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "TSBOARD 권장 버전")
-                    Text(text = Env.MIN_TSBOARD_VER)
+                    Text(text = "서버 API 계약")
+                    Text(text = Env.API_CONTRACT_VERSION)
                 }
 
                 HorizontalDivider(
@@ -96,7 +96,7 @@ fun VersionScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "안드로이드 권장 버전")
+                    Text(text = "지원 운영체제")
                     Text(text = Env.MIN_ANDROID_VER)
                 }
             }

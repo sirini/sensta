@@ -1,31 +1,27 @@
-# SENSTA
+# SENSTA Android
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=fff&style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=fff&style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=fff&style=for-the-badge" />
-  <img src="https://img.shields.io/badge/TSBOARD-000000.svg?&style=for-the-badge&&logoColor=3178C6"/>
-</p>
+SENSTA는 [sensta.me](https://sensta.me)의 사진을 감상하고, 여러 장의 사진과 EXIF를 공유하며,
+좋아요·댓글·1:1 대화·활동 알림을 이용하는 Android 네이티브 앱입니다. Android 8(API 26) 이상을
+지원하며 Android 16(API 36)을 대상으로 빌드합니다.
 
-1. SENSTA란 무엇인가요?
-2. TSBOARD와는 무슨 관계인가요?
-3. 어떻게 활용하면 좋을까요?
+2.0은 NUBO의 디자인 언어와 GOAPI의 API v1 계약을 기준으로 다시 만든 버전입니다. SENSTA 자체 앱인
+동시에, NUBO 기반 커뮤니티 운영자가 자신의 게시판·브랜드·서버 주소를 바꾸어 전용 앱을 제작할 수 있는
+참고 구현을 지향합니다.
 
-## SENSTA란 무엇인가요?
+## 주요 기능
 
-SENSTA는 https://sensta.me 사이트에서 제공하고 있는 사진 공유 서비스를 안드로이드 스마트폰에서
-보다 편리하게 이용 하실 수 있도록 개발하고 있는 앱입니다. SENSTA 앱과 웹사이트 모두 사용자분들이 올려주신
-고품질의 사진들을 로그인 없이도 편하게 만나 보실 수 있습니다. (사진 업로드 및 좋아요/댓글 기능 등에는 로그인이 필요합니다)
-
-> SENSTA 이름은 `Share Elegant, Noble Shots That Amaze` 라는 나름 거창한 풀네임의 줄임말로 지었습니다만,
-> 실상은 짧은 도메인을 고민하다가 뭔가 마음에 들어서 선택 하였습니다.
-
-SENSTA 2.0은 Android 8 이상을 지원하고 Android 16을 기준으로 빌드합니다. 최신 NUBO의 API 계약과 디자인 언어를
-공유하면서 사진 감상과 업로드에 집중한 네이티브 경험으로 개편하고 있습니다.
+- 로그인 없이 사진 피드·탐색·게시글·댓글 감상
+- Google 또는 이메일 계정 가입과 로그인
+- 최대 9장, 100MB의 사진 업로드와 EXIF 표시
+- 게시글·댓글 좋아요와 댓글 작성
+- 회원 간 1:1 대화, 댓글·좋아요·대화 푸시 알림
+- 게시글·사용자 신고, 차단과 차단 해제
+- 앱 안의 계정 및 관련 데이터 삭제
+- 시스템 설정을 따르는 밝은/어두운 테마
 
 ## 개발 환경
 
-WSL2 Ubuntu에서는 sudo 없이 프로젝트에 필요한 JDK와 Android SDK를 준비할 수 있습니다.
+WSL2 Ubuntu에서는 프로젝트가 제공하는 스크립트로 사용자 홈에 JDK 17과 Android SDK를 준비할 수 있습니다.
 
 ```bash
 ./scripts/bootstrap-wsl.sh
@@ -33,33 +29,28 @@ source ./scripts/android-env.sh
 ./scripts/check.sh
 ```
 
-실시간 알림을 포함한 배포 설정은 [Firebase 설정](docs/FIREBASE_SETUP.md)을 참고하세요.
+`check.sh`는 단위 테스트, Lint, 디버그·릴리스 APK와 릴리스 App Bundle을 모두 검증합니다. Firebase를
+연결하지 않은 로컬 빌드는 주기적 알림 조회 방식으로 동작합니다. 실제 푸시 배포 방법은
+[Firebase 설정](docs/FIREBASE_SETUP.md), Play 제출 방법은 [릴리스 안내](docs/PLAY_RELEASE.md)를 참고하세요.
 
-## TSBOARD와는 무슨 관계인가요?
+## 다른 NUBO 커뮤니티에 적용하기
 
-SENSTA 서비스는 TSBOARD 기반으로 운영되고 있고, TSBOARD의 GOAPI에서 제공하는 각종 API들을 그대로 활용하고 있습니다.
-따라서 이 SENSTA 안드로이드 앱은 약간의 설정 변경만으로도 TSBOARD 기반의 커뮤니티 사이트에 딱 맞춘 안드로이드 앱을
-빠르게 제작 하실 수 있습니다.
+포크한 뒤 최소한 다음 값을 자신의 서비스에 맞게 바꿉니다.
 
-- 즉, TSBOARD 기반으로 커뮤니티를 운영하시는 분들은 처음부터 새로 앱을 제작 하실 필요가 없습니다.
-- 본 프로젝트를 따로 포크 하신 후, 자신의 커뮤니티에 맞게 조금만 수정 하시면 바로 앱이 완성 됩니다.
+- `data/src/main/java/me/data/env/Env.kt`: 도메인, 게시판 UID·ID, 기본 카테고리와 업로드 한도
+- `app/src/main/res`: 앱 이름, 아이콘, 로고와 색상 자원
+- `app/build.gradle.kts`: 고유한 `applicationId`, 버전과 서명 설정
+- `app/google-services.json`: 해당 Android 패키지를 등록한 Firebase 프로젝트 설정
 
-## 어떻게 활용하면 좋을까요?
+서버는 최신 [NUBO](https://github.com/sirini/nubo)와 [GOAPI](https://github.com/sirini/goapi)의 API v1
+계약을 제공해야 합니다. 인증, 신고·차단·탈퇴, FCM 토큰과 채팅 계약은 임의로 생략하면 앱 기능 일부가
+동작하지 않습니다.
 
-아래와 같은 분들에게 도움이 되실 것 같습니다.
+## 프로젝트
 
-- 이미 TSBOARD 기반으로 웹사이트를 운영중이거나, 운영할 생각이 있으신 개발자/관리자님
-    - 이분들은 이 SENSTA 프로젝트를 이용해서 빠르게 운영중인 사이트의 전용 앱을 개발 하실 수 있습니다.
-    - 안드로이드 앱 개발을 전혀 해본 적이 없거나, 약간의 수정에 어려움이 있으시다면? https://tsboard.dev 사이트에서 도움을 요청해 주세요!
-    - TSBOARD 사용을 고려중이시라면? 이 SENSTA 앱을 참고해 주세요! 웹 뿐만 아니라 앱도 빠르게 제작 가능합니다.
-- SENSTA 앱의 개선에 기여하고자 하는 개발자님
-    - 발견하신 버그, 개선해주신 코드 모두 환영합니다! 안드로이드 앱 개발을 주로 하신 베테랑 개발자님들의 조언도 환영합니다!
+- 웹사이트: https://sensta.me
+- Android 소스: https://github.com/sirini/sensta
+- NUBO: https://github.com/sirini/nubo
+- GOAPI: https://github.com/sirini/goapi
 
-# 참고
-
-- SENSTA.ME 웹사이트 : https://sensta.me
-- TSBOARD 공식 홈페이지 : https://tsboard.dev
-    - TSBOARD GitHub : https://github.com/sirini/tsboard
-    - GOAPI GitHub : https://github.com/sirini/goapi
-
-> SENSTA 서비스는 비상업적 목적으로 운영되고 있으며, 사진을 좋아하는 모든 분들에게 열려 있습니다.
+SENSTA는 비상업적으로 운영하며 사진을 좋아하는 모든 분에게 열려 있습니다.

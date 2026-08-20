@@ -7,14 +7,16 @@
 
     <application
         android:name=".App"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:appCategory="social"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Sensta">
+        android:theme="@style/Theme.Sensta"
+        android:usesCleartextTraffic="false">
         <!-- 2026년부터 권장되는 FID 기반 개별 푸시 등록 방식을 사용한다. -->
         <meta-data
             android:name="firebase_messaging_installation_id_enabled"

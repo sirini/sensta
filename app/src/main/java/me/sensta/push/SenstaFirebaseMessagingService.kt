@@ -1,5 +1,6 @@
 package me.sensta.push
 
+import android.annotation.SuppressLint
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
@@ -12,6 +13,8 @@ import me.sensta.util.AppNotification
 import javax.inject.Inject
 
 @AndroidEntryPoint
+// 최신 FCM은 등록 토큰 대신 onRegistered에서 전달하는 FID를 사용하므로 구형 린트 검사를 제외한다.
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class SenstaFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var pushTokenManager: PushTokenManager

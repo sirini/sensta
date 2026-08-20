@@ -19,8 +19,8 @@ android {
         applicationId = "me.sensta"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 20
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -28,6 +28,31 @@ android {
     buildFeatures {
         compose = true
         buildConfig = false
+    }
+
+    signingConfigs {
+        val storePath = providers.gradleProperty("SENSTA_STORE_FILE")
+            .orElse(providers.environmentVariable("SENSTA_STORE_FILE"))
+            .orNull
+        val storePasswordValue = providers.gradleProperty("SENSTA_STORE_PASSWORD")
+            .orElse(providers.environmentVariable("SENSTA_STORE_PASSWORD"))
+            .orNull
+        val keyAliasValue = providers.gradleProperty("SENSTA_KEY_ALIAS")
+            .orElse(providers.environmentVariable("SENSTA_KEY_ALIAS"))
+            .orNull
+        val keyPasswordValue = providers.gradleProperty("SENSTA_KEY_PASSWORD")
+            .orElse(providers.environmentVariable("SENSTA_KEY_PASSWORD"))
+            .orNull
+
+        // 업로드 키와 비밀번호는 저장소가 아닌 사용자 Gradle 속성이나 환경변수로만 받는다.
+        if (listOf(storePath, storePasswordValue, keyAliasValue, keyPasswordValue).all { it != null }) {
+            create("release") {
+                storeFile = file(requireNotNull(storePath))
+                storePassword = requireNotNull(storePasswordValue)
+                keyAlias = requireNotNull(keyAliasValue)
+                keyPassword = requireNotNull(keyPasswordValue)
+            }
+        }
     }
 
     buildTypes {
@@ -38,7 +63,9 @@ android {
             resValue("string", "version", defaultConfig.versionName ?: "1.0.0")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -49,9 +76,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        compose = true
     }
 }
 
@@ -68,7 +92,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.activity.compose.v190)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
@@ -76,11 +100,6 @@ dependencies {
     implementation(libs.androidx.material3)
 
     // Compose
-    implementation(platform(libs.androidx.compose.bom.v20240300))
-    implementation(libs.ui)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
-    implementation(libs.androidx.activity.compose.v190)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material.icons.extended)
 
@@ -100,7 +119,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui)
 
     // Foundation layout
-    implementation("androidx.compose.foundation:foundation-layout:1.7.8")
+    implementation(libs.androidx.foundation.layout)
 
     // uCrop
     implementation(libs.ucrop)

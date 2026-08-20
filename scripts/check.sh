@@ -7,4 +7,7 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/android-env.sh"
 cd "$PROJECT_DIR"
-./gradlew test lintDebug assembleDebug assembleRelease
+# Hilt 생성 소스를 린트와 릴리스 컴파일이 동시에 갱신하면 AGP 린트가 간헐적으로 실패하므로 단계를 분리한다.
+./gradlew test
+./gradlew lintDebug
+./gradlew assembleDebug assembleRelease bundleRelease
