@@ -43,6 +43,7 @@ import me.domain.usecase.auth.UpdateAccessTokenUseCase
 import me.domain.usecase.auth.UpdateUserInfoUseCase
 import me.sensta.R
 import me.sensta.push.PushTokenManager
+import me.sensta.policy.CommunityPolicyManager
 import me.sensta.util.CustomTime
 import me.sensta.util.now
 import me.sensta.viewmodel.state.LoginState
@@ -66,7 +67,8 @@ class AuthViewModel @Inject constructor(
     private val updateAccessTokenUseCase: UpdateAccessTokenUseCase,
     private val updateUserInfoUseCase: UpdateUserInfoUseCase,
     private val verifyCodeUseCase: CheckVerificationCodeUseCase,
-    private val pushTokenManager: PushTokenManager
+    private val pushTokenManager: PushTokenManager,
+    private val communityPolicyManager: CommunityPolicyManager
 ) : ViewModel() {
     private val _id = mutableStateOf("")
     val id: State<String> get() = _id
@@ -91,6 +93,9 @@ class AuthViewModel @Inject constructor(
 
     private val _signupState = mutableStateOf<SignupState>(SignupState.InputEmail)
     val signupState: State<SignupState> get() = _signupState
+
+    private val _isCommunityPolicyAccepted = mutableStateOf(communityPolicyManager.isAccepted())
+    val isCommunityPolicyAccepted: State<Boolean> get() = _isCommunityPolicyAccepted
 
     private val _targetUserUid = mutableIntStateOf(0)
     val targetUserUid: State<Int> get() = _targetUserUid
@@ -171,6 +176,10 @@ class AuthViewModel @Inject constructor(
     // 회원 가입시 유효한 이름인지 확인하고, 확인되면 인증 코드 입력으로 이동 혹은 가입 완료
     fun checkValidName() {
         viewModelScope.launch {
+            if (!_isCommunityPolicyAccepted.value) {
+                _uiAuthEvent.emit(AuthUiEvent.CommunityPolicyRequired)
+                return@launch
+            }
             if (_name.value.isEmpty() || _name.value.length < 2) {
                 _uiAuthEvent.emit(AuthUiEvent.InvalidName)
                 return@launch
@@ -322,6 +331,12 @@ class AuthViewModel @Inject constructor(
     // 회원가입 시 이름 입력 받기
     fun setName(name: String) {
         _name.value = name.trim()
+    }
+
+    // 회원가입 전에 이용약관과 커뮤니티 운영 원칙에 동의한 상태를 보관한다.
+    fun acceptCommunityPolicy(accepted: Boolean) {
+        _isCommunityPolicyAccepted.value = accepted
+        if (accepted) communityPolicyManager.accept()
     }
 
     // 인증코드 6자리 입력 받기

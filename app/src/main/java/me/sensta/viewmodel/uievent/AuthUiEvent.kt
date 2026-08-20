@@ -18,4 +18,5 @@ sealed interface AuthUiEvent {
     data class SentVerificationCode(val email: String) : AuthUiEvent
     data object SignupCompleted : AuthUiEvent
     data object WrongVerificationCode : AuthUiEvent
+    data object CommunityPolicyRequired : AuthUiEvent
 }

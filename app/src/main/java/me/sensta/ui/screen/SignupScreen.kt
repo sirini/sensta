@@ -122,6 +122,14 @@ fun SignupScreen() {
                 is AuthUiEvent.WrongVerificationCode -> {
                     Toast.makeText(context, "인증번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
                 }
+
+                is AuthUiEvent.CommunityPolicyRequired -> {
+                    Toast.makeText(
+                        context,
+                        "이용약관과 커뮤니티 운영 원칙에 동의해주세요",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

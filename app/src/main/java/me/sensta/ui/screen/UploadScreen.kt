@@ -112,6 +112,14 @@ fun UploadScreen() {
                         Toast.LENGTH_LONG
                     ).show()
                 }
+
+                is UploadUiEvent.CommunityPolicyRequired -> {
+                    Toast.makeText(
+                        context,
+                        "게시물 운영 원칙에 동의해주세요",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

@@ -124,6 +124,44 @@ fun VersionScreen() {
 
             TextButton(
                 onClick = {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, "${Env.DOMAIN}/terms".toUri())
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(text = "이용약관과 커뮤니티 운영 원칙")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            TextButton(
+                onClick = {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, "${Env.DOMAIN}/privacy".toUri())
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(text = "개인정보 처리방침")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            TextButton(
+                onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, Env.GITHUB_URL.toUri())
                     context.startActivity(intent)
                 },
