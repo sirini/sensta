@@ -44,7 +44,7 @@ fun RecentHashtag() {
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(horizontalScrollState)
-                .padding(bottom = 16.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             recentHashtags.forEach { t ->

@@ -66,15 +66,15 @@ fun ViewPostLikeButton(post: TsboardPost) {
                     if (likeState) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
-                            contentDescription = "like",
+                            contentDescription = "좋아요 취소",
                             modifier = Modifier
                                 .size(40.dp),
-                            tint = MaterialTheme.colorScheme.onErrorContainer
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
-                            contentDescription = "like",
+                            contentDescription = "좋아요",
                             modifier = Modifier
                                 .size(40.dp)
                         )
@@ -90,7 +90,7 @@ fun ViewPostLikeButton(post: TsboardPost) {
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
-                            contentDescription = "Remove",
+                            contentDescription = "사진 삭제",
                             modifier = Modifier.size(40.dp)
                         )
                     }

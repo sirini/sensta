@@ -29,11 +29,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
 import me.domain.model.photo.TsboardImage
 import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.ui.theme.LocalSenstaExtendedColors
 
 @Composable
 fun PostCarousel(images: List<TsboardImage>) {
     val pagerState = rememberPagerState(0) { images.size }
     val commonViewModel = LocalCommonViewModel.current
+    val extendedColors = LocalSenstaExtendedColors.current
 
     // 보고 있는 페이지가 변경되면 인덱스를 공용 뷰모델에 저장한다.
     LaunchedEffect(pagerState) {
@@ -47,7 +49,12 @@ fun PostCarousel(images: List<TsboardImage>) {
         pagerState.scrollToPage(0)
     }
 
-    Box(modifier = Modifier.fillMaxWidth().aspectRatio(0.75f)) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(0.8f)
+            .background(extendedColors.media)
+    ) {
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
             AsyncImage(
                 model = Env.DOMAIN + images[page].thumbnail.large,
@@ -57,7 +64,7 @@ fun PostCarousel(images: List<TsboardImage>) {
                         commonViewModel.openFullScreen(images[page].thumbnail.large)
                     }
                 },
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
         }
 
@@ -75,8 +82,14 @@ fun PostCarousel(images: List<TsboardImage>) {
                         modifier = Modifier
                             .padding(2.dp)
                             .clip(CircleShape)
-                            .background(if (pagerState.currentPage == index) Color.White else Color.Gray)
-                            .size(4.dp)
+                            .background(
+                                if (pagerState.currentPage == index) {
+                                    extendedColors.onMedia
+                                } else {
+                                    extendedColors.onMedia.copy(alpha = 0.4f)
+                                }
+                            )
+                            .size(if (pagerState.currentPage == index) 6.dp else 5.dp)
                     )
                 }
             }
