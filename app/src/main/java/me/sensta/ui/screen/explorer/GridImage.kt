@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -37,8 +36,6 @@ fun GridImage(posts: List<TsboardPost>) {
     val commonViewModel = LocalCommonViewModel.current
     val explorerViewModel = LocalExplorerViewModel.current
     val gridState = rememberLazyGridState()
-    val bunch by explorerViewModel.bunch
-    val page by explorerViewModel.page
 
     // 스크롤 상태를 감시해서 마지막 항목에 도달하면 이전 사진들 불러오기
     LaunchedEffect(gridState) {
@@ -47,8 +44,8 @@ fun GridImage(posts: List<TsboardPost>) {
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= (bunch * page) - 1) {
-                        explorerViewModel.refresh(resetLastUid = false)
+                    if (posts.isNotEmpty() && index >= posts.lastIndex - 6) {
+                        explorerViewModel.refresh(resetPaging = false)
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }

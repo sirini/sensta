@@ -8,5 +8,7 @@ import javax.inject.Inject
 class GetHomeLatestPostUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
-    operator fun invoke(limit: Int) = flow { emit(repository.getHomeLatestPosts(limit)) }
+    operator fun invoke(limit: Int, token: String = "") = flow {
+        emit(repository.getHomeLatestPosts(limit = limit, token = token))
+    }
 }

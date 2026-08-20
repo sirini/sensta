@@ -22,7 +22,7 @@ fun HomeScreen() {
     val notiViewModel = LocalNotificationViewModel.current
     val user by authViewModel.user
     val uncheckedNotification by notiViewModel.hasUncheckedNotification
-    val photos by homeViewModel.photos
+    val posts by homeViewModel.posts
 
     LaunchedEffect(Unit) {
         // 사용자 정보 업데이트하기
@@ -43,7 +43,7 @@ fun HomeScreen() {
     }
 
     LaunchedEffect(user) {
-        homeViewModel.refresh(true)
+        homeViewModel.refresh(resetPaging = true)
 
         if (user.token.isNotEmpty()) {
             notiViewModel.loadNotifications()
@@ -55,7 +55,7 @@ fun HomeScreen() {
     }
 
     // 사진 목록 가져오기
-    when (val photoResponse = photos) {
+    when (val photoResponse = posts) {
         is TsboardResponse.Loading -> LoadingScreen()
         is TsboardResponse.Success -> PhotoList(photoResponse.data)
         is TsboardResponse.Error -> PhotoError(viewModel = homeViewModel)

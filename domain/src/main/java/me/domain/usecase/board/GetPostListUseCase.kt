@@ -10,7 +10,7 @@ class GetPostListUseCase @Inject constructor(
     private val repository: TsboardBoardRepository
 ) {
     operator fun invoke(
-        sinceUid: Int,
+        page: Int,
         option: Int,
         keyword: String,
         token: String
@@ -18,7 +18,7 @@ class GetPostListUseCase @Inject constructor(
         emit(
             repository.getPosts(
                 TsboardGetPostsParam(
-                    sinceUid = sinceUid,
+                    page = page,
                     option = option,
                     keyword = keyword,
                     token = token

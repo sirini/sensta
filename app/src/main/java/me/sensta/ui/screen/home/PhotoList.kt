@@ -28,18 +28,16 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import me.domain.model.photo.TsboardPhoto
+import me.domain.model.board.TsboardPost
 import me.sensta.ui.screen.home.post.PostCard
 import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
-fun PhotoList(photos: List<TsboardPhoto>) {
+fun PhotoList(posts: List<TsboardPost>) {
     val context = LocalContext.current
     val homeViewModel = LocalHomeViewModel.current
     val isLoading by homeViewModel.isLoadingMore
-    val bunch by homeViewModel.bunch
-    val page by homeViewModel.page
     val listState = rememberLazyListState()
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -50,7 +48,7 @@ fun PhotoList(photos: List<TsboardPhoto>) {
             .distinctUntilChanged()
             .collect { index ->
                 index?.let {
-                    if (index >= (bunch * page) - 1) {
+                    if (posts.isNotEmpty() && index >= posts.lastIndex - 3) {
                         homeViewModel.refresh()
                         Toast.makeText(context, "이전 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                     }
@@ -67,7 +65,7 @@ fun PhotoList(photos: List<TsboardPhoto>) {
                         state = pullToRefreshState,
                         isRefreshing = isLoading,
                         onRefresh = {
-                            homeViewModel.refresh(resetLastUid = true)
+                            homeViewModel.refresh(resetPaging = true)
                             Toast.makeText(context, "최근 사진들을 불러왔습니다.", Toast.LENGTH_SHORT).show()
                         }
                     )
@@ -78,8 +76,8 @@ fun PhotoList(photos: List<TsboardPhoto>) {
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    items(photos) { photo ->
-                        PostCard(photo = photo)
+                    items(posts) { post ->
+                        PostCard(post = post)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }

@@ -2,10 +2,12 @@ package me.data.repository
 
 import me.data.env.Env
 import me.data.remote.api.TsboardGoapi
+import me.data.remote.dto.board.BoardLikeRequestDto
+import me.data.remote.dto.board.CommentLikeRequestDto
+import me.data.remote.dto.board.RemovePostRequestDto
 import me.data.remote.dto.board.toEntity
 import me.data.remote.dto.common.toEntity
 import me.data.remote.dto.home.toEntity
-import me.data.remote.dto.photo.toEntity
 import me.data.util.Upload
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
@@ -18,7 +20,6 @@ import me.domain.model.board.TsboardWritePostParam
 import me.domain.model.board.TsboardWriteResponse
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.home.TsboardLatestPost
-import me.domain.model.photo.TsboardPhoto
 import me.domain.repository.TsboardBoardRepository
 import me.domain.repository.TsboardResponse
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -35,13 +36,11 @@ class TsboardBoardRepositoryImpl @Inject constructor(
     ): TsboardResponse<List<TsboardComment>> {
         return try {
             val response = api.getComments(
-                authorization = "Bearer $token",
-                id = Env.BOARD_ID,
+                authorization = token.toAuthorizationHeader(),
+                boardUid = Env.BOARD_UID,
                 postUid = postUid,
                 page = 1,
-                pagingDirection = 1,
-                sinceUid = 0,
-                bunch = 100
+                limit = 100
             )
             TsboardResponse.Success(response.toEntity().result.comments)
         } catch (e: Exception) {
@@ -52,13 +51,13 @@ class TsboardBoardRepositoryImpl @Inject constructor(
     // 지정된 게시판의 최근글 목록 가져오기
     override suspend fun getHomeLatestPosts(
         limit: Int,
-        accessUserUid: Int
+        token: String
     ): TsboardResponse<List<TsboardLatestPost>> {
         return try {
             val response = api.getHomeLatestPosts(
+                authorization = token.toAuthorizationHeader(),
                 id = Env.BOARD_ID,
-                limit = limit,
-                accessUserUid = accessUserUid
+                limit = limit
             )
             TsboardResponse.Success(response.toEntity().result.items)
         } catch (e: Exception) {
@@ -70,11 +69,9 @@ class TsboardBoardRepositoryImpl @Inject constructor(
     override suspend fun getPosts(param: TsboardGetPostsParam): TsboardResponse<List<TsboardPost>> {
         return try {
             val response = api.getPosts(
-                authorization = "Bearer ${param.token}",
+                authorization = param.token.toAuthorizationHeader(),
                 id = Env.BOARD_ID,
-                page = 1,
-                pagingDirection = 1,
-                sinceUid = param.sinceUid,
+                page = param.page,
                 option = param.option,
                 keyword = param.keyword
             )
@@ -92,33 +89,13 @@ class TsboardBoardRepositoryImpl @Inject constructor(
     ): TsboardResponse<TsboardBoardViewResponse> {
         return try {
             val response = api.getPost(
-                authorization = "Bearer $token",
+                authorization = token.toAuthorizationHeader(),
                 id = Env.BOARD_ID,
                 postUid = postUid,
                 needUpdateHit = if (needUpdateHit) 1 else 0,
                 latestLimit = 3
             )
             TsboardResponse.Success(response.toEntity())
-        } catch (e: Exception) {
-            TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
-        }
-    }
-
-    // 갤러리 사진 목록 가져오기
-    override suspend fun getPhotos(
-        sinceUid: Int,
-        token: String
-    ): TsboardResponse<List<TsboardPhoto>> {
-        return try {
-            val response = api.getPhotos(
-                authorization = "Bearer $token",
-                id = Env.BOARD_ID,
-                page = 1,
-                pagingDirection = 1,
-                sinceUid = sinceUid,
-                option = 0
-            )
-            TsboardResponse.Success(response.toEntity().result.images)
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
@@ -167,8 +144,7 @@ class TsboardBoardRepositoryImpl @Inject constructor(
         return try {
             val response = api.removePost(
                 authorization = "Bearer $token",
-                boardUid = boardUid,
-                postUid = postUid
+                request = RemovePostRequestDto(boardUid = boardUid, postUid = postUid)
             )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
@@ -181,9 +157,11 @@ class TsboardBoardRepositoryImpl @Inject constructor(
         return try {
             val response = api.likePost(
                 authorization = "Bearer ${param.token}",
-                boardUid = param.boardUid,
-                postUid = param.targetUid,
-                liked = param.liked
+                request = BoardLikeRequestDto(
+                    boardUid = param.boardUid,
+                    postUid = param.targetUid,
+                    liked = param.liked != 0
+                )
             )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
@@ -196,9 +174,11 @@ class TsboardBoardRepositoryImpl @Inject constructor(
         return try {
             val response = api.likeComment(
                 authorization = "Bearer ${param.token}",
-                boardUid = param.boardUid,
-                commentUid = param.targetUid,
-                liked = param.liked
+                request = CommentLikeRequestDto(
+                    boardUid = param.boardUid,
+                    commentUid = param.targetUid,
+                    liked = param.liked != 0
+                )
             )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
@@ -255,3 +235,6 @@ class TsboardBoardRepositoryImpl @Inject constructor(
         }
     }
 }
+
+// 비로그인 요청에는 불필요한 Bearer 접두사를 보내지 않는다.
+private fun String.toAuthorizationHeader() = if (isBlank()) "" else "Bearer $this"

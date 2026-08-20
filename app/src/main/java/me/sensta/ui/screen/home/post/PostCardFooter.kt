@@ -28,26 +28,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import me.domain.model.photo.TsboardPhoto
+import me.domain.model.board.TsboardPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @Composable
-fun PostCardFooter(photo: TsboardPhoto) {
+fun PostCardFooter(post: TsboardPost) {
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
     val homeViewModel = LocalHomeViewModel.current
 
-    var likeState by remember { mutableStateOf(photo.liked) }
-    var likeCount by remember { mutableIntStateOf(photo.like) }
-    var commentCount by remember { mutableIntStateOf(photo.comment) }
+    var likeState by remember(post.uid, post.liked) { mutableStateOf(post.liked) }
+    var likeCount by remember(post.uid, post.like) { mutableIntStateOf(post.like) }
+    val commentCount = post.comment
 
     // 좋아요 클릭
     val doLike: () -> Unit = {
         likeState = !likeState
-        homeViewModel.like(photo.uid, likeState)
+        homeViewModel.like(post.uid, likeState)
 
         if (likeState) {
             likeCount++
@@ -58,7 +58,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
 
     // 게시글 보기 페이지로 이동
     val moveToView: () -> Unit = {
-        commonViewModel.updatePostUid(photo.uid)
+        commonViewModel.updatePostUid(post.uid)
         navController.navigate(Screen.View.route) {
             launchSingleTop = true
             restoreState = true
@@ -99,7 +99,7 @@ fun PostCardFooter(photo: TsboardPhoto) {
                 modifier = Modifier.clickable { doLike() }
             )
 
-            IconButton(onClick = { commonViewModel.openWriteCommentDialog(photo.uid) }) {
+            IconButton(onClick = { commonViewModel.openWriteCommentDialog(post.uid) }) {
                 Icon(
                     imageVector = Icons.Default.ChatBubbleOutline,
                     contentDescription = "comment",

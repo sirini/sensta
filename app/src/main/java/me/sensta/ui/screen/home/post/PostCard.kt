@@ -1,11 +1,11 @@
 package me.sensta.ui.screen.home.post
 
 import androidx.compose.runtime.Composable
-import me.domain.model.photo.TsboardPhoto
+import me.domain.model.board.TsboardPost
 
 @Composable
-fun PostCard(photo: TsboardPhoto) {
-    PostCardHeader(writer = photo.writer)
-    PostCarousel(images = photo.images)
-    PostCardFooter(photo)
+fun PostCard(post: TsboardPost) {
+    PostCardHeader(writer = post.writer)
+    FeedCover(path = post.cover, title = post.title)
+    PostCardFooter(post)
 }
