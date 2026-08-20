@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,15 +34,10 @@ fun PostCardHeader(writer: TsboardWriter) {
     val userViewModel = LocalUserChatViewModel.current
     var expanded by remember { mutableStateOf(false) }
 
-    HorizontalDivider(
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-    )
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -52,7 +46,7 @@ fun PostCardHeader(writer: TsboardWriter) {
                 model = Env.DOMAIN + writer.profile,
                 contentDescription = writer.name,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
                     .clickable {
                         userViewModel.loadOtherUserInfo(writer)
@@ -66,7 +60,7 @@ fun PostCardHeader(writer: TsboardWriter) {
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = writer.name,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.titleSmall
             )
         }
     }

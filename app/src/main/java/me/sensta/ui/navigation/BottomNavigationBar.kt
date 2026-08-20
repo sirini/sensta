@@ -1,15 +1,22 @@
 package me.sensta.ui.navigation
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
@@ -25,8 +32,22 @@ fun BottomNavigationBar() {
     val authViewModel = LocalAuthViewModel.current
     val user by authViewModel.user
 
-    NavigationBar {
-        screens.forEach { screen ->
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .shadow(12.dp, MaterialTheme.shapes.extraLarge),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+        tonalElevation = 3.dp
+    ) {
+        NavigationBar(
+            modifier = Modifier.height(68.dp),
+            containerColor = androidx.compose.ui.graphics.Color.Transparent,
+            tonalElevation = 0.dp
+        ) {
+            screens.forEach { screen ->
             NavigationBarItem(
                 icon = { Icon(screen.icon, contentDescription = screen.title) },
                 label = { Text(screen.title) },
@@ -40,9 +61,9 @@ fun BottomNavigationBar() {
                     }
                 },
             )
-        }
+            }
 
-        NavigationBarItem(
+            NavigationBarItem(
             icon = {
                 if (user.profile.isEmpty()) {
                     Icon(
@@ -68,6 +89,7 @@ fun BottomNavigationBar() {
                     restoreState = true
                 }
             }
-        )
+            )
+        }
     }
 }

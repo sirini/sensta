@@ -2,6 +2,7 @@ package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,69 +66,65 @@ fun PostCardFooter(post: TsboardPost) {
         }
     }
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = doLike) {
-                if (likeState) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = doLike) {
+                    if (likeState) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "좋아요 취소",
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.FavoriteBorder,
+                            contentDescription = "좋아요",
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+                IconButton(onClick = { commonViewModel.openWriteCommentDialog(post.uid) }) {
                     Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = "like",
-                        modifier = Modifier
-                            .size(20.dp),
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "like",
-                        modifier = Modifier
-                            .size(20.dp)
+                        imageVector = Icons.Default.ChatBubbleOutline,
+                        contentDescription = "댓글 쓰기",
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
-            Text(
-                text = "${likeCount}개 좋아요",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.clickable { doLike() }
-            )
-
-            IconButton(onClick = { commonViewModel.openWriteCommentDialog(post.uid) }) {
+            TextButton(onClick = moveToView) {
+                Text(text = "사진 보기", style = MaterialTheme.typography.labelLarge)
+                Spacer(modifier = Modifier.width(4.dp))
                 Icon(
-                    imageVector = Icons.Default.ChatBubbleOutline,
-                    contentDescription = "comment",
-                    modifier = Modifier
-                        .size(20.dp)
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
                 )
             }
-            Text(
-                text = "${commentCount}개 댓글",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.clickable { moveToView() })
         }
 
-        TextButton(
-            onClick = { moveToView() },
-        ) {
-            Text(
-                text = "보기",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(0.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                contentDescription = Screen.View.title,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+        Text(
+            text = post.title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .clickable(onClick = moveToView)
+        )
+        Text(
+            text = "좋아요 ${likeCount} · 댓글 ${commentCount} · 조회 ${post.hit}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
+        )
     }
 }
