@@ -20,6 +20,7 @@ import me.data.remote.dto.home.NotificationListResponseDto
 import me.data.remote.dto.user.ChatHistoryListResponseDto
 import me.data.remote.dto.user.OtherUserInfoDto
 import me.data.remote.dto.user.SendChatResponseDto
+import me.data.remote.dto.user.SendChatRequestDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.DELETE
@@ -153,12 +154,10 @@ interface TsboardGoapi {
     ): ChatHistoryListResponseDto
 
     // 상대방에게 메시지 보내기
-    @FormUrlEncoded
     @POST("chat/save")
     suspend fun sendChatMessage(
         @Header("Authorization") authorization: String,
-        @Field("targetUserUid") targetUserUid: Int,
-        @Field("message") message: String
+        @Body request: SendChatRequestDto
     ): SendChatResponseDto
 
     // 댓글에 좋아요 누르기

@@ -66,7 +66,10 @@ class UserChatViewModel @Inject constructor(
 
         viewModelScope.launch {
             val token = getUserInfoUseCase().first().token
-            if (token.isEmpty()) return@launch
+            if (token.isEmpty()) {
+                _isLoadingChat.value = false
+                return@launch
+            }
 
             getChatHistoryUseCase(
                 targetUserUid = _otherUser.value.uid,
@@ -74,7 +77,8 @@ class UserChatViewModel @Inject constructor(
                 token = token
             ).collect {
                 it.handle { resp ->
-                    _chatHistory.value = resp.result.reversed()
+                    // 서버가 과거에서 최신 순으로 정렬한 결과를 그대로 표시한다.
+                    _chatHistory.value = resp.result
                 }
             }
             _isLoadingChat.value = false
@@ -111,30 +115,32 @@ class UserChatViewModel @Inject constructor(
         viewModelScope.launch {
             val userInfo = getUserInfoUseCase().first()
             if (userInfo.token.isEmpty()) return@launch
+            val outgoingMessage = _chatMessage.value.trim()
+            if (outgoingMessage.isEmpty()) return@launch
 
             sendChatUseCase(
                 targetUserUid = _otherUser.value.uid,
-                message = _chatMessage.value,
+                message = outgoingMessage,
                 token = userInfo.token
             ).collect {
                 it.handle { resp ->
-                    if (resp.success) {
+                    if (resp.success && resp.result > 0) {
                         val updated = _chatHistory.value.toMutableList()
                         updated.add(
                             TsboardChatHistory(
-                                uid = 0,
+                                uid = resp.result,
                                 userUid = userInfo.uid,
-                                message = _chatMessage.value,
+                                message = outgoingMessage,
                                 timestamp = LocalDateTime.now()
                             )
                         )
                         _chatHistory.value = updated
+                        _chatMessage.value = ""
                     } else {
                         _uiEvent.emit(ChatUiEvent.FailedToSendChat)
                     }
                 }
             }
-            _chatMessage.value = ""
         }
     }
 }

@@ -12,7 +12,7 @@ data class ChatHistoryListResponseDto(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: List<ChatHistoryResultDto>
+    val result: List<ChatHistoryResultDto> = emptyList()
 )
 
 // 상대방과의 최근 대화 기록 응답 결과

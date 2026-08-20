@@ -2,6 +2,7 @@ package me.data.repository
 
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.user.toEntity
+import me.data.remote.dto.user.SendChatRequestDto
 import me.domain.model.user.TsboardChatHistoryResponse
 import me.domain.model.user.TsboardOtherUserInfoResult
 import me.domain.model.user.TsboardSendChatResponse
@@ -19,7 +20,12 @@ class TsboardUserChatRepositoryImpl @Inject constructor(
     ): TsboardResponse<TsboardOtherUserInfoResult> {
         return try {
             val response = api.getOtherUserInfo(targetUserUid = userUid)
-            TsboardResponse.Success(response.result.toEntity())
+            val result = response.result
+            if (!response.success || result == null) {
+                TsboardResponse.Error(response.error.ifBlank { "사용자 정보를 찾지 못했습니다" })
+            } else {
+                TsboardResponse.Success(result.toEntity())
+            }
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }
@@ -52,8 +58,10 @@ class TsboardUserChatRepositoryImpl @Inject constructor(
         return try {
             val response = api.sendChatMessage(
                 authorization = "Bearer $token",
-                targetUserUid = targetUserUid,
-                message = message
+                request = SendChatRequestDto(
+                    targetUserUid = targetUserUid,
+                    message = message
+                )
             )
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
