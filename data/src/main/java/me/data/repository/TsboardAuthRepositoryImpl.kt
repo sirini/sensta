@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.map
 import me.data.auth.UserPreferencesKeys
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.auth.toEntity
+import me.data.remote.dto.auth.MobileRefreshRequestDto
 import me.data.remote.dto.common.toEntity
-import me.data.util.toSHA256
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
 import me.domain.model.auth.TsboardSignup
@@ -101,8 +101,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     // 아이디와 비밀번호로 로그인하기
     override suspend fun signIn(id: String, password: String): TsboardResponse<TsboardSignin> {
         return try {
-            val hashedPassword = password.toSHA256()
-            val response = api.signIn(id, hashedPassword).toEntity()
+            val response = api.signIn(id, password).toEntity()
 
             response.result?.also { saveUserInfo(it) }
             TsboardResponse.Success(response)
@@ -129,7 +128,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
         name: String
     ): TsboardResponse<TsboardSignup> {
         return try {
-            val response = api.signUp(id, password.toSHA256(), name).toEntity()
+            val response = api.signUp(id, password, name).toEntity()
             TsboardResponse.Success(response)
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
@@ -156,12 +155,9 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     }
 
     // 리프레시 토큰으로 새 액세스 토큰 발급받기
-    override suspend fun updateAccessToken(
-        userUid: Int,
-        refresh: String
-    ): TsboardResponse<TsboardUpdateAccessToken> {
+    override suspend fun updateAccessToken(refresh: String): TsboardResponse<TsboardUpdateAccessToken> {
         return try {
-            val response = api.updateAccessToken(userUid, refresh)
+            val response = api.updateAccessToken(MobileRefreshRequestDto(refresh))
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
@@ -176,7 +172,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
                 name = param.name.toRequestBody(),
                 signature = param.signature.toRequestBody(),
                 password = if (param.password.length > 3) {
-                    param.password.toSHA256()
+                    param.password
                 } else {
                     ""
                 }.toRequestBody(),
@@ -195,7 +191,7 @@ class TsboardAuthRepositoryImpl @Inject constructor(
                 target = param.target,
                 code = param.code,
                 email = param.email,
-                password = param.password.toSHA256(),
+                password = param.password,
                 name = param.name
             )
             TsboardResponse.Success(response.toEntity())

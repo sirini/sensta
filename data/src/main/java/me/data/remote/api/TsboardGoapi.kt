@@ -3,6 +3,7 @@ package me.data.remote.api
 import me.data.remote.dto.auth.SigninDto
 import me.data.remote.dto.auth.SignupDto
 import me.data.remote.dto.auth.UpdateAccessTokenDto
+import me.data.remote.dto.auth.MobileRefreshRequestDto
 import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
@@ -10,6 +11,7 @@ import me.data.remote.dto.board.CommentListResponseDto
 import me.data.remote.dto.board.RecentHashtagResponseDto
 import me.data.remote.dto.board.WriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
+import me.data.remote.dto.common.BooleanResponseDto
 import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.home.NotificationListResponseDto
 import me.data.remote.dto.photo.BoardPhotoListResponseDto
@@ -23,6 +25,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Body
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -44,21 +47,19 @@ interface TsboardGoapi {
     @POST("auth/checkemail")
     suspend fun checkID(
         @Field("email") email: String
-    ): ResponseNothingDto
+    ): BooleanResponseDto
 
     // 닉네임이 존재하는지 확인하기
     @FormUrlEncoded
     @POST("auth/checkname")
     suspend fun checkName(
         @Field("name") name: String
-    ): ResponseNothingDto
+    ): BooleanResponseDto
 
     // 리프레시 토큰으로 새 액세스 토큰 발급 받기
-    @FormUrlEncoded
-    @POST("auth/refresh")
+    @POST("auth/android/refresh")
     suspend fun updateAccessToken(
-        @Field("userUid") userUid: Int,
-        @Field("refresh") refresh: String
+        @Body request: MobileRefreshRequestDto
     ): UpdateAccessTokenDto
 
     // 로그인 하기
@@ -73,7 +74,7 @@ interface TsboardGoapi {
     @FormUrlEncoded
     @POST("auth/signup")
     suspend fun signUp(
-        @Field("email") email: String,
+        @Field("id") email: String,
         @Field("password") password: String,
         @Field("name") name: String
     ): SignupDto
@@ -95,10 +96,10 @@ interface TsboardGoapi {
     suspend fun verifyCode(
         @Field("target") target: Int,
         @Field("code") code: String,
-        @Field("email") email: String,
+        @Field("id") email: String,
         @Field("password") password: String,
         @Field("name") name: String
-    ): ResponseNothingDto
+    ): BooleanResponseDto
 
     // 게시글 목록 가져오기
     @GET("board/list")

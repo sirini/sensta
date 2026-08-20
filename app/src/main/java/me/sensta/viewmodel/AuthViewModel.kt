@@ -41,8 +41,6 @@ import me.domain.usecase.auth.UpdateUserInfoUseCase
 import me.sensta.R
 import me.sensta.util.CustomTime
 import me.sensta.util.now
-import me.sensta.viewmodel.state.ID_INVALID
-import me.sensta.viewmodel.state.ID_REGISTERED
 import me.sensta.viewmodel.state.LoginState
 import me.sensta.viewmodel.state.SignupState
 import me.sensta.viewmodel.uievent.AuthUiEvent
@@ -121,12 +119,10 @@ class AuthViewModel @Inject constructor(
     // 회원가입 시 아이디 확인
     private fun checkIDForSignup(checkEmailData: TsboardResponseNothing) {
         viewModelScope.launch {
-            when (checkEmailData.code) {
-                ID_REGISTERED -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedID)
-                ID_INVALID -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
-                else -> {
-                    _signupState.value = SignupState.InputPassword
-                }
+            when {
+                !checkEmailData.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                checkEmailData.result == "true" -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedID)
+                else -> _signupState.value = SignupState.InputPassword
             }
         }
     }
@@ -134,13 +130,10 @@ class AuthViewModel @Inject constructor(
     // 로그인 시 아이디 확인
     private fun checkIDForLogin(checkEmailData: TsboardResponseNothing) {
         viewModelScope.launch {
-            when (checkEmailData.code) {
-                ID_INVALID -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
-                ID_REGISTERED -> {
-                    _loginState.value = LoginState.InputPassword
-                }
-
-                else -> _uiLoginEvent.emit(LoginUiEvent.IDNotFound(checkEmailData.error))
+            when {
+                !checkEmailData.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                checkEmailData.result == "true" -> _loginState.value = LoginState.InputPassword
+                else -> _uiLoginEvent.emit(LoginUiEvent.IDNotFound("등록되지 않은 이메일입니다"))
             }
         }
     }
@@ -177,10 +170,10 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = true
             checkNameUseCase(_name.value).collect {
                 it.handle { resp ->
-                    if (resp.code == ID_REGISTERED) {
-                        _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedName)
-                    } else {
-                        signUp() // 회원가입 진행
+                    when {
+                        !resp.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidName)
+                        resp.result == "true" -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedName)
+                        else -> signUp() // 회원가입 진행
                     }
                 }
             }
@@ -231,7 +224,7 @@ class AuthViewModel @Inject constructor(
                 )
             ).collect {
                 it.handle { resp ->
-                    if (!resp.success) {
+                    if (!resp.success || resp.result != "true") {
                         _uiAuthEvent.emit(AuthUiEvent.WrongVerificationCode)
                     } else {
                         _signupState.value = SignupState.SignupCompleted
@@ -377,11 +370,11 @@ class AuthViewModel @Inject constructor(
                         _uiAuthEvent.emit(AuthUiEvent.FailedToSignUp)
                         return@handle
                     }
-                    if (resp.result.sendmail) {
+                    if (resp.result.requiresVerification) {
                         _targetUserUid.intValue = resp.result.target
                         _signupState.value = SignupState.InputCode
                         _uiAuthEvent.emit(AuthUiEvent.SentVerificationCode(_id.value))
-                    } else {
+                    } else if (resp.result.completed) {
                         _signupState.value = SignupState.SignupCompleted
                         _uiAuthEvent.emit(AuthUiEvent.SignupCompleted)
                     }
@@ -455,10 +448,15 @@ class AuthViewModel @Inject constructor(
     private suspend fun updateAccessToken() {
         if (_user.value.uid < 1) return
 
-        updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
+        updateAccessTokenUseCase(_user.value.refresh).collect {
             it.handle { resp ->
-                if (resp.success) {
-                    _user.value = _user.value.copy(token = resp.result!!, signin = CustomTime.now())
+                val tokens = resp.result
+                if (resp.success && tokens != null) {
+                    _user.value = _user.value.copy(
+                        token = tokens.token,
+                        refresh = tokens.refresh,
+                        signin = CustomTime.now()
+                    )
                     saveUserInfoUseCase(_user.value)
                     _uiAuthEvent.emit(AuthUiEvent.AccessTokenUpdated)
                 } else {
