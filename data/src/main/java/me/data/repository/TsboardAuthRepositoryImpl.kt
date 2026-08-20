@@ -31,7 +31,7 @@ import javax.inject.Inject
 
 class TsboardAuthRepositoryImpl @Inject constructor(
     private val api: TsboardGoapi,
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : TsboardAuthRepository {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_prefs")
     private val userInfoFlow: Flow<TsboardSigninResult> = context.dataStore.data.map { prefs ->

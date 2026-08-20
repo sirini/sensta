@@ -20,8 +20,18 @@ SENSTA는 https://sensta.me 사이트에서 제공하고 있는 사진 공유 �
 > SENSTA 이름은 `Share Elegant, Noble Shots That Amaze` 라는 나름 거창한 풀네임의 줄임말로 지었습니다만,
 > 실상은 짧은 도메인을 고민하다가 뭔가 마음에 들어서 선택 하였습니다.
 
-이 SENSTA 프로젝트는 안드로이드 14 버전 기준으로 제작되고 있으며, 제가 테스트하고 있는 기기는 갤럭시 S23 울트라입니다.
-안드로이드 스마트폰을 사용하시는 분들께서는 25년 6월 전후로 구글 플레이를 통해서 무료로 설치하여 사용해 보실 수 있습니다.
+SENSTA 2.0은 Android 8 이상을 지원하고 Android 16을 기준으로 빌드합니다. 최신 NUBO의 API 계약과 디자인 언어를
+공유하면서 사진 감상과 업로드에 집중한 네이티브 경험으로 개편하고 있습니다.
+
+## 개발 환경
+
+WSL2 Ubuntu에서는 sudo 없이 프로젝트에 필요한 JDK와 Android SDK를 준비할 수 있습니다.
+
+```bash
+./scripts/bootstrap-wsl.sh
+source ./scripts/android-env.sh
+./scripts/check.sh
+```
 
 ## TSBOARD와는 무슨 관계인가요?
 

@@ -2,6 +2,7 @@ package me.sensta.ui.common
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
@@ -25,6 +26,11 @@ fun RequestNotificationPermission(
     }
 
     LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            onPermissionGranted()
+            return@LaunchedEffect
+        }
+
         val permission = Manifest.permission.POST_NOTIFICATIONS
         if (context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             onPermissionGranted()

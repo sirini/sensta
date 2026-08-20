@@ -1,13 +1,14 @@
 [versions]
 activityComposeVersion = "1.9.0"
-agp = "8.9.1"
+agp = "8.13.2"
 coilCompose = "2.6.0"
 composeBomVersion = "2024.05.00"
 credentials = "1.3.0"
 datastorePreferences = "1.1.3"
-hiltAndroidGradlePlugin = "2.52"
-hiltNavigationCompose = "1.2.0"
-kotlin = "2.0.21"
+hiltAndroidGradlePlugin = "2.58"
+hiltNavigationCompose = "1.3.0"
+kotlin = "2.3.21"
+ksp = "2.3.11"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -89,5 +90,6 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-

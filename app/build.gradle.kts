@@ -2,18 +2,18 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
     id("com.google.dagger.hilt.android")
-    kotlin("kapt")
 }
 
 android {
     namespace = "me.sensta"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "me.sensta"
-        minSdk = 34
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 36
         versionCode = 4
         versionName = "1.0.3"
 
@@ -42,14 +42,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -86,7 +89,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)
 
     // Navigation
     implementation(libs.androidx.navigation.ui)
@@ -99,7 +102,7 @@ dependencies {
 
     // Worker
     implementation(libs.androidx.hilt.work)
-    kapt(libs.androidx.hilt.compiler)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.androidx.work.runtime.ktx)
 
     // Google login

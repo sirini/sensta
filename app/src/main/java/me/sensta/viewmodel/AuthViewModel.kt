@@ -1,7 +1,6 @@
 package me.sensta.viewmodel
 
 import android.content.Context
-import android.credentials.GetCredentialException
 import android.net.Uri
 import android.util.Patterns
 import androidx.compose.runtime.State
@@ -10,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -345,16 +345,16 @@ class AuthViewModel @Inject constructor(
                         }
                     }
                 }
-            } catch (e: GetCredentialException) {
-                _uiLoginEvent.emit(
-                    LoginUiEvent.FailedToLoginByGoogle(
-                        e.message ?: "Failed to get credential from Google"
-                    )
-                )
             } catch (e: NoCredentialException) {
                 _uiLoginEvent.emit(
                     LoginUiEvent.FailedToLoginByGoogle(
                         e.message ?: "No credential found"
+                    )
+                )
+            } catch (e: GetCredentialException) {
+                _uiLoginEvent.emit(
+                    LoginUiEvent.FailedToLoginByGoogle(
+                        e.message ?: "Failed to get credential from Google"
                     )
                 )
             } finally {
