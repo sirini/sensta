@@ -118,6 +118,7 @@ dependencies {
     // Firebase KTX 모듈은 BoM 34부터 제외되었으므로 기본 모듈을 사용한다.
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.installations)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

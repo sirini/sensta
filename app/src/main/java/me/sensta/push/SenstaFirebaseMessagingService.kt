@@ -18,9 +18,9 @@ class SenstaFirebaseMessagingService : FirebaseMessagingService() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        serviceScope.launch { pushTokenManager.register(token) }
+    override fun onRegistered(installationId: String) {
+        super.onRegistered(installationId)
+        serviceScope.launch { pushTokenManager.register(installationId) }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

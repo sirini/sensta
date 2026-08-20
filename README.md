@@ -33,6 +33,8 @@ source ./scripts/android-env.sh
 ./scripts/check.sh
 ```
 
+실시간 알림을 포함한 배포 설정은 [Firebase 설정](docs/FIREBASE_SETUP.md)을 참고하세요.
+
 ## TSBOARD와는 무슨 관계인가요?
 
 SENSTA 서비스는 TSBOARD 기반으로 운영되고 있고, TSBOARD의 GOAPI에서 제공하는 각종 API들을 그대로 활용하고 있습니다.

@@ -2,6 +2,7 @@ package me.sensta.push
 
 import android.content.Context
 import com.google.firebase.FirebaseApp
+import com.google.firebase.installations.FirebaseInstallations
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.android.gms.tasks.Task
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -18,7 +19,7 @@ import kotlin.coroutines.resumeWithException
 
 @Singleton
 class PushTokenManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val registerPushDeviceUseCase: RegisterPushDeviceUseCase,
     private val unregisterPushDeviceUseCase: UnregisterPushDeviceUseCase
@@ -28,10 +29,11 @@ class PushTokenManager @Inject constructor(
 
     suspend fun synchronize(): Boolean {
         if (!isFirebaseConfigured()) return false
-        val deviceToken = runCatching { FirebaseMessaging.getInstance().token.await() }
-            .getOrNull()
-            ?: return false
-        return register(deviceToken)
+        val messaging = FirebaseMessaging.getInstance()
+        if (runCatching { messaging.register().await() }.isFailure) return false
+        val installationId = runCatching { FirebaseInstallations.getInstance().id.await() }
+            .getOrNull() ?: return false
+        return register(installationId)
     }
 
     suspend fun register(deviceToken: String): Boolean {
@@ -42,10 +44,11 @@ class PushTokenManager @Inject constructor(
 
     suspend fun unregister(accessToken: String): Boolean {
         if (!isFirebaseConfigured() || accessToken.isBlank()) return false
-        val messaging = FirebaseMessaging.getInstance()
-        val deviceToken = runCatching { messaging.token.await() }.getOrNull() ?: return false
-        val unregistered = unregisterPushDeviceUseCase(deviceToken, accessToken) is TsboardResponse.Success
-        if (unregistered) runCatching { messaging.deleteToken().await() }
+        val installationId = runCatching { FirebaseInstallations.getInstance().id.await() }
+            .getOrNull() ?: return false
+        val unregistered =
+            unregisterPushDeviceUseCase(installationId, accessToken) is TsboardResponse.Success
+        if (unregistered) runCatching { FirebaseMessaging.getInstance().unregister().await() }
         return unregistered
     }
 }
