@@ -17,6 +17,9 @@ import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.user.GetChatHistoryUseCase
 import me.domain.usecase.user.GetOtherUserInfoUseCase
+import me.domain.usecase.user.GetUserSafetyStatusUseCase
+import me.domain.usecase.user.ReportUserUseCase
+import me.domain.usecase.user.ChangeUserBlockUseCase
 import me.domain.usecase.user.SendChatUseCase
 import me.sensta.viewmodel.uievent.ChatUiEvent
 import me.sensta.push.PushEventBus
@@ -29,6 +32,9 @@ class UserChatViewModel @Inject constructor(
     private val getOtherUserInfoUseCase: GetOtherUserInfoUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
     private val sendChatUseCase: SendChatUseCase,
+    private val getUserSafetyStatusUseCase: GetUserSafetyStatusUseCase,
+    private val reportUserUseCase: ReportUserUseCase,
+    private val changeUserBlockUseCase: ChangeUserBlockUseCase,
     private val pushEventBus: PushEventBus
 ) : ViewModel() {
     private val _otherUser =
@@ -59,6 +65,12 @@ class UserChatViewModel @Inject constructor(
     private val _isLoadingChat = mutableStateOf(false)
     val isLoadingChat: State<Boolean> get() = _isLoadingChat
 
+    private val _isReported = mutableStateOf(false)
+    val isReported: State<Boolean> get() = _isReported
+
+    private val _isBlockedByMe = mutableStateOf(false)
+    val isBlockedByMe: State<Boolean> get() = _isBlockedByMe
+
     private val _uiEvent = MutableSharedFlow<ChatUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
 
@@ -85,6 +97,12 @@ class UserChatViewModel @Inject constructor(
                 return@launch
             }
 
+            if (_isBlockedByMe.value) {
+                _chatHistory.value = emptyList()
+                _isLoadingChat.value = false
+                return@launch
+            }
+
             getChatHistoryUseCase(
                 targetUserUid = _otherUser.value.uid,
                 limit = 100,
@@ -102,6 +120,7 @@ class UserChatViewModel @Inject constructor(
     // 다른 사용자의 기본 정보 열어보기
     fun loadOtherUserInfo(user: TsboardWriter) {
         _isLoadingInfo.value = true
+        resetUserSafetyStatus()
         _otherUser.value = _otherUser.value.copy(
             uid = user.uid,
             name = user.name,
@@ -115,6 +134,7 @@ class UserChatViewModel @Inject constructor(
                     _otherUser.value = resp
                 }
             }
+            loadUserSafetyStatus(user.uid)
             _isLoadingInfo.value = false
         }
     }
@@ -123,12 +143,14 @@ class UserChatViewModel @Inject constructor(
     fun loadOtherUserInfo(userUid: Int) {
         if (userUid < 1) return
         _isLoadingInfo.value = true
+        resetUserSafetyStatus()
         _otherUser.value = _otherUser.value.copy(uid = userUid)
 
         viewModelScope.launch {
             getOtherUserInfoUseCase(userUid).collect {
                 it.handle { resp -> _otherUser.value = resp }
             }
+            loadUserSafetyStatus(userUid)
             _isLoadingInfo.value = false
         }
     }
@@ -141,6 +163,7 @@ class UserChatViewModel @Inject constructor(
     // 메시지 보내기
     fun sendMessage() {
         viewModelScope.launch {
+            if (_isBlockedByMe.value) return@launch
             val userInfo = getUserInfoUseCase().first()
             if (userInfo.token.isEmpty()) return@launch
             val outgoingMessage = _chatMessage.value.trim()
@@ -167,6 +190,79 @@ class UserChatViewModel @Inject constructor(
                     } else {
                         _uiEvent.emit(ChatUiEvent.FailedToSendChat)
                     }
+                }
+            }
+        }
+    }
+
+    // 로그인한 사용자의 신고 및 차단 상태를 서버와 동기화한다.
+    private suspend fun loadUserSafetyStatus(targetUserUid: Int) {
+        val currentUser = getUserInfoUseCase().first()
+        if (currentUser.token.isBlank() || currentUser.uid == targetUserUid) {
+            _isReported.value = false
+            _isBlockedByMe.value = false
+            return
+        }
+        getUserSafetyStatusUseCase(targetUserUid, currentUser.token).collect {
+            it.handle { status ->
+                _isReported.value = status.isReported
+                _isBlockedByMe.value = status.isBlockedByMe
+                if (status.isBlockedByMe) _chatHistory.value = emptyList()
+            }
+        }
+    }
+
+    private fun resetUserSafetyStatus() {
+        _isReported.value = false
+        _isBlockedByMe.value = false
+        _chatHistory.value = emptyList()
+    }
+
+    // 사용자나 사용자가 작성한 특정 사진을 운영진에게 신고한다.
+    fun reportUser(targetUserUid: Int, content: String) {
+        viewModelScope.launch {
+            val currentUser = getUserInfoUseCase().first()
+            if (currentUser.token.isBlank() || currentUser.uid == targetUserUid) return@launch
+            reportUserUseCase(targetUserUid, content.trim(), currentUser.token).collect { response ->
+                response.handle { result ->
+                    if (result.success) {
+                        _isReported.value = true
+                        _uiEvent.emit(ChatUiEvent.UserReported)
+                    } else {
+                        _uiEvent.emit(ChatUiEvent.FailedToReport(result.error))
+                    }
+                }
+                if (response is me.domain.repository.TsboardResponse.Error) {
+                    _uiEvent.emit(ChatUiEvent.FailedToReport(response.message))
+                }
+            }
+        }
+    }
+
+    // 차단하면 기존 대화를 즉시 화면에서 숨기고 메시지 전송도 막는다.
+    fun changeBlockStatus() {
+        viewModelScope.launch {
+            val currentUser = getUserInfoUseCase().first()
+            val targetUserUid = _otherUser.value.uid
+            if (currentUser.token.isBlank() || currentUser.uid == targetUserUid) return@launch
+            val shouldBlock = !_isBlockedByMe.value
+            changeUserBlockUseCase(targetUserUid, shouldBlock, currentUser.token).collect { response ->
+                response.handle { result ->
+                    if (result.success) {
+                        _isBlockedByMe.value = shouldBlock
+                        if (shouldBlock) {
+                            _chatHistory.value = emptyList()
+                            _uiEvent.emit(ChatUiEvent.UserBlocked)
+                        } else {
+                            _uiEvent.emit(ChatUiEvent.UserUnblocked)
+                            loadChatHistory()
+                        }
+                    } else {
+                        _uiEvent.emit(ChatUiEvent.FailedToChangeBlock(result.error))
+                    }
+                }
+                if (response is me.domain.repository.TsboardResponse.Error) {
+                    _uiEvent.emit(ChatUiEvent.FailedToChangeBlock(response.message))
                 }
             }
         }

@@ -13,6 +13,7 @@ import me.data.auth.UserPreferencesKeys
 import me.data.remote.api.TsboardGoapi
 import me.data.remote.dto.auth.toEntity
 import me.data.remote.dto.auth.MobileRefreshRequestDto
+import me.data.remote.dto.auth.DeleteAccountRequestDto
 import me.data.remote.dto.common.toEntity
 import me.domain.model.auth.TsboardSignin
 import me.domain.model.auth.TsboardSigninResult
@@ -87,6 +88,20 @@ class TsboardAuthRepositoryImpl @Inject constructor(
     // Data Store에 보관했던 사용자 정보 지우기
     override suspend fun clearUserInfo() {
         context.dataStore.edit { prefs -> prefs.clear() }
+    }
+
+    // 서버 계정과 연관 데이터를 영구 삭제하기
+    override suspend fun deleteAccount(token: String): TsboardResponse<TsboardResponseNothing> {
+        return try {
+            TsboardResponse.Success(
+                api.deleteAccount(
+                    authorization = "Bearer $token",
+                    request = DeleteAccountRequestDto(confirmation = "DELETE")
+                ).toEntity()
+            )
+        } catch (e: Exception) {
+            TsboardResponse.Error(e.localizedMessage ?: "계정 삭제에 실패했습니다")
+        }
     }
 
     // 사용자 로그인 후 정보를 가져오기

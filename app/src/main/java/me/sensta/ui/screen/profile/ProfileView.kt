@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +43,7 @@ fun ProfileView() {
 
     var isEditNameDialog by remember { mutableStateOf(false) }
     var isEditSignatureDialog by remember { mutableStateOf(false) }
+    var isDeleteAccountDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -183,6 +185,19 @@ fun ProfileView() {
             ) {
                 Text(text = "로그아웃")
             }
+
+            TextButton(
+                onClick = { isDeleteAccountDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.DeleteForever,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "계정 및 모든 데이터 삭제", color = MaterialTheme.colorScheme.error)
+            }
         }
 
         if (isEditNameDialog) {
@@ -201,6 +216,16 @@ fun ProfileView() {
                 onConfirm = {
                     authViewModel.updateSignature(it)
                     isEditSignatureDialog = !isEditSignatureDialog
+                }
+            )
+        }
+
+        if (isDeleteAccountDialog) {
+            DeleteAccountDialog(
+                onDismissRequest = { isDeleteAccountDialog = false },
+                onConfirm = {
+                    isDeleteAccountDialog = false
+                    authViewModel.deleteAccount()
                 }
             )
         }

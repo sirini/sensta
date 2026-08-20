@@ -10,11 +10,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -23,13 +25,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import me.domain.model.board.TsboardPost
 import me.sensta.ui.common.CommonDialog
+import me.sensta.ui.common.UserReportDialog
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalPostViewViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
+import me.sensta.viewmodel.uievent.ChatUiEvent
 
 @Composable
 fun ViewPostLikeButton(post: TsboardPost) {
@@ -37,10 +44,27 @@ fun ViewPostLikeButton(post: TsboardPost) {
     val homeViewModel = LocalHomeViewModel.current
     val authViewModel = LocalAuthViewModel.current
     val postViewViewModel = LocalPostViewViewModel.current
+    val userChatViewModel = LocalUserChatViewModel.current
+    val context = LocalContext.current
     val userInfo by authViewModel.user
     var likeState by remember { mutableStateOf(post.liked) }
     var likeCount by remember { mutableIntStateOf(post.like) }
     var isReallyRemove by remember { mutableStateOf(false) }
+    var isReportDialogVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        userChatViewModel.uiEvent.collect { event ->
+            when (event) {
+                is ChatUiEvent.UserReported -> {
+                    Toast.makeText(context, "사진 신고가 접수되었습니다", Toast.LENGTH_SHORT).show()
+                }
+                is ChatUiEvent.FailedToReport -> {
+                    Toast.makeText(context, "사진 신고에 실패했습니다 (${event.message})", Toast.LENGTH_SHORT).show()
+                }
+                else -> Unit
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -100,6 +124,20 @@ fun ViewPostLikeButton(post: TsboardPost) {
                         modifier = Modifier.padding(start = 2.dp)
                     )
                 }
+            } else if (userInfo.token.isNotBlank()) {
+                Column(modifier = Modifier.padding(start = 12.dp)) {
+                    IconButton(onClick = { isReportDialogVisible = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Report,
+                            contentDescription = "사진 신고",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Text(
+                        text = "사진 신고",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }
@@ -121,6 +159,22 @@ fun ViewPostLikeButton(post: TsboardPost) {
                     text = "작성하신 게시글을 정말로 삭제 할까요?",
                     style = MaterialTheme.typography.bodyLarge
                 )
+            }
+        )
+    }
+
+
+    if (isReportDialogVisible) {
+        UserReportDialog(
+            title = "사진 신고",
+            description = "이 사진이 커뮤니티 운영 원칙을 위반한 이유를 알려주세요.",
+            onDismissRequest = { isReportDialogVisible = false },
+            onReport = { reason ->
+                userChatViewModel.reportUser(
+                    targetUserUid = post.writer.uid,
+                    content = "사진 #${post.uid} 신고: $reason"
+                )
+                isReportDialogVisible = false
             }
         )
     }

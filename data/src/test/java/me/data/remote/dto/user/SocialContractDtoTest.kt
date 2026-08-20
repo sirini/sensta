@@ -95,6 +95,37 @@ class SocialContractDtoTest {
     }
 
     @Test
+    fun `사용자 안전 상태 응답을 앱 모델로 변환한다`() {
+        val response = json.decodeFromString<UserSafetyStatusResponseDto>(
+            """{"success":true,"error":"","code":0,"result":{"isReported":true,"isBannedByMe":true}}"""
+        )
+
+        val status = requireNotNull(response.result).toEntity()
+        assertTrue(status.isReported)
+        assertTrue(status.isBlockedByMe)
+    }
+
+    @Test
+    fun `신고와 차단 요청은 서로 독립된 계약으로 직렬화한다`() {
+        val report = json.parseToJsonElement(
+            json.encodeToString(
+                UserReportRequestDto(
+                    targetUserUid = 42,
+                    checkedBlackList = false,
+                    content = "사진 #7 신고: 도용"
+                )
+            )
+        ).jsonObject
+        val block = json.parseToJsonElement(
+            json.encodeToString(UserTargetRequestDto(targetUserUid = 42))
+        ).jsonObject
+
+        assertEquals(42, report.getValue("targetUserUid").jsonPrimitive.int)
+        assertFalse(report.getValue("checkedBlackList").jsonPrimitive.content.toBoolean())
+        assertEquals(42, block.getValue("targetUserUid").jsonPrimitive.int)
+    }
+
+    @Test
     fun `푸시 기기 요청은 안드로이드 플랫폼을 명시한다`() {
         val body = json.parseToJsonElement(
             json.encodeToString(

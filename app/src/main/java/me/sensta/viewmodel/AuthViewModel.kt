@@ -33,6 +33,7 @@ import me.domain.usecase.auth.CheckEmailUseCase
 import me.domain.usecase.auth.CheckNameUseCase
 import me.domain.usecase.auth.CheckVerificationCodeUseCase
 import me.domain.usecase.auth.ClearUserInfoUseCase
+import me.domain.usecase.auth.DeleteAccountUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.auth.SaveUserInfoUseCase
 import me.domain.usecase.auth.SignInUseCase
@@ -56,6 +57,7 @@ class AuthViewModel @Inject constructor(
     private val checkEmailUseCase: CheckEmailUseCase,
     private val checkNameUseCase: CheckNameUseCase,
     private val clearUserInfoUseCase: ClearUserInfoUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val saveUserInfoUseCase: SaveUserInfoUseCase,
     private val signInUseCase: SignInUseCase,
@@ -272,6 +274,33 @@ class AuthViewModel @Inject constructor(
             }
             _user.value = emptyUser
             clearUserInfoUseCase()
+        }
+    }
+
+    // 서버 데이터를 먼저 삭제한 뒤 기기의 로그인 정보도 제거한다.
+    fun deleteAccount() {
+        val accessToken = _user.value.token
+        if (accessToken.isBlank() || _isLoading.value) return
+
+        _isLoading.value = true
+        viewModelScope.launch {
+            deleteAccountUseCase(accessToken).collect { response ->
+                response.handle { result ->
+                    if (result.success) {
+                        // 서버에서 기기 등록도 함께 삭제하므로 별도의 해제 호출은 하지 않는다.
+                        _user.value = emptyUser
+                        clearUserInfoUseCase()
+                        _loginState.value = LoginState.InputEmail
+                        _uiProfileEvent.emit(ProfileUiEvent.AccountDeleted)
+                    } else {
+                        _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(result.error))
+                    }
+                }
+                if (response is me.domain.repository.TsboardResponse.Error) {
+                    _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(response.message))
+                }
+            }
+            _isLoading.value = false
         }
     }
 

@@ -5,6 +5,7 @@ import me.data.remote.dto.auth.SignupDto
 import me.data.remote.dto.auth.UpdateAccessTokenDto
 import me.data.remote.dto.auth.MobileRefreshRequestDto
 import me.data.remote.dto.auth.UpdateUserInfoDto
+import me.data.remote.dto.auth.DeleteAccountRequestDto
 import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardLikeRequestDto
 import me.data.remote.dto.board.BoardViewResponseDto
@@ -22,6 +23,9 @@ import me.data.remote.dto.user.ChatHistoryListResponseDto
 import me.data.remote.dto.user.OtherUserInfoDto
 import me.data.remote.dto.user.SendChatResponseDto
 import me.data.remote.dto.user.SendChatRequestDto
+import me.data.remote.dto.user.UserReportRequestDto
+import me.data.remote.dto.user.UserSafetyStatusResponseDto
+import me.data.remote.dto.user.UserTargetRequestDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.DELETE
@@ -105,6 +109,13 @@ interface TsboardGoapi {
         @Field("password") password: String,
         @Field("name") name: String
     ): BooleanResponseDto
+
+    // 계정과 계정에 연결된 모든 데이터를 영구 삭제하기
+    @HTTP(method = "DELETE", path = "auth/account", hasBody = true)
+    suspend fun deleteAccount(
+        @Header("Authorization") authorization: String,
+        @Body request: DeleteAccountRequestDto
+    ): ResponseNothingDto
 
     // 게시글 목록 가져오기
     @GET("board/list")
@@ -259,4 +270,32 @@ interface TsboardGoapi {
     suspend fun getOtherUserInfo(
         @Query("targetUserUid") targetUserUid: Int
     ): OtherUserInfoDto
+
+    // 상대방 신고 및 차단 상태 확인하기
+    @GET("auth/user/report")
+    suspend fun getUserSafetyStatus(
+        @Header("Authorization") authorization: String,
+        @Query("targetUserUid") targetUserUid: Int
+    ): UserSafetyStatusResponseDto
+
+    // 사용자 또는 해당 사용자가 작성한 콘텐츠 신고하기
+    @POST("auth/user/report")
+    suspend fun reportUser(
+        @Header("Authorization") authorization: String,
+        @Body request: UserReportRequestDto
+    ): ResponseNothingDto
+
+    // 사용자 차단하기
+    @retrofit2.http.PUT("auth/user/block")
+    suspend fun blockUser(
+        @Header("Authorization") authorization: String,
+        @Body request: UserTargetRequestDto
+    ): ResponseNothingDto
+
+    // 사용자 차단 해제하기
+    @HTTP(method = "DELETE", path = "auth/user/block", hasBody = true)
+    suspend fun unblockUser(
+        @Header("Authorization") authorization: String,
+        @Body request: UserTargetRequestDto
+    ): ResponseNothingDto
 }

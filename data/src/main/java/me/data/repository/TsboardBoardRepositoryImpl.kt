@@ -77,7 +77,11 @@ class TsboardBoardRepositoryImpl @Inject constructor(
                 option = param.option,
                 keyword = param.keyword
             )
-            TsboardResponse.Success(response.toEntity().result.posts)
+            val result = response.toEntity().result
+            // 차단한 사용자의 콘텐츠는 홈과 탐색 어디에서도 노출하지 않는다.
+            TsboardResponse.Success(
+                result.posts.filterNot { post -> post.writer.uid in result.blackList }
+            )
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
         }

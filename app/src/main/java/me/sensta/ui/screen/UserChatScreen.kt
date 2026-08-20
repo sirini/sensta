@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -20,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.user.ChatInputBar
 import me.sensta.ui.screen.user.ChatMyMessage
@@ -42,6 +45,7 @@ fun UserChatScreen(initialUserUid: Int = 0) {
     val chatHistory by userViewModel.chatHistory.collectAsState()
     val my by authViewModel.user
     val isLoadingChat by userViewModel.isLoadingChat
+    val isBlockedByMe by userViewModel.isBlockedByMe
     val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(Unit) {
@@ -63,6 +67,26 @@ fun UserChatScreen(initialUserUid: Int = 0) {
                 is ChatUiEvent.FailedToSendChat -> {
                     Toast.makeText(context, "메시지 전송에 실패했습니다", Toast.LENGTH_SHORT).show()
                 }
+
+                is ChatUiEvent.UserReported -> {
+                    Toast.makeText(context, "신고가 접수되었습니다", Toast.LENGTH_SHORT).show()
+                }
+
+                is ChatUiEvent.FailedToReport -> {
+                    Toast.makeText(context, "신고 접수에 실패했습니다 (${event.message})", Toast.LENGTH_SHORT).show()
+                }
+
+                is ChatUiEvent.UserBlocked -> {
+                    Toast.makeText(context, "사용자를 차단했습니다", Toast.LENGTH_SHORT).show()
+                }
+
+                is ChatUiEvent.UserUnblocked -> {
+                    Toast.makeText(context, "차단을 해제했습니다", Toast.LENGTH_SHORT).show()
+                }
+
+                is ChatUiEvent.FailedToChangeBlock -> {
+                    Toast.makeText(context, "차단 설정을 바꾸지 못했습니다 (${event.message})", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -75,7 +99,7 @@ fun UserChatScreen(initialUserUid: Int = 0) {
     }
 
     Scaffold(
-        bottomBar = { ChatInputBar() },
+        bottomBar = { if (!isBlockedByMe) ChatInputBar() },
     ) {
         Crossfade(targetState = !isLoadingChat) { visible ->
             if (visible) {
@@ -100,7 +124,19 @@ fun UserChatScreen(initialUserUid: Int = 0) {
                             OtherUserInfo()
                             LatestMessageDivider()
                         }
-                        items(chatHistory) { chat ->
+                        if (isBlockedByMe) {
+                            item {
+                                Text(
+                                    text = "차단한 사용자의 대화는 표시하지 않습니다.",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(24.dp),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        items(if (isBlockedByMe) emptyList() else chatHistory) { chat ->
                             val message = convertHtmlToText(chat.message)
                             if (chat.userUid == my.uid) {
                                 ChatMyMessage(message = message)

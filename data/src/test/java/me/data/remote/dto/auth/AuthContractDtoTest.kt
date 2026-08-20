@@ -1,6 +1,9 @@
 package me.data.remote.dto.auth
 
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import me.data.remote.dto.common.BooleanResponseDto
 import me.data.remote.dto.common.toEntity
 import org.junit.Assert.assertEquals
@@ -79,5 +82,14 @@ class AuthContractDtoTest {
 
         assertFalse(response.success)
         assertNull(response.result)
+    }
+
+    @Test
+    fun `계정 삭제 요청은 명시 확인 문자열을 전송한다`() {
+        val body = json.parseToJsonElement(
+            json.encodeToString(DeleteAccountRequestDto(confirmation = "DELETE"))
+        ).jsonObject
+
+        assertEquals("DELETE", body.getValue("confirmation").jsonPrimitive.content)
     }
 }

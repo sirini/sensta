@@ -14,6 +14,7 @@ interface TsboardAuthRepository {
     suspend fun checkEmail(email: String): TsboardResponse<TsboardResponseNothing>
     suspend fun checkName(name: String): TsboardResponse<TsboardResponseNothing>
     suspend fun clearUserInfo()
+    suspend fun deleteAccount(token: String): TsboardResponse<TsboardResponseNothing>
     suspend fun getUserInfo(): TsboardSigninResult
     suspend fun signIn(id: String, password: String): TsboardResponse<TsboardSignin>
     suspend fun signInWithGoogle(idToken: String): TsboardResponse<TsboardSignin>
