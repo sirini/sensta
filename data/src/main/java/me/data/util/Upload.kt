@@ -9,27 +9,59 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 
 object Upload {
-    // 선택한 파일을 업로드 가능한 형태로 변홚하여 반환
-    fun uriToMultipart(context: Context, uri: Uri, name: String): MultipartBody.Part? {
-        val contentResolver = context.contentResolver
-        val inputStream = contentResolver.openInputStream(uri) ?: return null
-        val fileName = getFileNameFromUri(context, uri) ?: "${System.currentTimeMillis()}.jpg"
-        val file = File(context.cacheDir, fileName)
-        file.outputStream().use { output -> inputStream.copyTo(output) }
-
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        return MultipartBody.Part.createFormData(name, file.name, requestFile)
+    data class PreparedFile(
+        val part: MultipartBody.Part,
+        val temporaryFile: File
+    ) {
+        fun cleanUp() {
+            temporaryFile.delete()
+        }
     }
 
-    // Uri에서 파일 이름 가져오기
-    private fun getFileNameFromUri(context: Context, uri: Uri): String? {
-        val returnCursor = context.contentResolver.query(uri, null, null, null, null) ?: return null
-        val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        returnCursor.moveToFirst()
+    // 콘텐츠 URI를 앱 전용 임시 파일로 안전하게 복사해 업로드 파트로 변환한다.
+    fun prepareImage(context: Context, uri: Uri, name: String): PreparedFile? {
+        val resolver = context.contentResolver
+        val displayName = getDisplayName(context, uri)
+        val suffix = displayName
+            ?.substringAfterLast('.', missingDelimiterValue = "")
+            ?.takeIf { it.matches(Regex("[A-Za-z0-9]{1,10}")) }
+            ?.let { ".$it" }
+            ?: ".jpg"
+        val temporaryFile = File.createTempFile("sensta-upload-", suffix, context.cacheDir)
 
-        val fileName = returnCursor.getString(nameIndex)
-        returnCursor.close()
+        return try {
+            val inputStream = resolver.openInputStream(uri)
+            if (inputStream == null) {
+                temporaryFile.delete()
+                return null
+            }
+            inputStream.use { input ->
+                temporaryFile.outputStream().use { output -> input.copyTo(output) }
+            }
 
-        return fileName
+            val mediaType = resolver.getType(uri)?.toMediaTypeOrNull()
+                ?: "image/*".toMediaTypeOrNull()
+            val requestBody = temporaryFile.asRequestBody(mediaType)
+            val uploadName = displayName ?: temporaryFile.name
+            PreparedFile(
+                part = MultipartBody.Part.createFormData(name, uploadName, requestBody),
+                temporaryFile = temporaryFile
+            )
+        } catch (_: Exception) {
+            temporaryFile.delete()
+            null
+        }
     }
+
+    private fun getDisplayName(context: Context, uri: Uri): String? =
+        context.contentResolver.query(
+            uri,
+            arrayOf(OpenableColumns.DISPLAY_NAME),
+            null,
+            null,
+            null
+        )?.use { cursor ->
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex >= 0 && cursor.moveToFirst()) cursor.getString(nameIndex) else null
+        }
 }

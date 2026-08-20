@@ -9,6 +9,8 @@ import me.data.remote.dto.board.toEntity
 import me.data.remote.dto.common.toEntity
 import me.data.remote.dto.home.toEntity
 import me.data.util.Upload
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import me.domain.model.board.TsboardBoardViewResponse
 import me.domain.model.board.TsboardComment
 import me.domain.model.board.TsboardGetPostsParam
@@ -204,10 +206,22 @@ class TsboardBoardRepositoryImpl @Inject constructor(
     // 게시글 작성하기
     override suspend fun writePost(param: TsboardWritePostParam): TsboardResponse<TsboardWriteResponse> {
         val tagString = param.tags.joinToString(",")
-        val attachmentsMultipart = param.attachments.map { uri ->
-            Upload.uriToMultipart(context = param.context, uri = uri, name = "attachments[]")
-                ?: return TsboardResponse.Error("사진 업로드에 실패했습니다")
+        val preparedFiles = mutableListOf<Upload.PreparedFile>()
+        withContext(Dispatchers.IO) {
+            for (uri in param.attachments) {
+                val prepared = Upload.prepareImage(
+                    context = param.context,
+                    uri = uri,
+                    name = "attachments[]"
+                ) ?: break
+                preparedFiles += prepared
+            }
         }
+        if (preparedFiles.size != param.attachments.size) {
+            preparedFiles.cleanUp()
+            return TsboardResponse.Error("사진 업로드를 준비하지 못했습니다")
+        }
+        val attachmentsMultipart = preparedFiles.map { it.part }
 
         val boardUidBody = param.boardUid.toString().toRequestBody()
         val categoryUidBody = param.categoryUid.toString().toRequestBody()
@@ -232,9 +246,14 @@ class TsboardBoardRepositoryImpl @Inject constructor(
             TsboardResponse.Success(response.toEntity())
         } catch (e: Exception) {
             TsboardResponse.Error(e.localizedMessage ?: "An unexpected error occurred")
+        } finally {
+            withContext(Dispatchers.IO) { preparedFiles.cleanUp() }
         }
     }
 }
 
 // 비로그인 요청에는 불필요한 Bearer 접두사를 보내지 않는다.
 private fun String.toAuthorizationHeader() = if (isBlank()) "" else "Bearer $this"
+
+// 업로드 완료 여부와 관계없이 앱 캐시에 복사한 임시 파일을 정리한다.
+private fun List<Upload.PreparedFile>.cleanUp() = forEach { it.cleanUp() }

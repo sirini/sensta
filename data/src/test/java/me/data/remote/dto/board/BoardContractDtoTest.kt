@@ -6,6 +6,8 @@ import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import me.data.remote.dto.photo.ImageDto
+import me.data.remote.dto.photo.toEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -86,5 +88,79 @@ class BoardContractDtoTest {
         ).jsonObject
 
         assertFalse(body.getValue("liked").jsonPrimitive.boolean)
+    }
+
+    @Test
+    fun `게시글 상세 이미지와 EXIF 응답을 읽는다`() {
+        val image = json.decodeFromString<ImageDto>(
+            """
+            {
+              "file": {"uid":7069,"path":"/upload/attachments/photo.jpeg"},
+              "thumbnail": {
+                "large":"/upload/thumbnails/large.webp",
+                "small":"/upload/thumbnails/small.webp"
+              },
+              "exif": {
+                "make":"Apple",
+                "model":"iPhone 17",
+                "aperture":160,
+                "iso":32,
+                "focalLength":52,
+                "exposure":4901,
+                "width":4032,
+                "height":3024,
+                "date":1783193189000
+              },
+              "description":"도심 풍경"
+            }
+            """.trimIndent()
+        ).toEntity()
+
+        assertEquals(7069, image.file.uid)
+        assertEquals("iPhone 17", image.exif.model)
+        assertEquals(4032, image.exif.width)
+    }
+
+    @Test
+    fun `현재 댓글 목록 응답을 읽는다`() {
+        val response = json.decodeFromString<CommentListResponseDto>(
+            """
+            {
+              "success":true,
+              "error":"",
+              "code":0,
+              "result":{
+                "boardUid":2,
+                "sinceUid":0,
+                "totalCommentCount":1,
+                "comments":[{
+                  "uid":231,
+                  "replyUid":231,
+                  "postUid":7520,
+                  "writer":{"uid":1,"name":"사진가","profile":"/profile.webp","signature":""},
+                  "like":0,
+                  "liked":false,
+                  "submitted":1778822019491,
+                  "modified":0,
+                  "status":0,
+                  "content":"<p>멋진 사진들이네요!</p>"
+                }]
+              }
+            }
+            """.trimIndent()
+        ).toEntity()
+
+        assertEquals(2, response.result.boardUid)
+        assertEquals(231, response.result.comments.single().uid)
+    }
+
+    @Test
+    fun `글쓰기 오류 응답에 result가 없어도 역직렬화한다`() {
+        val response = json.decodeFromString<WriteResponseDto>(
+            """{"success":false,"error":"invalid title","code":1}"""
+        )
+
+        assertFalse(response.success)
+        assertEquals(0, response.result)
     }
 }

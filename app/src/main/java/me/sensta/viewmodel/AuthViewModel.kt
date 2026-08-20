@@ -16,10 +16,12 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.data.util.Upload
 import me.domain.model.auth.TsboardSigninResult
 import me.domain.model.auth.TsboardUpdateUserInfoParam
@@ -474,27 +476,41 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateAccessToken()
+            val preparedProfile = withContext(Dispatchers.IO) {
+                Upload.prepareImage(context, uri, "profile")
+            }
+            if (preparedProfile == null) {
+                _uiProfileEvent.emit(
+                    ProfileUiEvent.FailedToUpdateProfileImage("사진을 읽지 못했습니다")
+                )
+                _isLoading.value = false
+                return@launch
+            }
             val param = TsboardUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
                 signature = _user.value.signature,
                 password = "",
-                profile = Upload.uriToMultipart(context, uri, "profile")
+                profile = preparedProfile.part
             )
 
-            updateUserInfoUseCase(param).collect {
-                it.handle { resp ->
-                    if (resp.success) {
-                        val userInfo = getUserInfoUseCase().first()
-                        _user.value = userInfo
-                        saveUserInfoUseCase(userInfo)
-                        _uiProfileEvent.emit(ProfileUiEvent.ProfileImageUpdated)
-                    } else {
-                        _uiProfileEvent.emit(ProfileUiEvent.FailedToUpdateProfileImage(resp.error))
+            try {
+                updateUserInfoUseCase(param).collect {
+                    it.handle { resp ->
+                        if (resp.success) {
+                            val userInfo = getUserInfoUseCase().first()
+                            _user.value = userInfo
+                            saveUserInfoUseCase(userInfo)
+                            _uiProfileEvent.emit(ProfileUiEvent.ProfileImageUpdated)
+                        } else {
+                            _uiProfileEvent.emit(ProfileUiEvent.FailedToUpdateProfileImage(resp.error))
+                        }
                     }
                 }
+            } finally {
+                withContext(Dispatchers.IO) { preparedProfile.cleanUp() }
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 }
