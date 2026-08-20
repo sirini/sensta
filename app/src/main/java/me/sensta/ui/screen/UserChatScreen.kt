@@ -33,7 +33,7 @@ import me.sensta.viewmodel.uievent.ChatUiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserChatScreen() {
+fun UserChatScreen(initialUserUid: Int = 0) {
     val context = LocalContext.current
     val scrollBehavior = LocalScrollBehavior.current
     val userViewModel = LocalUserChatViewModel.current
@@ -49,6 +49,9 @@ fun UserChatScreen() {
         scrollBehavior.state.heightOffset = 0f
 
         // 대화 내역 가져와서 제일 하단으로 스크롤해주기
+        if (initialUserUid > 0) {
+            userViewModel.loadOtherUserInfo(initialUserUid)
+        }
         userViewModel.loadChatHistory()
         if (chatHistory.isNotEmpty()) {
             listState.animateScrollToItem(chatHistory.lastIndex)

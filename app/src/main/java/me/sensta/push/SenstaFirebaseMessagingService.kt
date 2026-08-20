@@ -16,6 +16,9 @@ class SenstaFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var pushTokenManager: PushTokenManager
 
+    @Inject
+    lateinit var pushEventBus: PushEventBus
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onRegistered(installationId: String) {
@@ -25,11 +28,14 @@ class SenstaFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
+        val event = PushEvent.from(message.data)
+        pushEventBus.publish(event)
         AppNotification.showRemote(
             context = this,
             title = message.notification?.title ?: message.data["title"],
             body = message.notification?.body ?: message.data["body"],
-            notificationId = message.messageId?.hashCode() ?: message.data.hashCode()
+            notificationId = message.messageId?.hashCode() ?: message.data.hashCode(),
+            event = event
         )
     }
 

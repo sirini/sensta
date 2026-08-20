@@ -25,7 +25,7 @@ import me.sensta.viewmodel.uievent.ViewUiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewScreen() {
+fun ViewScreen(initialPostUid: Int = 0) {
     val context = LocalContext.current
     val navController = LocalNavController.current
     val postViewViewModel = LocalPostViewViewModel.current
@@ -36,14 +36,16 @@ fun ViewScreen() {
     val postUid by commonViewModel.postUid
     val post by postViewViewModel.post
     val comments by commentViewModel.comments
+    val requestedPostUid = initialPostUid.takeIf { it > 0 } ?: postUid
 
     LaunchedEffect(Unit) {
         // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
         scrollBehavior.state.heightOffset = 0f
 
         // 게시글 및 댓글 가져오기
-        postViewViewModel.refresh(postUid = postUid)
-        commentViewModel.refresh(postUid = postUid)
+        commonViewModel.updatePostUid(requestedPostUid)
+        postViewViewModel.refresh(postUid = requestedPostUid)
+        commentViewModel.refresh(postUid = requestedPostUid)
 
         // CommentViewModel에서 전달된 이벤트들에 따라 메시지 출력하기
         launch {
@@ -67,12 +69,12 @@ fun ViewScreen() {
 
                     is CommentUiEvent.CommentRemoved -> {
                         Toast.makeText(context, "댓글이 삭제되었습니다", Toast.LENGTH_SHORT).show()
-                        commentViewModel.refresh(postUid = postUid)
+                        commentViewModel.refresh(postUid = requestedPostUid)
                     }
 
                     is CommentUiEvent.WroteComment -> {
                         Toast.makeText(context, "댓글을 작성했습니다", Toast.LENGTH_SHORT).show()
-                        commentViewModel.refresh(postUid = postUid)
+                        commentViewModel.refresh(postUid = requestedPostUid)
                     }
 
                     is CommentUiEvent.FailedToWriteComment -> {

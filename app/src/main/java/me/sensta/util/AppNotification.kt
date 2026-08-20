@@ -14,6 +14,7 @@ import me.domain.model.home.TsboardNotification
 import me.domain.repository.TsboardResponse
 import me.domain.repository.handle
 import me.sensta.R
+import me.sensta.push.PushEvent
 import me.sensta.ui.MainActivity
 
 object AppNotification {
@@ -23,11 +24,12 @@ object AppNotification {
         context: Context,
         title: String?,
         body: String?,
-        notificationId: Int
+        notificationId: Int,
+        event: PushEvent
     ) {
         if (!hasPermission(context)) return
 
-        val pendingIntent = notificationPendingIntent(context, notificationId)
+        val pendingIntent = notificationPendingIntent(context, notificationId, event)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle(title?.takeIf { it.isNotBlank() } ?: "Sensta 새 알림")
             .setContentText(body?.takeIf { it.isNotBlank() } ?: "새로운 활동이 있습니다")
@@ -101,9 +103,16 @@ object AppNotification {
         NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
 
-    private fun notificationPendingIntent(context: Context, requestCode: Int): PendingIntent {
+    private fun notificationPendingIntent(
+        context: Context,
+        requestCode: Int,
+        event: PushEvent? = null
+    ): PendingIntent {
         val intent = Intent(context, MainActivity::class.java).apply {
             putExtra("navigate_to", "notification")
+            event?.notificationType?.let { putExtra("type", it.toString()) }
+            putExtra("postUid", event?.postUid?.toString() ?: "0")
+            putExtra("fromUserUid", event?.fromUserUid?.toString() ?: "0")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         return PendingIntent.getActivity(

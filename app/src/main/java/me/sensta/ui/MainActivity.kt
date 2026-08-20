@@ -18,6 +18,9 @@ import me.sensta.ui.navigation.AppNavigation
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.theme.SenstaTheme
 import me.sensta.push.PushTokenManager
+import me.sensta.push.PushDestinationResolver
+import me.sensta.push.PushDestination
+import me.sensta.push.PushEvent
 import me.sensta.util.AppNotification
 import me.sensta.worker.NotificationCheckWorker
 import javax.inject.Inject
@@ -44,11 +47,17 @@ class MainActivity : ComponentActivity() {
                     }
                 )
 
-                var startDestination = Screen.Home.route
-                if (intent.getStringExtra("navigate_to") == "notification") {
-                    startDestination = Screen.Notification.route
+                val pushEvent = intent.toPushEvent()
+                val startDestination = when {
+                    pushEvent != null -> when (PushDestinationResolver.resolve(pushEvent)) {
+                        PushDestination.Chat -> Screen.User.route
+                        PushDestination.Post -> Screen.View.route
+                        PushDestination.Notification -> Screen.Notification.route
+                    }
+                    intent.getStringExtra("navigate_to") == "notification" -> Screen.Notification.route
+                    else -> Screen.Home.route
                 }
-                AppNavigation(startDestination)
+                AppNavigation(startDestination = startDestination, initialPushEvent = pushEvent)
             }
         }
     }
@@ -92,5 +101,16 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         const val NOTIFICATION_WORK_NAME = "sensta_notification_check"
+    }
+
+    private fun android.content.Intent.toPushEvent(): PushEvent? {
+        val event = PushEvent(
+            notificationType = getStringExtra("type")?.toIntOrNull(),
+            postUid = getStringExtra("postUid")?.toIntOrNull() ?: 0,
+            fromUserUid = getStringExtra("fromUserUid")?.toIntOrNull() ?: 0
+        )
+        return event.takeIf {
+            it.notificationType != null || it.postUid > 0 || it.fromUserUid > 0
+        }
     }
 }

@@ -54,6 +54,7 @@ import me.sensta.ui.screen.VersionScreen
 import me.sensta.ui.screen.ViewScreen
 import me.sensta.ui.screen.home.post.PostCardFullScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
+import me.sensta.push.PushEvent
 import me.sensta.viewmodel.AuthViewModel
 import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.CommonViewModel
@@ -89,7 +90,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(startDestination: String) {
+fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null) {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val commonViewModel: CommonViewModel = hiltViewModel()
@@ -147,8 +148,12 @@ fun AppNavigation(startDestination: String) {
                     composable(Screen.Profile.route) { ProfileScreen() }
                     composable(Screen.Signup.route) { SignupScreen() }
                     composable(Screen.Upload.route) { UploadScreen() }
-                    composable(Screen.User.route) { UserChatScreen() }
-                    composable(Screen.View.route) { ViewScreen() }
+                    composable(Screen.User.route) {
+                        UserChatScreen(initialUserUid = initialPushEvent?.fromUserUid ?: 0)
+                    }
+                    composable(Screen.View.route) {
+                        ViewScreen(initialPostUid = initialPushEvent?.postUid ?: 0)
+                    }
                     composable(Screen.Version.route) { VersionScreen() }
                 }
 

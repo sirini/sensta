@@ -24,6 +24,7 @@ import me.domain.usecase.home.CheckAllNotificationUseCase
 import me.domain.usecase.home.CheckNotificationUseCase
 import me.domain.usecase.home.GetNotificationUseCase
 import me.sensta.viewmodel.uievent.NotificationUiEvent
+import me.sensta.push.PushEventBus
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +32,8 @@ class NotificationViewModel @Inject constructor(
     private val getNotificationUseCase: GetNotificationUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val checkNotificationUseCase: CheckNotificationUseCase,
-    private val checkAllNotificationUseCase: CheckAllNotificationUseCase
+    private val checkAllNotificationUseCase: CheckAllNotificationUseCase,
+    private val pushEventBus: PushEventBus
 ) : ViewModel() {
     private val _notifications = mutableStateOf<TsboardResponse<List<TsboardNotification>>>(
         TsboardResponse.Loading
@@ -49,6 +51,9 @@ class NotificationViewModel @Inject constructor(
 
     init {
         loadNotifications()
+        viewModelScope.launch {
+            pushEventBus.events.collect { loadNotifications() }
+        }
     }
 
     // 알림 가져오기 헬퍼 함수

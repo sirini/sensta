@@ -19,6 +19,7 @@ import me.domain.usecase.user.GetChatHistoryUseCase
 import me.domain.usecase.user.GetOtherUserInfoUseCase
 import me.domain.usecase.user.SendChatUseCase
 import me.sensta.viewmodel.uievent.ChatUiEvent
+import me.sensta.push.PushEventBus
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -27,7 +28,8 @@ class UserChatViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val getOtherUserInfoUseCase: GetOtherUserInfoUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
-    private val sendChatUseCase: SendChatUseCase
+    private val sendChatUseCase: SendChatUseCase,
+    private val pushEventBus: PushEventBus
 ) : ViewModel() {
     private val _otherUser =
         mutableStateOf(
@@ -59,6 +61,18 @@ class UserChatViewModel @Inject constructor(
 
     private val _uiEvent = MutableSharedFlow<ChatUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
+
+    init {
+        viewModelScope.launch {
+            pushEventBus.events.collect { event ->
+                if (event.notificationType == CHAT_NOTIFICATION_TYPE &&
+                    event.fromUserUid == _otherUser.value.uid
+                ) {
+                    loadChatHistory()
+                }
+            }
+        }
+    }
 
     // 상대방과의 대화 목록 가져오기
     fun loadChatHistory() {
@@ -105,6 +119,20 @@ class UserChatViewModel @Inject constructor(
         }
     }
 
+    // 푸시 알림처럼 사용자 번호만 아는 진입점에서 대화 상대를 선택한다.
+    fun loadOtherUserInfo(userUid: Int) {
+        if (userUid < 1) return
+        _isLoadingInfo.value = true
+        _otherUser.value = _otherUser.value.copy(uid = userUid)
+
+        viewModelScope.launch {
+            getOtherUserInfoUseCase(userUid).collect {
+                it.handle { resp -> _otherUser.value = resp }
+            }
+            _isLoadingInfo.value = false
+        }
+    }
+
     // 메시지 작성 시 호출
     fun onMessageChange(message: String) {
         _chatMessage.value = message
@@ -142,5 +170,9 @@ class UserChatViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private companion object {
+        const val CHAT_NOTIFICATION_TYPE = 4
     }
 }
