@@ -41,6 +41,7 @@ import me.domain.usecase.auth.SignUpUseCase
 import me.domain.usecase.auth.UpdateAccessTokenUseCase
 import me.domain.usecase.auth.UpdateUserInfoUseCase
 import me.sensta.R
+import me.sensta.push.PushTokenManager
 import me.sensta.util.CustomTime
 import me.sensta.util.now
 import me.sensta.viewmodel.state.LoginState
@@ -62,7 +63,8 @@ class AuthViewModel @Inject constructor(
     private val signUpUseCase: SignUpUseCase,
     private val updateAccessTokenUseCase: UpdateAccessTokenUseCase,
     private val updateUserInfoUseCase: UpdateUserInfoUseCase,
-    private val verifyCodeUseCase: CheckVerificationCodeUseCase
+    private val verifyCodeUseCase: CheckVerificationCodeUseCase,
+    private val pushTokenManager: PushTokenManager
 ) : ViewModel() {
     private val _id = mutableStateOf("")
     val id: State<String> get() = _id
@@ -108,6 +110,9 @@ class AuthViewModel @Inject constructor(
         _isLoading.value = true
         viewModelScope.launch {
             _user.value = getUserInfoUseCase().first()
+            if (_user.value.token.isNotBlank()) {
+                pushTokenManager.synchronize()
+            }
             _loginState.value = LoginState.InputEmail
             _isLoading.value = false
         }
@@ -248,6 +253,7 @@ class AuthViewModel @Inject constructor(
                         _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                     } else {
                         _user.value = resp.result!!
+                        pushTokenManager.synchronize()
                         _loginState.value = LoginState.LoginCompleted
                     }
                 }
@@ -259,8 +265,12 @@ class AuthViewModel @Inject constructor(
     // 로그아웃하기
     fun logout() {
         _loginState.value = LoginState.InputEmail
-        _user.value = emptyUser
         viewModelScope.launch {
+            val accessToken = _user.value.token
+            if (accessToken.isNotBlank()) {
+                pushTokenManager.unregister(accessToken)
+            }
+            _user.value = emptyUser
             clearUserInfoUseCase()
         }
     }
@@ -333,6 +343,7 @@ class AuthViewModel @Inject constructor(
                                         _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                                     } else {
                                         _user.value = resp.result!!
+                                        pushTokenManager.synchronize()
                                         _loginState.value = LoginState.LoginCompleted
                                     }
                                 }
@@ -460,6 +471,7 @@ class AuthViewModel @Inject constructor(
                         signin = CustomTime.now()
                     )
                     saveUserInfoUseCase(_user.value)
+                    pushTokenManager.synchronize()
                     _uiAuthEvent.emit(AuthUiEvent.AccessTokenUpdated)
                 } else {
                     _user.value = emptyUser

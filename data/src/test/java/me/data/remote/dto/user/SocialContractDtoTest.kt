@@ -6,6 +6,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import me.data.remote.dto.home.NotificationListResponseDto
+import me.data.remote.dto.home.PushDeviceRequestDto
 import me.data.remote.dto.home.toEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -91,5 +92,17 @@ class SocialContractDtoTest {
 
         assertFalse(response.success)
         assertNull(response.result)
+    }
+
+    @Test
+    fun `푸시 기기 요청은 안드로이드 플랫폼을 명시한다`() {
+        val body = json.parseToJsonElement(
+            json.encodeToString(
+                PushDeviceRequestDto(token = "fcm-device-token", platform = "android")
+            )
+        ).jsonObject
+
+        assertEquals("fcm-device-token", body.getValue("token").jsonPrimitive.content)
+        assertEquals("android", body.getValue("platform").jsonPrimitive.content)
     }
 }

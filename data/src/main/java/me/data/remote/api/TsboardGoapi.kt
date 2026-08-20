@@ -17,6 +17,7 @@ import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.common.BooleanResponseDto
 import me.data.remote.dto.home.HomeLatestResponseDto
 import me.data.remote.dto.home.NotificationListResponseDto
+import me.data.remote.dto.home.PushDeviceRequestDto
 import me.data.remote.dto.user.ChatHistoryListResponseDto
 import me.data.remote.dto.user.OtherUserInfoDto
 import me.data.remote.dto.user.SendChatResponseDto
@@ -27,6 +28,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.Body
 import retrofit2.http.Multipart
@@ -236,6 +238,20 @@ interface TsboardGoapi {
     @PATCH("home/noti/checked")
     suspend fun checkAllNotifications(
         @Header("Authorization") authorization: String,
+    ): ResponseNothingDto
+
+    // 현재 기기의 Firebase 푸시 토큰 등록하기
+    @POST("push/device")
+    suspend fun registerPushDevice(
+        @Header("Authorization") authorization: String,
+        @Body request: PushDeviceRequestDto
+    ): ResponseNothingDto
+
+    // 로그아웃할 기기의 Firebase 푸시 토큰 해제하기
+    @HTTP(method = "DELETE", path = "push/device", hasBody = true)
+    suspend fun unregisterPushDevice(
+        @Header("Authorization") authorization: String,
+        @Body request: PushDeviceRequestDto
     ): ResponseNothingDto
 
     // 다른 사용자의 기본 정보 가져오기

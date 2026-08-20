@@ -16,4 +16,14 @@ interface TsboardNotificationRepository {
     ): TsboardResponse<TsboardResponseNothing>
 
     suspend fun checkAllNotifications(token: String): TsboardResponse<TsboardResponseNothing>
+
+    suspend fun registerPushDevice(
+        deviceToken: String,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing>
+
+    suspend fun unregisterPushDevice(
+        deviceToken: String,
+        token: String
+    ): TsboardResponse<TsboardResponseNothing>
 }
