@@ -5,6 +5,7 @@
 - 패키지: `me.sensta`
 - 버전: `2.0.0` (`versionCode 20`)
 - 최소 Android: 8(API 26)
+- 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
 - 권한: 인터넷, Android 13 이상의 알림
@@ -35,7 +36,7 @@ SENSTA_KEY_PASSWORD=키-비밀번호
 ```bash
 ./scripts/check.sh
 source ./scripts/android-env.sh
-$ANDROID_HOME/build-tools/36.1.0/apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
+$ANDROID_HOME/build-tools/37.0.0/apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
 ```
 
 Play Console에 등록된 최신 `versionCode`가 20 이상이면 코드 값을 그보다 크게 올린 뒤 다시 빌드한다.
@@ -70,12 +71,14 @@ Data safety에는 실제 운영 서버 동작을 다시 확인한 뒤 적어도 
 
 ## 권장 출시 순서
 
-1. 기존 Play 앱의 패키지, 최신 버전 코드, 앱 서명·업로드 인증서를 확인한다.
-2. Firebase 운영 설정을 연결하고 서명된 AAB를 만든다.
-3. 내부 테스트에서 핵심 시나리오와 비정상 종료·ANR을 확인한다.
-4. 회사 사진 사용자 그룹으로 비공개 테스트와 피드백 수집을 진행한다.
-5. Data safety, 콘텐츠 등급, 앱 액세스, UGC 정책과 스토어 등록정보를 제출한다.
-6. 단계적 배포로 시작하고 Android vitals와 서버 오류를 관찰한다.
+1. [운영 서버 배포](SERVER_DEPLOYMENT.md)에 따라 Sensta 2.0 계약을 포함한 NUBO·GOAPI 릴리스를
+   `sensta.me`에 먼저 반영한다.
+2. 기존 Play 앱의 패키지, 최신 버전 코드, 앱 서명·업로드 인증서를 확인한다.
+3. Firebase 운영 설정을 연결하고 서명된 AAB를 만든다.
+4. [Galaxy 실제 기기 테스트](DEVICE_TESTING.md)와 Play 내부 테스트에서 핵심 시나리오와 비정상 종료·ANR을 확인한다.
+5. 회사 사진 사용자 그룹으로 비공개 테스트와 피드백 수집을 진행한다.
+6. Data safety, 콘텐츠 등급, 앱 액세스, UGC 정책과 스토어 등록정보를 제출한다.
+7. 단계적 배포로 시작하고 Android vitals와 서버 오류를 관찰한다.
 
 2023년 11월 13일 이후 개설한 개인 개발자 계정에만 적용되는 별도 제작 앱이라면, 프로덕션 접근 전에
 [12명 이상이 14일 연속 참여하는 비공개 테스트](https://support.google.com/googleplay/android-developer/answer/14151465)가

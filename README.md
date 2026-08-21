@@ -2,7 +2,7 @@
 
 SENSTA는 [sensta.me](https://sensta.me)의 사진을 감상하고, 여러 장의 사진과 EXIF를 공유하며,
 좋아요·댓글·1:1 대화·활동 알림을 이용하는 Android 네이티브 앱입니다. Android 8(API 26) 이상을
-지원하며 Android 16(API 36)을 대상으로 빌드합니다.
+지원합니다. Android 17 SDK(API 37)로 컴파일하되 Play 배포 대상은 Android 16(API 36)입니다.
 
 2.0은 NUBO의 디자인 언어와 GOAPI의 API v1 계약을 기준으로 다시 만든 버전입니다. SENSTA 자체 앱인
 동시에, NUBO 기반 커뮤니티 운영자가 자신의 게시판·브랜드·서버 주소를 바꾸어 전용 앱을 제작할 수 있는
@@ -31,7 +31,9 @@ source ./scripts/android-env.sh
 
 `check.sh`는 단위 테스트, Lint, 디버그·릴리스 APK와 릴리스 App Bundle을 모두 검증합니다. Firebase를
 연결하지 않은 로컬 빌드는 주기적 알림 조회 방식으로 동작합니다. 실제 푸시 배포 방법은
-[Firebase 설정](docs/FIREBASE_SETUP.md), Play 제출 방법은 [릴리스 안내](docs/PLAY_RELEASE.md)를 참고하세요.
+[Firebase 설정](docs/FIREBASE_SETUP.md), [Galaxy 실제 기기 테스트](docs/DEVICE_TESTING.md),
+[NUBO·GOAPI 운영 배포](docs/SERVER_DEPLOYMENT.md), Play 제출 방법은 [릴리스 안내](docs/PLAY_RELEASE.md)를
+참고하세요.
 
 ## 다른 NUBO 커뮤니티에 적용하기
 
