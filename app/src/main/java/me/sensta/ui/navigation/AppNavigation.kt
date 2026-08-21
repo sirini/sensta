@@ -14,12 +14,12 @@ import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -82,7 +82,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Notification : Screen("notification", "알림", Icons.Default.Notifications)
     data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
     data object Signup : Screen("signup", "회원가입", Icons.Default.GroupAdd)
-    data object Upload : Screen("upload", "업로드", Icons.Default.Upload)
+    data object Upload : Screen("upload", "업로드", Icons.Default.AddCircleOutline)
     data object User : Screen("user", "사용자", Icons.Default.AccountBox)
     data object View : Screen("view", "게시글", Icons.AutoMirrored.Default.Article)
     data object Version : Screen("version", "버전", Icons.Default.Verified)
