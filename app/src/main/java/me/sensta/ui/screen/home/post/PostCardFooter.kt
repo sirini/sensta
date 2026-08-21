@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,7 +70,7 @@ fun PostCardFooter(post: TsboardPost) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -93,6 +94,11 @@ fun PostCardFooter(post: TsboardPost) {
                         )
                     }
                 }
+                Text(
+                    text = likeCount.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 IconButton(onClick = { commonViewModel.openWriteCommentDialog(post.uid) }) {
                     Icon(
                         imageVector = Icons.Default.ChatBubbleOutline,
@@ -100,14 +106,27 @@ fun PostCardFooter(post: TsboardPost) {
                         modifier = Modifier.size(22.dp)
                     )
                 }
+                Text(
+                    text = commentCount.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            TextButton(onClick = moveToView) {
-                Text(text = "사진 보기", style = MaterialTheme.typography.labelLarge)
-                Spacer(modifier = Modifier.width(4.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(end = 8.dp)
+            ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    imageVector = Icons.Default.Visibility,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = post.hit.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -117,14 +136,20 @@ fun PostCardFooter(post: TsboardPost) {
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
-                .padding(horizontal = 6.dp)
+                .padding(horizontal = 6.dp, vertical = 2.dp)
                 .clickable(onClick = moveToView)
         )
-        Text(
-            text = "좋아요 ${likeCount} · 댓글 ${commentCount} · 조회 ${post.hit}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp)
-        )
+        TextButton(
+            onClick = moveToView,
+            modifier = Modifier.padding(start = 0.dp)
+        ) {
+            Text(text = "작품 상세 보기", style = MaterialTheme.typography.labelLarge)
+            Spacer(modifier = Modifier.width(2.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
