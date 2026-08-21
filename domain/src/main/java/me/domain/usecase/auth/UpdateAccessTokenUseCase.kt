@@ -8,8 +8,7 @@ import javax.inject.Inject
 class UpdateAccessTokenUseCase @Inject constructor(
     private val repository: TsboardAuthRepository
 ) {
-    operator fun invoke(
-        userUid: Int,
-        refresh: String
-    ) = flow { emit(repository.updateAccessToken(userUid = userUid, refresh = refresh)) }
+    operator fun invoke(refresh: String) = flow {
+        emit(repository.updateAccessToken(refresh = refresh))
+    }
 }

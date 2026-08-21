@@ -11,24 +11,24 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.env.Env
-import me.domain.model.photo.TsboardPhoto
+import me.domain.model.board.TsboardPost
 import me.domain.repository.TsboardResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
-import me.domain.usecase.board.GetPhotoListUseCase
+import me.domain.usecase.board.GetPostListUseCase
 import me.domain.usecase.board.UpdateLikePostUseCase
 import me.sensta.viewmodel.uievent.HomeUiEvent
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getPhotoListUseCase: GetPhotoListUseCase,
+    private val getPostListUseCase: GetPostListUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val updateLikePostUseCase: UpdateLikePostUseCase
 ) : ViewModel() {
-    private val _photos =
-        mutableStateOf<TsboardResponse<List<TsboardPhoto>>>(TsboardResponse.Loading)
-    val photos: State<TsboardResponse<List<TsboardPhoto>>> get() = _photos
+    private val _posts =
+        mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
+    val posts: State<TsboardResponse<List<TsboardPost>>> get() = _posts
 
     private val _isLoadingMore = mutableStateOf(false)
     val isLoadingMore: State<Boolean> get() = _isLoadingMore
@@ -39,9 +39,13 @@ class HomeViewModel @Inject constructor(
     private val _bunch = mutableIntStateOf(0)
     val bunch: State<Int> get() = _bunch
 
-    private val _lastPostUid = mutableIntStateOf(0)
+    private val _feedIndex = mutableIntStateOf(0)
+    val feedIndex: State<Int> get() = _feedIndex
+
     private val _uiEvent = MutableSharedFlow<HomeUiEvent>()
     val uiEvent get() = _uiEvent.asSharedFlow()
+    private var loadedForUserUid: Int? = null
+    private var pendingUserUid: Int? = null
 
     init {
         loadPhotos()
@@ -52,43 +56,62 @@ class HomeViewModel @Inject constructor(
         if (_isLoadingMore.value) return
 
         viewModelScope.launch {
-            if (_lastPostUid.intValue == 0) {
-                _photos.value = TsboardResponse.Loading
+            if (_page.intValue == 1) {
+                _posts.value = TsboardResponse.Loading
                 _page.intValue = 1
             }
             _isLoadingMore.value = true
 
             val token = getUserInfoUseCase().first().token
-            getPhotoListUseCase(sinceUid = _lastPostUid.intValue, token = token).collect {
+            getPostListUseCase(
+                page = _page.intValue,
+                option = 0,
+                keyword = "",
+                token = token
+            ).collect {
                 it.handle { resp ->
-                    if (_lastPostUid.intValue == 0) {
-                        _photos.value = TsboardResponse.Success(resp)
+                    if (_page.intValue == 1) {
+                        _posts.value = TsboardResponse.Success(resp)
                         _bunch.intValue = resp.size
-
                     } else {
                         // 이전 게시글들을 이어서 붙여나가기
-                        val currentPhotos =
-                            (_photos.value as TsboardResponse.Success<List<TsboardPhoto>>).data
+                        val currentPosts =
+                            (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
                         resp.ifEmpty {
-                            _photos.value = TsboardResponse.Success(currentPhotos)
+                            _posts.value = TsboardResponse.Success(currentPosts)
                             return@handle
                         }
-                        _photos.value = TsboardResponse.Success(currentPhotos + resp)
-                        _page.intValue++
+                        _posts.value = TsboardResponse.Success(currentPosts + resp)
                     }
-                    _lastPostUid.intValue = resp.last().uid
+                    if (resp.isNotEmpty()) _page.intValue++
                 }
             }
             _isLoadingMore.value = false
+            pendingUserUid?.let { userUid ->
+                pendingUserUid = null
+                refreshForUser(userUid)
+            }
         }
     }
 
     // 갤러리 목록 업데이트
-    fun refresh(resetLastUid: Boolean = false) {
-        if (resetLastUid) {
-            _lastPostUid.intValue = 0
-        }
+    fun refresh(resetPaging: Boolean = false) {
+        if (resetPaging) _page.intValue = 1
         loadPhotos()
+    }
+
+    fun refreshForUser(userUid: Int) {
+        if (loadedForUserUid == userUid) return
+        if (_isLoadingMore.value) {
+            pendingUserUid = userUid
+            return
+        }
+        loadedForUserUid = userUid
+        refresh(resetPaging = true)
+    }
+
+    fun updateFeedIndex(index: Int) {
+        _feedIndex.intValue = index.coerceAtLeast(0)
     }
 
     // 게시글에 좋아요 누르기

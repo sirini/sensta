@@ -26,6 +26,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object TsboardDataModule {
+    private val apiJson = Json {
+        // 서버가 새 필드를 추가해도 구버전 앱의 기존 기능은 계속 동작해야 한다.
+        ignoreUnknownKeys = true
+    }
 
     // Retrofit 객체 생성
     @Provides
@@ -34,7 +38,7 @@ object TsboardDataModule {
         Retrofit.Builder()
             .baseUrl("https://sensta.me/goapi/")
             .addConverterFactory(
-                Json.asConverterFactory("application/json".toMediaType())
+                apiJson.asConverterFactory("application/json".toMediaType())
             ).build()
 
     // 게시글 API 객체 생성

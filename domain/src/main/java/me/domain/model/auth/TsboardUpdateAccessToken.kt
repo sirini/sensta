@@ -5,5 +5,10 @@ data class TsboardUpdateAccessToken(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: String? = null
+    val result: TsboardAuthTokenPair? = null
+)
+
+data class TsboardAuthTokenPair(
+    val token: String,
+    val refresh: String
 )

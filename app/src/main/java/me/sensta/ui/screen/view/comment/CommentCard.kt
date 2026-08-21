@@ -33,7 +33,11 @@ fun CommentCard(comment: TsboardComment) {
             .fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.onSecondary
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp

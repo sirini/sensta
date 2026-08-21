@@ -36,16 +36,16 @@ val baseline = Typography()
 
 val AppTypography = Typography(
     displayLarge = baseline.displayLarge.copy(
-        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.ExtraBold
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
     ),
     displayMedium = baseline.displayMedium.copy(
-        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Bold
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
     ),
     displaySmall = baseline.displaySmall.copy(
-        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Medium
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.SemiBold
     ),
     headlineLarge = baseline.headlineLarge.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.ExtraBold
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
     ),
     headlineMedium = baseline.headlineMedium.copy(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
@@ -54,22 +54,22 @@ val AppTypography = Typography(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium
     ),
     titleLarge = baseline.titleLarge.copy(
-        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Bold
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Bold
     ),
     titleMedium = baseline.titleMedium.copy(
-        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Medium
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.SemiBold
     ),
     titleSmall = baseline.titleSmall.copy(
-        fontFamily = robotoSlabFontFamily, fontWeight = FontWeight.Thin
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium
     ),
     bodyLarge = baseline.bodyLarge.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium /* Default */
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Normal
     ),
     bodyMedium = baseline.bodyMedium.copy(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Normal
     ),
     bodySmall = baseline.bodySmall.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Thin
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Normal
     ),
     labelLarge = baseline.labelLarge.copy(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Medium
@@ -78,7 +78,6 @@ val AppTypography = Typography(
         fontFamily = pretendardFontFamily, fontWeight = FontWeight.Normal
     ),
     labelSmall = baseline.labelSmall.copy(
-        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Thin
+        fontFamily = pretendardFontFamily, fontWeight = FontWeight.Normal
     ),
 )
-

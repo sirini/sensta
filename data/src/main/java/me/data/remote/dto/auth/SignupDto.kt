@@ -10,14 +10,15 @@ data class SignupDto(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: SignupResultDto
+    val result: SignupResultDto = SignupResultDto()
 )
 
 // 회원가입 시 이메일 인증 여부를 포함한 결과 정의
 @Serializable
 data class SignupResultDto(
-    val sendmail: Boolean,
-    val target: Int
+    val target: Int = 0,
+    val requiresVerification: Boolean = false,
+    val completed: Boolean = false
 )
 
 // 회원가입 시 받을 응답을 엔티티로 변환하는 매퍼
@@ -30,6 +31,7 @@ fun SignupDto.toEntity() = TsboardSignup(
 
 // 회원가입 시 메일 인증 여부를 포함한 결과를 엔티티로 변환하는 매퍼
 fun SignupResultDto.toEntity() = TsboardSignupResult(
-    sendmail = sendmail,
-    target = target
+    target = target,
+    requiresVerification = requiresVerification,
+    completed = completed
 )

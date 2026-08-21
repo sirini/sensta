@@ -10,6 +10,7 @@ data class TsboardSignup(
 
 // 회원가입 시 결과 엔티티
 data class TsboardSignupResult(
-    val sendmail: Boolean,
-    val target: Int
+    val target: Int,
+    val requiresVerification: Boolean,
+    val completed: Boolean
 )

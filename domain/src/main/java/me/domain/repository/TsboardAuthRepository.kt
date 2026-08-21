@@ -14,15 +14,13 @@ interface TsboardAuthRepository {
     suspend fun checkEmail(email: String): TsboardResponse<TsboardResponseNothing>
     suspend fun checkName(name: String): TsboardResponse<TsboardResponseNothing>
     suspend fun clearUserInfo()
+    suspend fun deleteAccount(token: String): TsboardResponse<TsboardResponseNothing>
     suspend fun getUserInfo(): TsboardSigninResult
     suspend fun signIn(id: String, password: String): TsboardResponse<TsboardSignin>
     suspend fun signInWithGoogle(idToken: String): TsboardResponse<TsboardSignin>
     suspend fun signUp(id: String, password: String, name: String): TsboardResponse<TsboardSignup>
     suspend fun saveUserInfo(user: TsboardSigninResult)
-    suspend fun updateAccessToken(
-        userUid: Int,
-        refresh: String
-    ): TsboardResponse<TsboardUpdateAccessToken>
+    suspend fun updateAccessToken(refresh: String): TsboardResponse<TsboardUpdateAccessToken>
 
     suspend fun updateUserInfo(param: TsboardUpdateUserInfoParam): TsboardResponse<TsboardUpdateUserInfo>
     suspend fun verifyCode(param: TsboardVerifyCodeParam): TsboardResponse<TsboardResponseNothing>

@@ -27,6 +27,8 @@ render.experimental.xml
 # Keystore files
 *.jks
 *.keystore
+signing.properties
+app/*.aab
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json

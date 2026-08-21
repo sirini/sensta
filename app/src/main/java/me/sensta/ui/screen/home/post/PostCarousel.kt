@@ -29,20 +29,22 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
 import me.domain.model.photo.TsboardImage
 import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.ui.theme.LocalSenstaExtendedColors
 
 @Composable
 fun PostCarousel(images: List<TsboardImage>) {
     val pagerState = rememberPagerState(0) { images.size }
     val commonViewModel = LocalCommonViewModel.current
+    val extendedColors = LocalSenstaExtendedColors.current
 
-    // 보고 있는 페이지가 변경되면 인덱스를 공용 뷰모델에 저장
+    // 보고 있는 페이지가 변경되면 인덱스를 공용 뷰모델에 저장한다.
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
             .collect { page -> commonViewModel.updatePagerIndex(page) }
     }
 
-    // 게시글 번호가 바뀌면 pagerState 초기화
+    // 게시글 번호가 바뀌면 첫 사진으로 돌아간다.
     LaunchedEffect(commonViewModel.postUid) {
         pagerState.scrollToPage(0)
     }
@@ -50,25 +52,18 @@ fun PostCarousel(images: List<TsboardImage>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f)
+            .aspectRatio(0.8f)
+            .background(extendedColors.media)
     ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) { page ->
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
             AsyncImage(
                 model = Env.DOMAIN + images[page].thumbnail.large,
                 contentDescription = "Image ${page + 1}",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectTapGestures(onTap = {
-                            commonViewModel.openFullScreen(
-                                imagePath = images[page].thumbnail.large,
-                            )
-                        })
-                    },
+                modifier = Modifier.fillMaxSize().pointerInput(images[page].thumbnail.large) {
+                    detectTapGestures {
+                        commonViewModel.openFullScreen(images[page].thumbnail.large)
+                    }
+                },
                 contentScale = ContentScale.Crop
             )
         }
@@ -82,15 +77,19 @@ fun PostCarousel(images: List<TsboardImage>) {
                     .padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                repeat(pagerState.pageCount) { iteration ->
-                    val color =
-                        if (pagerState.currentPage == iteration) Color.White else Color.Gray
+                repeat(pagerState.pageCount) { index ->
                     Box(
                         modifier = Modifier
                             .padding(2.dp)
                             .clip(CircleShape)
-                            .background(color)
-                            .size(4.dp)
+                            .background(
+                                if (pagerState.currentPage == index) {
+                                    extendedColors.onMedia
+                                } else {
+                                    extendedColors.onMedia.copy(alpha = 0.4f)
+                                }
+                            )
+                            .size(if (pagerState.currentPage == index) 6.dp else 5.dp)
                     )
                 }
             }

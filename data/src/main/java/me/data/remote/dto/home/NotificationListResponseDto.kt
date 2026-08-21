@@ -14,7 +14,7 @@ data class NotificationListResponseDto(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: List<NotificationResultDto>?
+    val result: List<NotificationResultDto>? = null
 )
 
 // 알림 리스트 JSON 응답

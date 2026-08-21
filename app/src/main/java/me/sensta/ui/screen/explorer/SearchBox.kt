@@ -39,7 +39,11 @@ fun SearchBox() {
     val option by explorerViewModel.option
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 12.dp)
+    ) {
         OutlinedTextField(
             value = keyword,
             onValueChange = { explorerViewModel.setKeyword(it) },
@@ -47,6 +51,7 @@ fun SearchBox() {
             singleLine = true,
             maxLines = 1,
             shape = MaterialTheme.shapes.large,
+            modifier = Modifier.fillMaxWidth(),
             leadingIcon = {
                 Row(
                     modifier = Modifier
@@ -57,7 +62,7 @@ fun SearchBox() {
                     Text(text = options.first { it.first == option }.second)
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "option"
+                        contentDescription = "검색 범위 선택"
                     )
                 }
             },
@@ -70,7 +75,7 @@ fun SearchBox() {
                 }) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "image search",
+                        contentDescription = "사진 검색",
                         modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                     )
                 }

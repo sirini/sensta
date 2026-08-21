@@ -9,7 +9,14 @@ data class SendChatResponseDto(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: Int
+    val result: Int = 0
+)
+
+// 상대방에게 메시지를 보내는 JSON 요청
+@Serializable
+data class SendChatRequestDto(
+    val targetUserUid: Int,
+    val message: String
 )
 
 // 응답을 엔티티로 변환하는 매퍼

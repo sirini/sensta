@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
@@ -72,17 +71,6 @@ fun ProfileViewImage() {
         }
     }
 
-    // 갤러리 접근 권한 요청 런처
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            imagePickerLauncher.launch("image/*")
-        } else {
-            Toast.makeText(context, "갤러리에 접근할 권한을 허용해주세요.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     Box(
         modifier = Modifier
             .width(180.dp)
@@ -114,7 +102,8 @@ fun ProfileViewImage() {
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.onBackground)
                     .clickable {
-                        launcher.launch(android.Manifest.permission.READ_MEDIA_IMAGES)
+                        // 시스템 문서 선택기는 별도 저장소 권한 없이 사용자가 고른 사진만 전달한다.
+                        imagePickerLauncher.launch("image/*")
                     }, contentAlignment = Alignment.Center
             ) {
                 Icon(

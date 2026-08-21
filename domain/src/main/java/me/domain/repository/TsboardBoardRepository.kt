@@ -11,14 +11,13 @@ import me.domain.model.board.TsboardWritePostParam
 import me.domain.model.board.TsboardWriteResponse
 import me.domain.model.common.TsboardResponseNothing
 import me.domain.model.home.TsboardLatestPost
-import me.domain.model.photo.TsboardPhoto
 
 // 게시글 관련 인터페이스
 interface TsboardBoardRepository {
     suspend fun getComments(postUid: Int, token: String): TsboardResponse<List<TsboardComment>>
     suspend fun getHomeLatestPosts(
         limit: Int,
-        accessUserUid: Int = 0
+        token: String = ""
     ): TsboardResponse<List<TsboardLatestPost>>
 
     suspend fun getPosts(param: TsboardGetPostsParam): TsboardResponse<List<TsboardPost>>
@@ -29,7 +28,6 @@ interface TsboardBoardRepository {
         needUpdateHit: Boolean = false
     ): TsboardResponse<TsboardBoardViewResponse>
 
-    suspend fun getPhotos(sinceUid: Int, token: String): TsboardResponse<List<TsboardPhoto>>
     suspend fun getRecentHashtags(
         boardUid: Int,
         limit: Int

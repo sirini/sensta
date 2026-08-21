@@ -48,7 +48,7 @@ fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: 
             } else {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "unknown profile",
+                        contentDescription = "기본 프로필",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
@@ -57,7 +57,7 @@ fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: 
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = comment.writer.name,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.titleSmall
             )
         }
 
@@ -66,13 +66,13 @@ fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: 
                 if (likeState) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = "like",
-                        tint = MaterialTheme.colorScheme.onErrorContainer
+                        contentDescription = "좋아요 취소",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "like"
+                        contentDescription = "좋아요"
                     )
                 }
             }

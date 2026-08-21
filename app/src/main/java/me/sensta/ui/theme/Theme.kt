@@ -4,7 +4,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 private val lightScheme = lightColorScheme(
@@ -249,14 +251,32 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun SenstaTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
-    val colorScheme = darkScheme
+    val colorScheme = if (darkTheme) NuboDarkColorScheme else NuboLightColorScheme
+    val extendedColors = if (darkTheme) {
+        SenstaExtendedColors(
+            media = Color(0xFF0F1012),
+            onMedia = Color(0xFFF4F1ED),
+            success = Color(0xFF64B88A),
+            warning = Color(0xFFE0AE55)
+        )
+    } else {
+        SenstaExtendedColors(
+            media = Color(0xFF131416),
+            onMedia = Color(0xFFF4F1ED),
+            success = Color(0xFF31855C),
+            warning = Color(0xFFB97716)
+        )
+    }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+    CompositionLocalProvider(LocalSenstaExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            shapes = SenstaShapes,
+            content = content
+        )
+    }
 }
-

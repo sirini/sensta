@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import me.data.env.Env
@@ -65,7 +66,7 @@ fun VersionScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "앱 버전")
-                    Text(text = context.getString(R.string.version))
+                    Text(text = stringResource(R.string.version))
                 }
 
                 HorizontalDivider(
@@ -80,8 +81,8 @@ fun VersionScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "TSBOARD 권장 버전")
-                    Text(text = Env.MIN_TSBOARD_VER)
+                    Text(text = "서버 API 계약")
+                    Text(text = Env.API_CONTRACT_VERSION)
                 }
 
                 HorizontalDivider(
@@ -96,7 +97,7 @@ fun VersionScreen() {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "안드로이드 권장 버전")
+                    Text(text = "지원 운영체제")
                     Text(text = Env.MIN_ANDROID_VER)
                 }
             }
@@ -119,6 +120,44 @@ fun VersionScreen() {
                     contentDescription = "github repo",
                     modifier = Modifier
                         .size(16.dp)
+                )
+            }
+
+            TextButton(
+                onClick = {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, "${Env.DOMAIN}/terms".toUri())
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(text = "이용약관과 커뮤니티 운영 원칙")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            TextButton(
+                onClick = {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, "${Env.DOMAIN}/privacy".toUri())
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+            ) {
+                Text(text = "개인정보 처리방침")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
                 )
             }
 

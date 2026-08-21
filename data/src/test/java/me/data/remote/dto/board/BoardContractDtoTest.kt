@@ -1,0 +1,166 @@
+package me.data.remote.dto.board
+
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import me.data.remote.dto.photo.ImageDto
+import me.data.remote.dto.photo.toEntity
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class BoardContractDtoTest {
+    private val json = Json { ignoreUnknownKeys = true }
+
+    @Test
+    fun `현재 게시글 목록 응답과 추가 설정 필드를 함께 읽는다`() {
+        val response = json.decodeFromString<BoardListResponseDto>(
+            """
+            {
+              "success": true,
+              "error": "",
+              "code": 0,
+              "result": {
+                "totalPostCount": 1,
+                "config": {
+                  "uid": 2,
+                  "id": "photo",
+                  "groupUid": 2,
+                  "admin": {"group":1,"board":1},
+                  "type": 1,
+                  "name": "일상",
+                  "info": "우리가 즐기고 사랑한 순간들",
+                  "rowCount": 32,
+                  "width": 1200,
+                  "useCategory": false,
+                  "category": [],
+                  "level": {"view":0,"write":1,"comment":1,"download":1,"list":0},
+                  "point": {"view":0,"write":5,"comment":2,"download":-10},
+                  "skinKey": "nubo-basic-board"
+                },
+                "notices": [],
+                "posts": [{
+                  "uid": 7522,
+                  "title": "선정릉",
+                  "content": "<p>도심 속 공간</p>",
+                  "submitted": 1787135276537,
+                  "modified": 0,
+                  "hit": 2,
+                  "status": 0,
+                  "category": {"uid":1,"name":"일반"},
+                  "cover": "/upload/thumbnails/photo.webp",
+                  "comment": 0,
+                  "like": 0,
+                  "liked": false,
+                  "writer": {"uid":1,"name":"사진가","profile":"/profile.webp","signature":""}
+                }],
+                "blackList": [],
+                "isAdmin": false
+              }
+            }
+            """.trimIndent()
+        ).toEntity()
+
+        assertTrue(response.success)
+        assertEquals(7522, response.result.posts.single().uid)
+        assertEquals("/upload/thumbnails/photo.webp", response.result.posts.single().cover)
+    }
+
+    @Test
+    fun `게시글 좋아요 요청은 불리언 JSON으로 직렬화한다`() {
+        val body = json.parseToJsonElement(
+            json.encodeToString(BoardLikeRequestDto(boardUid = 2, postUid = 7522, liked = true))
+        ).jsonObject
+
+        assertEquals(2, body.getValue("boardUid").jsonPrimitive.int)
+        assertEquals(7522, body.getValue("postUid").jsonPrimitive.int)
+        assertTrue(body.getValue("liked").jsonPrimitive.boolean)
+    }
+
+    @Test
+    fun `댓글 좋아요 취소 요청도 불리언 JSON으로 직렬화한다`() {
+        val body = json.parseToJsonElement(
+            json.encodeToString(CommentLikeRequestDto(boardUid = 2, commentUid = 9, liked = false))
+        ).jsonObject
+
+        assertFalse(body.getValue("liked").jsonPrimitive.boolean)
+    }
+
+    @Test
+    fun `게시글 상세 이미지와 EXIF 응답을 읽는다`() {
+        val image = json.decodeFromString<ImageDto>(
+            """
+            {
+              "file": {"uid":7069,"path":"/upload/attachments/photo.jpeg"},
+              "thumbnail": {
+                "large":"/upload/thumbnails/large.webp",
+                "small":"/upload/thumbnails/small.webp"
+              },
+              "exif": {
+                "make":"Apple",
+                "model":"iPhone 17",
+                "aperture":160,
+                "iso":32,
+                "focalLength":52,
+                "exposure":4901,
+                "width":4032,
+                "height":3024,
+                "date":1783193189000
+              },
+              "description":"도심 풍경"
+            }
+            """.trimIndent()
+        ).toEntity()
+
+        assertEquals(7069, image.file.uid)
+        assertEquals("iPhone 17", image.exif.model)
+        assertEquals(4032, image.exif.width)
+    }
+
+    @Test
+    fun `현재 댓글 목록 응답을 읽는다`() {
+        val response = json.decodeFromString<CommentListResponseDto>(
+            """
+            {
+              "success":true,
+              "error":"",
+              "code":0,
+              "result":{
+                "boardUid":2,
+                "sinceUid":0,
+                "totalCommentCount":1,
+                "comments":[{
+                  "uid":231,
+                  "replyUid":231,
+                  "postUid":7520,
+                  "writer":{"uid":1,"name":"사진가","profile":"/profile.webp","signature":""},
+                  "like":0,
+                  "liked":false,
+                  "submitted":1778822019491,
+                  "modified":0,
+                  "status":0,
+                  "content":"<p>멋진 사진들이네요!</p>"
+                }]
+              }
+            }
+            """.trimIndent()
+        ).toEntity()
+
+        assertEquals(2, response.result.boardUid)
+        assertEquals(231, response.result.comments.single().uid)
+    }
+
+    @Test
+    fun `글쓰기 오류 응답에 result가 없어도 역직렬화한다`() {
+        val response = json.decodeFromString<WriteResponseDto>(
+            """{"success":false,"error":"invalid title","code":1}"""
+        )
+
+        assertFalse(response.success)
+        assertEquals(0, response.result)
+    }
+}

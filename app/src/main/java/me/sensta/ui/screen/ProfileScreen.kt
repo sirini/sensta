@@ -67,6 +67,18 @@ fun ProfileScreen() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+
+                is ProfileUiEvent.AccountDeleted -> {
+                    Toast.makeText(context, "계정과 모든 데이터가 삭제되었습니다", Toast.LENGTH_LONG).show()
+                }
+
+                is ProfileUiEvent.FailedToDeleteAccount -> {
+                    Toast.makeText(
+                        context,
+                        "계정 삭제에 실패했습니다 (${event.message})",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }

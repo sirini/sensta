@@ -9,7 +9,7 @@ data class WriteResponseDto(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: Int
+    val result: Int = 0
 )
 
 // 댓글 작성 후 JSON 응답을 엔티티로 변환하는 매퍼

@@ -21,12 +21,14 @@ import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.WritePostUseCase
 import me.sensta.viewmodel.state.UploadState
 import me.sensta.viewmodel.uievent.UploadUiEvent
+import me.sensta.policy.CommunityPolicyManager
 import javax.inject.Inject
 
 @HiltViewModel
 class UploadViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
-    private val writePostUseCase: WritePostUseCase
+    private val writePostUseCase: WritePostUseCase,
+    private val communityPolicyManager: CommunityPolicyManager
 ) : ViewModel() {
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> get() = _isLoading
@@ -48,6 +50,9 @@ class UploadViewModel @Inject constructor(
 
     private val _uploadedPostUid = mutableIntStateOf(0)
     val uploadedPostUid: State<Int> get() = _uploadedPostUid
+
+    private val _isCommunityPolicyAccepted = mutableStateOf(communityPolicyManager.isAccepted())
+    val isCommunityPolicyAccepted: State<Boolean> get() = _isCommunityPolicyAccepted
 
     private val _uiEvent = MutableSharedFlow<UploadUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
@@ -126,9 +131,19 @@ class UploadViewModel @Inject constructor(
         _uploadState.value = state
     }
 
+    // 기존 회원도 최초 업로드 전에 현재 운영 원칙을 확인하도록 한다.
+    fun acceptCommunityPolicy(accepted: Boolean) {
+        _isCommunityPolicyAccepted.value = accepted
+        if (accepted) communityPolicyManager.accept()
+    }
+
     // 게시글 업로드
     fun upload(context: Context) {
         viewModelScope.launch {
+            if (!_isCommunityPolicyAccepted.value) {
+                _uiEvent.emit(UploadUiEvent.CommunityPolicyRequired)
+                return@launch
+            }
             val token = getUserInfoUseCase().first().token
             if (token.isEmpty()) return@launch
 

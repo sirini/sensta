@@ -8,4 +8,6 @@ sealed interface ProfileUiEvent {
     data class FailedToChangeSignature(val message: String) : ProfileUiEvent
     data class FailedToUpdateProfileImage(val message: String) : ProfileUiEvent
     data object ProfileImageUpdated : ProfileUiEvent
+    data object AccountDeleted : ProfileUiEvent
+    data class FailedToDeleteAccount(val message: String) : ProfileUiEvent
 }

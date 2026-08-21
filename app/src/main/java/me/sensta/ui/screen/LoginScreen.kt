@@ -1,6 +1,5 @@
 package me.sensta.ui.screen
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -23,12 +23,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import me.sensta.ui.screen.login.LoginCompleted
 import me.sensta.ui.screen.login.LoginInputEmail
 import me.sensta.ui.screen.login.LoginInputPassword
+import me.sensta.ui.navigation.common.LocalSnackbar
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.state.LoginState
 import me.sensta.viewmodel.uievent.LoginUiEvent
@@ -36,9 +36,9 @@ import me.sensta.viewmodel.uievent.LoginUiEvent
 @Composable
 fun LoginScreen() {
     val imeInsets = WindowInsets.ime
-    val context = LocalContext.current
     val density = LocalDensity.current
     val authViewModel = LocalAuthViewModel.current
+    val snackbarHostState = LocalSnackbar.current
     val isLoading by authViewModel.isLoading
     val loginState by authViewModel.loginState
 
@@ -47,20 +47,27 @@ fun LoginScreen() {
         authViewModel.uiLoginEvent.collect { event ->
             when (event) {
                 is LoginUiEvent.IDNotFound -> {
-                    Toast.makeText(context, "아이디를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+                    snackbarHostState.showSnackbar(
+                        message = "아이디를 찾을 수 없습니다.",
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Long
+                    )
                 }
 
                 is LoginUiEvent.FailedToLogin -> {
-                    Toast.makeText(context, "로그인에 실패했습니다 (${event.message})", Toast.LENGTH_SHORT)
-                        .show()
+                    snackbarHostState.showSnackbar(
+                        message = "로그인에 실패했습니다. ${event.message}",
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Long
+                    )
                 }
 
                 is LoginUiEvent.FailedToLoginByGoogle -> {
-                    Toast.makeText(
-                        context,
-                        "구글 계정으로 로그인에 실패했습니다 (${event.message})",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Long
+                    )
                 }
             }
         }

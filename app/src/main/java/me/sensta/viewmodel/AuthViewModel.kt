@@ -1,8 +1,8 @@
 package me.sensta.viewmodel
 
 import android.content.Context
-import android.credentials.GetCredentialException
 import android.net.Uri
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
@@ -10,16 +10,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.data.util.Upload
 import me.domain.model.auth.TsboardSigninResult
 import me.domain.model.auth.TsboardUpdateUserInfoParam
@@ -31,6 +34,7 @@ import me.domain.usecase.auth.CheckEmailUseCase
 import me.domain.usecase.auth.CheckNameUseCase
 import me.domain.usecase.auth.CheckVerificationCodeUseCase
 import me.domain.usecase.auth.ClearUserInfoUseCase
+import me.domain.usecase.auth.DeleteAccountUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.auth.SaveUserInfoUseCase
 import me.domain.usecase.auth.SignInUseCase
@@ -39,10 +43,10 @@ import me.domain.usecase.auth.SignUpUseCase
 import me.domain.usecase.auth.UpdateAccessTokenUseCase
 import me.domain.usecase.auth.UpdateUserInfoUseCase
 import me.sensta.R
+import me.sensta.push.PushTokenManager
+import me.sensta.policy.CommunityPolicyManager
 import me.sensta.util.CustomTime
 import me.sensta.util.now
-import me.sensta.viewmodel.state.ID_INVALID
-import me.sensta.viewmodel.state.ID_REGISTERED
 import me.sensta.viewmodel.state.LoginState
 import me.sensta.viewmodel.state.SignupState
 import me.sensta.viewmodel.uievent.AuthUiEvent
@@ -55,6 +59,7 @@ class AuthViewModel @Inject constructor(
     private val checkEmailUseCase: CheckEmailUseCase,
     private val checkNameUseCase: CheckNameUseCase,
     private val clearUserInfoUseCase: ClearUserInfoUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val saveUserInfoUseCase: SaveUserInfoUseCase,
     private val signInUseCase: SignInUseCase,
@@ -62,8 +67,14 @@ class AuthViewModel @Inject constructor(
     private val signUpUseCase: SignUpUseCase,
     private val updateAccessTokenUseCase: UpdateAccessTokenUseCase,
     private val updateUserInfoUseCase: UpdateUserInfoUseCase,
-    private val verifyCodeUseCase: CheckVerificationCodeUseCase
+    private val verifyCodeUseCase: CheckVerificationCodeUseCase,
+    private val pushTokenManager: PushTokenManager,
+    private val communityPolicyManager: CommunityPolicyManager
 ) : ViewModel() {
+    private companion object {
+        const val TAG = "AuthViewModel"
+    }
+
     private val _id = mutableStateOf("")
     val id: State<String> get() = _id
 
@@ -88,6 +99,9 @@ class AuthViewModel @Inject constructor(
     private val _signupState = mutableStateOf<SignupState>(SignupState.InputEmail)
     val signupState: State<SignupState> get() = _signupState
 
+    private val _isCommunityPolicyAccepted = mutableStateOf(communityPolicyManager.isAccepted())
+    val isCommunityPolicyAccepted: State<Boolean> get() = _isCommunityPolicyAccepted
+
     private val _targetUserUid = mutableIntStateOf(0)
     val targetUserUid: State<Int> get() = _targetUserUid
 
@@ -108,6 +122,9 @@ class AuthViewModel @Inject constructor(
         _isLoading.value = true
         viewModelScope.launch {
             _user.value = getUserInfoUseCase().first()
+            if (_user.value.token.isNotBlank()) {
+                pushTokenManager.synchronize()
+            }
             _loginState.value = LoginState.InputEmail
             _isLoading.value = false
         }
@@ -121,12 +138,10 @@ class AuthViewModel @Inject constructor(
     // 회원가입 시 아이디 확인
     private fun checkIDForSignup(checkEmailData: TsboardResponseNothing) {
         viewModelScope.launch {
-            when (checkEmailData.code) {
-                ID_REGISTERED -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedID)
-                ID_INVALID -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
-                else -> {
-                    _signupState.value = SignupState.InputPassword
-                }
+            when {
+                !checkEmailData.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                checkEmailData.result == "true" -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedID)
+                else -> _signupState.value = SignupState.InputPassword
             }
         }
     }
@@ -134,13 +149,10 @@ class AuthViewModel @Inject constructor(
     // 로그인 시 아이디 확인
     private fun checkIDForLogin(checkEmailData: TsboardResponseNothing) {
         viewModelScope.launch {
-            when (checkEmailData.code) {
-                ID_INVALID -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
-                ID_REGISTERED -> {
-                    _loginState.value = LoginState.InputPassword
-                }
-
-                else -> _uiLoginEvent.emit(LoginUiEvent.IDNotFound(checkEmailData.error))
+            when {
+                !checkEmailData.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
+                checkEmailData.result == "true" -> _loginState.value = LoginState.InputPassword
+                else -> _uiLoginEvent.emit(LoginUiEvent.IDNotFound("등록되지 않은 이메일입니다"))
             }
         }
     }
@@ -169,6 +181,10 @@ class AuthViewModel @Inject constructor(
     // 회원 가입시 유효한 이름인지 확인하고, 확인되면 인증 코드 입력으로 이동 혹은 가입 완료
     fun checkValidName() {
         viewModelScope.launch {
+            if (!_isCommunityPolicyAccepted.value) {
+                _uiAuthEvent.emit(AuthUiEvent.CommunityPolicyRequired)
+                return@launch
+            }
             if (_name.value.isEmpty() || _name.value.length < 2) {
                 _uiAuthEvent.emit(AuthUiEvent.InvalidName)
                 return@launch
@@ -177,10 +193,10 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = true
             checkNameUseCase(_name.value).collect {
                 it.handle { resp ->
-                    if (resp.code == ID_REGISTERED) {
-                        _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedName)
-                    } else {
-                        signUp() // 회원가입 진행
+                    when {
+                        !resp.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidName)
+                        resp.result == "true" -> _uiAuthEvent.emit(AuthUiEvent.AlreadyUsedName)
+                        else -> signUp() // 회원가입 진행
                     }
                 }
             }
@@ -231,7 +247,7 @@ class AuthViewModel @Inject constructor(
                 )
             ).collect {
                 it.handle { resp ->
-                    if (!resp.success) {
+                    if (!resp.success || resp.result != "true") {
                         _uiAuthEvent.emit(AuthUiEvent.WrongVerificationCode)
                     } else {
                         _signupState.value = SignupState.SignupCompleted
@@ -253,6 +269,7 @@ class AuthViewModel @Inject constructor(
                         _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                     } else {
                         _user.value = resp.result!!
+                        pushTokenManager.synchronize()
                         _loginState.value = LoginState.LoginCompleted
                     }
                 }
@@ -264,9 +281,40 @@ class AuthViewModel @Inject constructor(
     // 로그아웃하기
     fun logout() {
         _loginState.value = LoginState.InputEmail
-        _user.value = emptyUser
         viewModelScope.launch {
+            val accessToken = _user.value.token
+            if (accessToken.isNotBlank()) {
+                pushTokenManager.unregister(accessToken)
+            }
+            _user.value = emptyUser
             clearUserInfoUseCase()
+        }
+    }
+
+    // 서버 데이터를 먼저 삭제한 뒤 기기의 로그인 정보도 제거한다.
+    fun deleteAccount() {
+        val accessToken = _user.value.token
+        if (accessToken.isBlank() || _isLoading.value) return
+
+        _isLoading.value = true
+        viewModelScope.launch {
+            deleteAccountUseCase(accessToken).collect { response ->
+                response.handle { result ->
+                    if (result.success) {
+                        // 서버에서 기기 등록도 함께 삭제하므로 별도의 해제 호출은 하지 않는다.
+                        _user.value = emptyUser
+                        clearUserInfoUseCase()
+                        _loginState.value = LoginState.InputEmail
+                        _uiProfileEvent.emit(ProfileUiEvent.AccountDeleted)
+                    } else {
+                        _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(result.error))
+                    }
+                }
+                if (response is me.domain.repository.TsboardResponse.Error) {
+                    _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(response.message))
+                }
+            }
+            _isLoading.value = false
         }
     }
 
@@ -288,6 +336,12 @@ class AuthViewModel @Inject constructor(
     // 회원가입 시 이름 입력 받기
     fun setName(name: String) {
         _name.value = name.trim()
+    }
+
+    // 회원가입 전에 이용약관과 커뮤니티 운영 원칙에 동의한 상태를 보관한다.
+    fun acceptCommunityPolicy(accepted: Boolean) {
+        _isCommunityPolicyAccepted.value = accepted
+        if (accepted) communityPolicyManager.accept()
     }
 
     // 인증코드 6자리 입력 받기
@@ -312,6 +366,7 @@ class AuthViewModel @Inject constructor(
         val credentialManager = CredentialManager.create(context)
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
+            // FCM용 Firebase 프로젝트와 별개로 GOAPI가 검증하는 기존 Web OAuth client를 사용한다.
             .setServerClientId(context.getString(R.string.google_web_client_id))
             .setAutoSelectEnabled(false)
             .build()
@@ -338,23 +393,47 @@ class AuthViewModel @Inject constructor(
                                         _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                                     } else {
                                         _user.value = resp.result!!
+                                        pushTokenManager.synchronize()
                                         _loginState.value = LoginState.LoginCompleted
                                     }
                                 }
                             }
+                        } else {
+                            _uiLoginEvent.emit(
+                                LoginUiEvent.FailedToLoginByGoogle(
+                                    "Google 로그인 응답 형식을 확인할 수 없습니다."
+                                )
+                            )
                         }
                     }
+
+                    else -> {
+                        _uiLoginEvent.emit(
+                            LoginUiEvent.FailedToLoginByGoogle(
+                                "Google 계정 인증 정보를 받지 못했습니다."
+                            )
+                        )
+                    }
                 }
-            } catch (e: GetCredentialException) {
+            } catch (e: NoCredentialException) {
+                Log.w(TAG, "Google 계정 credential을 찾지 못했습니다.", e)
                 _uiLoginEvent.emit(
                     LoginUiEvent.FailedToLoginByGoogle(
-                        e.message ?: "Failed to get credential from Google"
+                        "사용할 수 있는 Google 계정을 찾지 못했습니다. 기기 계정과 OAuth 설정을 확인해주세요."
                     )
                 )
-            } catch (e: NoCredentialException) {
+            } catch (e: GetCredentialException) {
+                Log.w(TAG, "Google Credential Manager 인증에 실패했습니다.", e)
                 _uiLoginEvent.emit(
                     LoginUiEvent.FailedToLoginByGoogle(
-                        e.message ?: "No credential found"
+                        "Google 계정 인증을 완료하지 못했습니다. 잠시 후 다시 시도해주세요."
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Google 로그인 응답 처리에 실패했습니다.", e)
+                _uiLoginEvent.emit(
+                    LoginUiEvent.FailedToLoginByGoogle(
+                        "Google 로그인 응답을 처리하지 못했습니다."
                     )
                 )
             } finally {
@@ -377,11 +456,11 @@ class AuthViewModel @Inject constructor(
                         _uiAuthEvent.emit(AuthUiEvent.FailedToSignUp)
                         return@handle
                     }
-                    if (resp.result.sendmail) {
+                    if (resp.result.requiresVerification) {
                         _targetUserUid.intValue = resp.result.target
                         _signupState.value = SignupState.InputCode
                         _uiAuthEvent.emit(AuthUiEvent.SentVerificationCode(_id.value))
-                    } else {
+                    } else if (resp.result.completed) {
                         _signupState.value = SignupState.SignupCompleted
                         _uiAuthEvent.emit(AuthUiEvent.SignupCompleted)
                     }
@@ -455,11 +534,17 @@ class AuthViewModel @Inject constructor(
     private suspend fun updateAccessToken() {
         if (_user.value.uid < 1) return
 
-        updateAccessTokenUseCase(_user.value.uid, _user.value.refresh).collect {
+        updateAccessTokenUseCase(_user.value.refresh).collect {
             it.handle { resp ->
-                if (resp.success) {
-                    _user.value = _user.value.copy(token = resp.result!!, signin = CustomTime.now())
+                val tokens = resp.result
+                if (resp.success && tokens != null) {
+                    _user.value = _user.value.copy(
+                        token = tokens.token,
+                        refresh = tokens.refresh,
+                        signin = CustomTime.now()
+                    )
                     saveUserInfoUseCase(_user.value)
+                    pushTokenManager.synchronize()
                     _uiAuthEvent.emit(AuthUiEvent.AccessTokenUpdated)
                 } else {
                     _user.value = emptyUser
@@ -476,27 +561,41 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             updateAccessToken()
+            val preparedProfile = withContext(Dispatchers.IO) {
+                Upload.prepareImage(context, uri, "profile")
+            }
+            if (preparedProfile == null) {
+                _uiProfileEvent.emit(
+                    ProfileUiEvent.FailedToUpdateProfileImage("사진을 읽지 못했습니다")
+                )
+                _isLoading.value = false
+                return@launch
+            }
             val param = TsboardUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
                 signature = _user.value.signature,
                 password = "",
-                profile = Upload.uriToMultipart(context, uri, "profile")
+                profile = preparedProfile.part
             )
 
-            updateUserInfoUseCase(param).collect {
-                it.handle { resp ->
-                    if (resp.success) {
-                        val userInfo = getUserInfoUseCase().first()
-                        _user.value = userInfo
-                        saveUserInfoUseCase(userInfo)
-                        _uiProfileEvent.emit(ProfileUiEvent.ProfileImageUpdated)
-                    } else {
-                        _uiProfileEvent.emit(ProfileUiEvent.FailedToUpdateProfileImage(resp.error))
+            try {
+                updateUserInfoUseCase(param).collect {
+                    it.handle { resp ->
+                        if (resp.success) {
+                            val userInfo = getUserInfoUseCase().first()
+                            _user.value = userInfo
+                            saveUserInfoUseCase(userInfo)
+                            _uiProfileEvent.emit(ProfileUiEvent.ProfileImageUpdated)
+                        } else {
+                            _uiProfileEvent.emit(ProfileUiEvent.FailedToUpdateProfileImage(resp.error))
+                        }
                     }
                 }
+            } finally {
+                withContext(Dispatchers.IO) { preparedProfile.cleanUp() }
+                _isLoading.value = false
             }
-            _isLoading.value = false
         }
     }
 }

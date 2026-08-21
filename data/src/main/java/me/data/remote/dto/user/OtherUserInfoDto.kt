@@ -12,7 +12,7 @@ data class OtherUserInfoDto(
     val success: Boolean,
     val error: String,
     val code: Int,
-    val result: OtherUserInfoResultDto
+    val result: OtherUserInfoResultDto? = null
 )
 
 // 다른 사용자의 기본 정보 결과
@@ -34,7 +34,7 @@ fun OtherUserInfoDto.toEntity() = TsboardOtherUserInfo(
     success = success,
     error = error,
     code = code,
-    result = result.toEntity()
+    result = requireNotNull(result).toEntity()
 )
 
 // 다른 사용자의 기본 정보를 엔티티로 변환하는 매퍼

@@ -45,8 +45,6 @@ class ExplorerViewModel @Inject constructor(
     private val _keyword = mutableStateOf("")
     val keyword: State<String> get() = _keyword
 
-    private val _lastPostUid = mutableIntStateOf(0)
-
     private val _page = mutableIntStateOf(1)
     val page: State<Int> get() = _page
 
@@ -69,15 +67,14 @@ class ExplorerViewModel @Inject constructor(
 
         viewModelScope.launch {
             // 처음 로딩할 때는 Loading 상태로 두기
-            if (_lastPostUid.intValue == 0) {
+            if (_page.intValue == 1) {
                 _posts.value = TsboardResponse.Loading
-                _page.intValue = 1
             }
             _isLoadingMore.value = true
 
             val token = getUserInfoUseCase().first().token
             getPostListUseCase(
-                sinceUid = _lastPostUid.intValue,
+                page = _page.intValue,
                 option = _option.intValue,
                 keyword = _keyword.value,
                 token = token
@@ -90,7 +87,7 @@ class ExplorerViewModel @Inject constructor(
                         return@handle
                     }
 
-                    if (_lastPostUid.intValue == 0) {
+                    if (_page.intValue == 1) {
                         _posts.value = it
                         _bunch.intValue = resp.size
 
@@ -103,9 +100,8 @@ class ExplorerViewModel @Inject constructor(
                             return@handle
                         }
                         _posts.value = TsboardResponse.Success(currentPosts + resp)
-                        _page.intValue++
                     }
-                    _lastPostUid.intValue = resp.last().uid
+                    _page.intValue++
                 }
             }
             _isLoadingMore.value = false
@@ -128,10 +124,8 @@ class ExplorerViewModel @Inject constructor(
     }
 
     // 게시글 목록 업데이트
-    fun refresh(resetLastUid: Boolean = false) {
-        if (resetLastUid) {
-            _lastPostUid.intValue = 0
-        }
+    fun refresh(resetPaging: Boolean = false) {
+        if (resetPaging) _page.intValue = 1
         loadPosts()
     }
 
@@ -140,7 +134,7 @@ class ExplorerViewModel @Inject constructor(
         _option.intValue = option
         _keyword.value = keyword
 
-        refresh(resetLastUid = true)
+        refresh(resetPaging = true)
     }
 
     // 검색 옵션 업데이트
