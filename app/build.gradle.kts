@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     id("com.google.dagger.hilt.android")
@@ -13,7 +12,7 @@ if (file("google-services.json").exists()) {
 
 android {
     namespace = "me.sensta"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "me.sensta"
@@ -28,6 +27,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = false
+        resValues = true
     }
 
     signingConfigs {

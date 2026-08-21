@@ -39,8 +39,8 @@ fi
 
 JAVA_HOME="$JDK_LINK" ANDROID_HOME="$SDK_DIR" \
   "$TOOLS_DIR/bin/android" sdk install \
-  "platforms/android-36" \
-  "build-tools/36.1.0" \
+  "platforms/android-37.0" \
+  "build-tools/37.0.0" \
   "platform-tools"
 
 echo "Android 빌드 환경 준비를 마쳤습니다."
