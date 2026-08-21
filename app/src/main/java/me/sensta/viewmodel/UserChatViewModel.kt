@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import me.domain.model.board.TsboardPost
 import me.domain.model.common.TsboardWriter
 import me.domain.model.user.TsboardChatHistory
 import me.domain.model.user.TsboardOtherUserInfoResult
+import me.domain.repository.TsboardResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
+import me.domain.usecase.board.GetPostListUseCase
 import me.domain.usecase.user.GetChatHistoryUseCase
 import me.domain.usecase.user.GetOtherUserInfoUseCase
 import me.domain.usecase.user.GetUserSafetyStatusUseCase
@@ -29,6 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class UserChatViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val getPostListUseCase: GetPostListUseCase,
     private val getOtherUserInfoUseCase: GetOtherUserInfoUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
     private val sendChatUseCase: SendChatUseCase,
@@ -52,6 +56,10 @@ class UserChatViewModel @Inject constructor(
             )
         )
     val otherUser: State<TsboardOtherUserInfoResult> get() = _otherUser
+
+    private val _userPosts =
+        mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
+    val userPosts: State<TsboardResponse<List<TsboardPost>>> get() = _userPosts
 
     private val _chatMessage = mutableStateOf("")
     val chatMessage: State<String> get() = _chatMessage
@@ -127,6 +135,7 @@ class UserChatViewModel @Inject constructor(
             profile = user.profile,
             signature = user.signature
         )
+        loadUserPosts(user.uid, user.name)
 
         viewModelScope.launch {
             getOtherUserInfoUseCase(user.uid).collect {
@@ -148,7 +157,10 @@ class UserChatViewModel @Inject constructor(
 
         viewModelScope.launch {
             getOtherUserInfoUseCase(userUid).collect {
-                it.handle { resp -> _otherUser.value = resp }
+                it.handle { resp ->
+                    _otherUser.value = resp
+                    loadUserPosts(resp.uid, resp.name)
+                }
             }
             loadUserSafetyStatus(userUid)
             _isLoadingInfo.value = false
@@ -216,6 +228,31 @@ class UserChatViewModel @Inject constructor(
         _isReported.value = false
         _isBlockedByMe.value = false
         _chatHistory.value = emptyList()
+        _userPosts.value = TsboardResponse.Loading
+    }
+
+    // 작성자 검색 결과를 UID로 다시 확인해 동명이인의 사진이 섞이지 않게 한다.
+    private fun loadUserPosts(targetUserUid: Int, writerName: String) {
+        if (targetUserUid < 1 || writerName.isBlank()) return
+        _userPosts.value = TsboardResponse.Loading
+
+        viewModelScope.launch {
+            val token = getUserInfoUseCase().first().token
+            getPostListUseCase(
+                page = 1,
+                option = WRITER_SEARCH_OPTION,
+                keyword = writerName,
+                token = token
+            ).collect { response ->
+                _userPosts.value = when (response) {
+                    is TsboardResponse.Success -> TsboardResponse.Success(
+                        response.data.filter { it.writer.uid == targetUserUid }
+                    )
+                    is TsboardResponse.Error -> response
+                    is TsboardResponse.Loading -> TsboardResponse.Loading
+                }
+            }
+        }
     }
 
     // 사용자나 사용자가 작성한 특정 사진을 운영진에게 신고한다.
@@ -270,5 +307,6 @@ class UserChatViewModel @Inject constructor(
 
     private companion object {
         const val CHAT_NOTIFICATION_TYPE = 4
+        const val WRITER_SEARCH_OPTION = 2
     }
 }
