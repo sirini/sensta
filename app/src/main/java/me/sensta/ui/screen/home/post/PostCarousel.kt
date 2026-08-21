@@ -64,7 +64,7 @@ fun PostCarousel(images: List<TsboardImage>) {
                         commonViewModel.openFullScreen(images[page].thumbnail.large)
                     }
                 },
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Crop
             )
         }
 
