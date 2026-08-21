@@ -2,6 +2,7 @@ package me.sensta.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
@@ -70,6 +71,10 @@ class AuthViewModel @Inject constructor(
     private val pushTokenManager: PushTokenManager,
     private val communityPolicyManager: CommunityPolicyManager
 ) : ViewModel() {
+    private companion object {
+        const val TAG = "AuthViewModel"
+    }
+
     private val _id = mutableStateOf("")
     val id: State<String> get() = _id
 
@@ -361,7 +366,7 @@ class AuthViewModel @Inject constructor(
         val credentialManager = CredentialManager.create(context)
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(context.getString(R.string.google_web_client_id))
+            .setServerClientId(resolveGoogleWebClientId(context))
             .setAutoSelectEnabled(false)
             .build()
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
@@ -392,24 +397,61 @@ class AuthViewModel @Inject constructor(
                                     }
                                 }
                             }
+                        } else {
+                            _uiLoginEvent.emit(
+                                LoginUiEvent.FailedToLoginByGoogle(
+                                    "Google 로그인 응답 형식을 확인할 수 없습니다."
+                                )
+                            )
                         }
+                    }
+
+                    else -> {
+                        _uiLoginEvent.emit(
+                            LoginUiEvent.FailedToLoginByGoogle(
+                                "Google 계정 인증 정보를 받지 못했습니다."
+                            )
+                        )
                     }
                 }
             } catch (e: NoCredentialException) {
+                Log.w(TAG, "Google 계정 credential을 찾지 못했습니다.", e)
                 _uiLoginEvent.emit(
                     LoginUiEvent.FailedToLoginByGoogle(
-                        e.message ?: "No credential found"
+                        "사용할 수 있는 Google 계정을 찾지 못했습니다. 기기 계정과 OAuth 설정을 확인해주세요."
                     )
                 )
             } catch (e: GetCredentialException) {
+                Log.w(TAG, "Google Credential Manager 인증에 실패했습니다.", e)
                 _uiLoginEvent.emit(
                     LoginUiEvent.FailedToLoginByGoogle(
-                        e.message ?: "Failed to get credential from Google"
+                        "Google 계정 인증을 완료하지 못했습니다. 잠시 후 다시 시도해주세요."
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Google 로그인 응답 처리에 실패했습니다.", e)
+                _uiLoginEvent.emit(
+                    LoginUiEvent.FailedToLoginByGoogle(
+                        "Google 로그인 응답을 처리하지 못했습니다."
                     )
                 )
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    // Google Services 플러그인이 변형별로 만든 Web client ID를 우선하고 설정 없는 CI에서만 기본값을 사용한다.
+    private fun resolveGoogleWebClientId(context: Context): String {
+        val generatedResource = context.resources.getIdentifier(
+            "default_web_client_id",
+            "string",
+            context.packageName
+        )
+        return if (generatedResource != 0) {
+            context.getString(generatedResource)
+        } else {
+            context.getString(R.string.google_web_client_id)
         }
     }
 
