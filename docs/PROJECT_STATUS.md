@@ -11,7 +11,7 @@
 - 최소 지원 버전은 Android 8(API 26)로 낮춘다.
 - PC 장애에 대비해 검증된 기능 단위마다 작게 커밋하고 즉시 GitHub 원격 브랜치에 푸시한다.
 - 실제 기기용 debug 앱은 `me.sensta.debug`로 설치해 Play 앱 `me.sensta`와 데이터·서명을 분리한다.
-- 2.0 기능·실서버 QA를 먼저 완결한 뒤 500px·Unsplash를 참고한 사진 중심 정보 구조와 시각 밀도로 디자인을 별도 개편한다.
+- 500px·Unsplash를 참고해 사진 중심 정보 구조와 시각 밀도로 홈 피드와 사진가 프로필을 개편한다.
 - `feat/sensta-2.0`을 `main`에 병합할 때 NUBO·GOAPI README 수준으로 Sensta README의 구조·설치·설정·테스트·배포 문서를 전면 개편한다.
 - Kotlin annotation processing은 KAPT 대신 KSP를 사용한다.
 - 최신 Nubo와 GOAPI의 API contract v1을 Android 네트워크 계층의 기준으로 삼는다.
@@ -52,6 +52,13 @@
 - 손상된 Gradle 다운로드를 확인하고 Wrapper SHA-256·재시도를 추가했으며 AGP 9 호환 Kotlin·Hilt로 갱신했다.
 - Galaxy 실제 기기 테스트와 NUBO·GOAPI 통합 배포 절차를 문서화했다.
 - GOAPI `42481c5`를 고정한 NUBO v1.2.16을 게시하고 GitHub Actions run `32437963579`의 전체 게이트·Ubuntu 22.04/24.04 fresh-install·Release 게시와 공개 asset SHA-256을 확인했다.
+- NUBO v1.2.16과 Firebase 서비스 계정을 `sensta.me` 운영 서버에 반영했다.
+- Firebase 프로젝트에 `me.sensta`와 `me.sensta.debug`를 연결하고 Galaxy S25 Edge에서 Google 로그인과 웹 로그인의 공존을 확인했다.
+- 홈을 preview 이미지 기반 전체 화면 세로 피드로 개편하고 상세 화면을 다녀와도 피드 위치를 유지하도록 했다.
+- 사진가 페이지를 최근 작품 헤더, 접히는 프로필과 사진·메시지 탭으로 개편했다.
+- 상세 이미지의 좌우 letterbox를 제거하고 태그를 한 줄 가로 스크롤로 정리했다.
+- 카메라 조리개와 빛의 흐름을 결합한 새 adaptive launcher 아이콘을 적용했다.
+- README를 2.0 기능, 아키텍처, 개발 환경, Firebase, 실기기 테스트와 출시 흐름 중심으로 전면 개편했다.
 
 ## 검증
 
@@ -60,13 +67,14 @@
 - `:data:testDebugUnitTest` 인증 계약 테스트 성공.
 - 라이브 `sensta.me/goapi/board/list`에서 사진 게시판 1페이지 32개 응답과 게시판 UID 2를 확인했다.
 - 라이브 게시글 7522의 이미지 2장·EXIF 응답과 게시글 7520의 댓글 응답을 확인했다.
+- Galaxy S25 Edge debug 앱과 `sensta.me` 웹에서 Google 로그인을 각각 확인했다.
+- 디자인·아이콘·README 반영 후 `./scripts/check.sh`의 단위 테스트, Lint, debug·release APK와 release App Bundle 빌드가 모두 성공했다.
 
 ## 다음 작업
 
-- 실서버 DB·업로드를 백업한 뒤 NUBO v1.2.16을 `nuboctl update`로 반영하고 `doctor`·readiness·version을 확인한다.
-- 운영 Firebase와 기존 Play 업로드 키를 연결한다.
-- Galaxy S25 Edge와 에뮬레이터에서 핵심 사용자 여정과 접근성을 통합 검증한다.
-- 실서버·기능 QA 후 사진을 주인공으로 두는 피드·탐색·상세·업로드 디자인을 전면 개편한다.
-- 스토어 아이콘·기능 그래픽·스크린샷·설명문을 준비한다.
+- Windows 빌드 환경에 기존 Play 업로드 키를 연결하고 서명된 release AAB의 인증서를 확인한다.
+- Galaxy S25 Edge와 에뮬레이터에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
+- Play Console의 기존 최신 `versionCode`와 업로드 인증서를 확인한다.
+- 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 준비한다.
 - 모든 기능이 확정된 뒤 기능 동일성을 유지하는 최종 구조 리팩터링을 수행한다.
-- `main` 병합 시 Sensta README를 전면 개편한다.
+- release 후보를 내부 테스트에 게시한 뒤 `feat/sensta-2.0`을 `main`에 병합한다.
