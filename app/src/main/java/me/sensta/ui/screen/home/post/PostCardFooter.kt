@@ -2,6 +2,7 @@ package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -29,16 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import me.domain.model.board.TsboardPost
-import me.sensta.ui.navigation.Screen
-import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 
 @Composable
-fun PostCardFooter(post: TsboardPost) {
-    val navController = LocalNavController.current
+fun PostCardFooter(post: TsboardPost, onViewClick: () -> Unit) {
     val commonViewModel = LocalCommonViewModel.current
     val homeViewModel = LocalHomeViewModel.current
 
@@ -55,15 +54,6 @@ fun PostCardFooter(post: TsboardPost) {
             likeCount++
         } else {
             likeCount--
-        }
-    }
-
-    // 게시글 보기 페이지로 이동
-    val moveToView: () -> Unit = {
-        commonViewModel.updatePostUid(post.uid)
-        navController.navigate(Screen.View.route) {
-            launchSingleTop = true
-            restoreState = true
         }
     }
 
@@ -131,25 +121,34 @@ fun PostCardFooter(post: TsboardPost) {
             }
         }
 
-        Text(
-            text = post.title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
+        Row(
             modifier = Modifier
-                .padding(horizontal = 6.dp, vertical = 2.dp)
-                .clickable(onClick = moveToView)
-        )
-        TextButton(
-            onClick = moveToView,
-            modifier = Modifier.padding(start = 0.dp)
+                .fillMaxWidth()
+                .padding(start = 6.dp, top = 2.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "작품 상세 보기", style = MaterialTheme.typography.labelLarge)
-            Spacer(modifier = Modifier.width(2.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
+            Text(
+                text = post.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = onViewClick)
             )
+            TextButton(
+                onClick = onViewClick,
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+            ) {
+                Text(text = "보기", style = MaterialTheme.typography.labelLarge)
+                Spacer(modifier = Modifier.width(1.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }

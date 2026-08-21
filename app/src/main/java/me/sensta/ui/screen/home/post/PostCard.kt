@@ -11,13 +11,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.domain.model.board.TsboardPost
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
+import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @Composable
 fun PostCard(post: TsboardPost) {
+    val navController = LocalNavController.current
+    val commonViewModel = LocalCommonViewModel.current
+    val moveToView: () -> Unit = {
+        commonViewModel.updatePostUid(post.uid)
+        navController.navigate(Screen.View.route) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         PostCardHeader(writer = post.writer)
-        FeedCover(path = post.cover, title = post.title)
-        PostCardFooter(post)
+        FeedCover(path = post.cover, title = post.title, onClick = moveToView)
+        PostCardFooter(post = post, onViewClick = moveToView)
         Spacer(modifier = Modifier.height(18.dp))
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 18.dp),
