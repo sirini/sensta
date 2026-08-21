@@ -36,6 +36,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.common.LocalNavController
@@ -106,6 +107,8 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val showFullScreen by commonViewModel.showFullScreen
     val showCommentDialog by commonViewModel.showCommentDialog
     val postUid by commonViewModel.postUid
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     CompositionLocalProvider(
         LocalNavController provides navController,
@@ -124,7 +127,9 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
         Box(modifier = Modifier.fillMaxSize()) {
 
             Scaffold(
-                topBar = { TopBar() },
+                topBar = {
+                    if (currentRoute != Screen.Home.route) TopBar()
+                },
                 bottomBar = { BottomNavigationBar() },
                 snackbarHost = {
                     SnackbarHost(
