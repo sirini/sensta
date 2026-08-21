@@ -1,6 +1,7 @@
 package me.sensta.viewmodel
 
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -60,6 +61,12 @@ class UserChatViewModel @Inject constructor(
     private val _userPosts =
         mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
     val userPosts: State<TsboardResponse<List<TsboardPost>>> get() = _userPosts
+    private val _userPostPage = mutableIntStateOf(1)
+    private val _isLoadingUserPosts = mutableStateOf(false)
+    private var userPostTargetUid = 0
+    private var userPostWriterName = ""
+    private var userPostRequestId = 0
+    private var hasMoreUserPosts = true
 
     private val _chatMessage = mutableStateOf("")
     val chatMessage: State<String> get() = _chatMessage
@@ -229,30 +236,71 @@ class UserChatViewModel @Inject constructor(
         _isBlockedByMe.value = false
         _chatHistory.value = emptyList()
         _userPosts.value = TsboardResponse.Loading
+        _isLoadingUserPosts.value = false
+        userPostTargetUid = 0
+        userPostWriterName = ""
+        userPostRequestId++
     }
 
     // 작성자 검색 결과를 UID로 다시 확인해 동명이인의 사진이 섞이지 않게 한다.
-    private fun loadUserPosts(targetUserUid: Int, writerName: String) {
+    private fun loadUserPosts(
+        targetUserUid: Int,
+        writerName: String,
+        resetPaging: Boolean = true
+    ) {
         if (targetUserUid < 1 || writerName.isBlank()) return
-        _userPosts.value = TsboardResponse.Loading
+        if (resetPaging) {
+            userPostRequestId++
+            userPostTargetUid = targetUserUid
+            userPostWriterName = writerName
+            _userPostPage.intValue = 1
+            _userPosts.value = TsboardResponse.Loading
+            hasMoreUserPosts = true
+        } else if (_isLoadingUserPosts.value || !hasMoreUserPosts) {
+            return
+        }
+        val requestId = userPostRequestId
+        val page = _userPostPage.intValue
+        _isLoadingUserPosts.value = true
 
         viewModelScope.launch {
             val token = getUserInfoUseCase().first().token
             getPostListUseCase(
-                page = 1,
+                page = page,
                 option = WRITER_SEARCH_OPTION,
                 keyword = writerName,
                 token = token
             ).collect { response ->
+                if (requestId != userPostRequestId) return@collect
                 _userPosts.value = when (response) {
-                    is TsboardResponse.Success -> TsboardResponse.Success(
-                        response.data.filter { it.writer.uid == targetUserUid }
-                    )
-                    is TsboardResponse.Error -> response
+                    is TsboardResponse.Success -> {
+                        val filtered = response.data.filter { it.writer.uid == targetUserUid }
+                        val current = (_userPosts.value as? TsboardResponse.Success)?.data.orEmpty()
+                        if (response.data.isNotEmpty()) {
+                            _userPostPage.intValue++
+                        } else {
+                            hasMoreUserPosts = false
+                        }
+                        TsboardResponse.Success(
+                            if (page == 1) filtered else current + filtered
+                        )
+                    }
+                    is TsboardResponse.Error -> {
+                        if (page == 1) response else _userPosts.value
+                    }
                     is TsboardResponse.Loading -> TsboardResponse.Loading
                 }
             }
+            if (requestId == userPostRequestId) _isLoadingUserPosts.value = false
         }
+    }
+
+    fun loadMoreUserPosts() {
+        loadUserPosts(
+            targetUserUid = userPostTargetUid,
+            writerName = userPostWriterName,
+            resetPaging = false
+        )
     }
 
     // 사용자나 사용자가 작성한 특정 사진을 운영진에게 신고한다.

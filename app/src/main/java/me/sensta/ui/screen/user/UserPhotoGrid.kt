@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,18 +29,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
 import me.domain.model.board.TsboardPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.LocalSenstaExtendedColors
 import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.viewmodel.local.LocalUserChatViewModel
 
+@OptIn(FlowPreview::class)
 @Composable
 fun UserPhotoGrid(posts: List<TsboardPost>) {
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
+    val userViewModel = LocalUserChatViewModel.current
     val onMedia = LocalSenstaExtendedColors.current.onMedia
+    val gridState = rememberLazyGridState()
+
+    LaunchedEffect(gridState) {
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+            .debounce(400)
+            .distinctUntilChanged()
+            .collect { index ->
+                if (index != null && posts.isNotEmpty() && index >= posts.lastIndex - 4) {
+                    userViewModel.loadMoreUserPosts()
+                }
+            }
+    }
 
     if (posts.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -51,6 +72,7 @@ fun UserPhotoGrid(posts: List<TsboardPost>) {
     }
 
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
