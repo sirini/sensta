@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import me.data.env.Env
@@ -65,7 +66,7 @@ fun VersionScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(text = "앱 버전")
-                    Text(text = context.getString(R.string.version))
+                    Text(text = stringResource(R.string.version))
                 }
 
                 HorizontalDivider(
