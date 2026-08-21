@@ -6,37 +6,19 @@ Sensta 2.0은 Android 앱과 NUBO Web, GOAPI가 같은 API v1 계약을 사용�
 
 ## 현재 릴리스 상태
 
-2026-08-21 기준 최신 NUBO 릴리스 `v1.2.15`는 GOAPI `fc430b8`을 고정합니다. Android 계약 작업은 그
-이후 GOAPI `42481c5`까지 이어졌으므로 `v1.2.15`만 설치한 서버에는 다음 기능이 모두 들어 있지 않습니다.
+2026-08-21에 [NUBO v1.2.16](https://github.com/sirini/nubo/releases/tag/v1.2.16)이 정식 게시됐습니다.
+NUBO `ade5ac7`과 GOAPI `42481c5`를 고정하며 다음 Sensta Android 계약을 모두 포함합니다.
 
 - `POST /auth/android/refresh` 리프레시 토큰 회전
 - Firebase FID 등록·해제와 실시간 알림
 - 채팅 입력 계약 보강
 - 사용자 신고·차단과 계정 완전 삭제
 
-따라서 다음 NUBO 패치 릴리스(예: `v1.2.16`)에서 GOAPI `42481c5` 이상을 고정해 통합 릴리스를 먼저
-게시해야 합니다. GOAPI 바이너리를 운영 서버에서 직접 빌드하거나 단독 교체하지 않습니다.
-
-## 통합 릴리스 게시
-
-릴리스 작업은 NUBO와 GOAPI의 깨끗한 `main`에서 진행합니다.
-
-1. GOAPI의 전체 테스트와 vet를 통과시키고 `main`을 푸시합니다.
-2. NUBO `deploy/release-sources.json`의 GOAPI commit을 검증한 최신 commit으로 고정합니다.
-3. NUBO의 `env.sample`, README, 배포 문서와 release source 버전을 같은 patch 버전으로 올립니다.
-4. NUBO test, lint, typecheck, build와 양쪽 API contract 일치를 검증해 커밋·푸시합니다.
-5. 같은 버전의 annotated tag를 만들고 푸시합니다.
-
-```bash
-git tag -a v1.2.16 -m "NUBO v1.2.16"
-git push origin main
-git push origin v1.2.16
-```
-
-태그 푸시는 `Publish Linux release` GitHub Actions를 실행합니다. `build-release`, Ubuntu 22.04/24.04
-`fresh-install`, `publish`가 모두 성공하고 GitHub Release에 통합 archive와 SHA-256이 게시된 뒤에만
-운영 서버 업데이트를 시작합니다. Release의 `manifest.json`에는 dirty가 아닌 NUBO와 GOAPI commit이
-기록되어야 합니다.
+릴리스 workflow run `32437963579`에서 NUBO·GOAPI 게이트, Ubuntu 22.04/24.04 fresh-install과
+게시를 모두 통과했고, 공개 archive를 다시 내려받아 SHA-256을 확인했습니다. manifest의
+NUBO·nuboctl `dirty=true`는 CI workspace 안의 별도 GOAPI checkout을 오인한 기존 표기 오류입니다.
+기록된 commit·checksum·fresh-install은 정상이며 NUBO `dc306ab`에서 다음 릴리스용 표기를
+바로잡았습니다. 운영 서버에서 GOAPI를 따로 빌드·교체하지 말고 이 통합 릴리스를 적용합니다.
 
 ## 운영 서버 업데이트
 
@@ -50,9 +32,9 @@ migration을 적용하며 readiness 실패 시 실행 파일과 프로세스는 
 ```bash
 cd /path/to/nubo
 git pull --ff-only
-sudo /opt/nubo/current/nuboctl status
-npm run server:update -- --dry-run
-npm run server:update
+nuboctl status
+nuboctl update --dry-run
+nuboctl update
 ```
 
 실행 중 외부 백업 완료 여부를 물으면 백업을 직접 확인한 뒤 빈 입력으로 진행합니다. `.env`, upload,

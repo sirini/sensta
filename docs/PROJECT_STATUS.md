@@ -11,6 +11,8 @@
 - 최소 지원 버전은 Android 8(API 26)로 낮춘다.
 - PC 장애에 대비해 검증된 기능 단위마다 작게 커밋하고 즉시 GitHub 원격 브랜치에 푸시한다.
 - 실제 기기용 debug 앱은 `me.sensta.debug`로 설치해 Play 앱 `me.sensta`와 데이터·서명을 분리한다.
+- 2.0 기능·실서버 QA를 먼저 완결한 뒤 500px·Unsplash를 참고한 사진 중심 정보 구조와 시각 밀도로 디자인을 별도 개편한다.
+- `feat/sensta-2.0`을 `main`에 병합할 때 NUBO·GOAPI README 수준으로 Sensta README의 구조·설치·설정·테스트·배포 문서를 전면 개편한다.
 - Kotlin annotation processing은 KAPT 대신 KSP를 사용한다.
 - 최신 Nubo와 GOAPI의 API contract v1을 Android 네트워크 계층의 기준으로 삼는다.
 - 새로 작성하거나 의미를 바로잡는 코드 주석은 한국어로 작성한다.
@@ -49,6 +51,7 @@
 - Play 제출 체크리스트와 NUBO 커뮤니티 포크 안내를 문서화했다.
 - 손상된 Gradle 다운로드를 확인하고 Wrapper SHA-256·재시도를 추가했으며 AGP 9 호환 Kotlin·Hilt로 갱신했다.
 - Galaxy 실제 기기 테스트와 NUBO·GOAPI 통합 배포 절차를 문서화했다.
+- GOAPI `42481c5`를 고정한 NUBO v1.2.16을 게시하고 GitHub Actions run `32437963579`의 전체 게이트·Ubuntu 22.04/24.04 fresh-install·Release 게시와 공개 asset SHA-256을 확인했다.
 
 ## 검증
 
@@ -60,8 +63,10 @@
 
 ## 다음 작업
 
-- 현재 NUBO v1.2.15에 빠진 GOAPI Android 계약을 다음 통합 릴리스로 게시하고 운영 서버에 반영한다.
+- 실서버 DB·업로드를 백업한 뒤 NUBO v1.2.16을 `nuboctl update`로 반영하고 `doctor`·readiness·version을 확인한다.
 - 운영 Firebase와 기존 Play 업로드 키를 연결한다.
 - Galaxy S25 Edge와 에뮬레이터에서 핵심 사용자 여정과 접근성을 통합 검증한다.
+- 실서버·기능 QA 후 사진을 주인공으로 두는 피드·탐색·상세·업로드 디자인을 전면 개편한다.
 - 스토어 아이콘·기능 그래픽·스크린샷·설명문을 준비한다.
 - 모든 기능이 확정된 뒤 기능 동일성을 유지하는 최종 구조 리팩터링을 수행한다.
+- `main` 병합 시 Sensta README를 전면 개편한다.
