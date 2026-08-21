@@ -366,7 +366,8 @@ class AuthViewModel @Inject constructor(
         val credentialManager = CredentialManager.create(context)
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(resolveGoogleWebClientId(context))
+            // FCM용 Firebase 프로젝트와 별개로 GOAPI가 검증하는 기존 Web OAuth client를 사용한다.
+            .setServerClientId(context.getString(R.string.google_web_client_id))
             .setAutoSelectEnabled(false)
             .build()
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
@@ -438,20 +439,6 @@ class AuthViewModel @Inject constructor(
             } finally {
                 _isLoading.value = false
             }
-        }
-    }
-
-    // Google Services 플러그인이 변형별로 만든 Web client ID를 우선하고 설정 없는 CI에서만 기본값을 사용한다.
-    private fun resolveGoogleWebClientId(context: Context): String {
-        val generatedResource = context.resources.getIdentifier(
-            "default_web_client_id",
-            "string",
-            context.packageName
-        )
-        return if (generatedResource != 0) {
-            context.getString(generatedResource)
-        } else {
-            context.getString(R.string.google_web_client_id)
         }
     }
 
