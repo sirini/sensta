@@ -1,6 +1,11 @@
 package me.sensta.ui.screen
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,9 +27,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import me.domain.repository.TsboardResponse
@@ -36,6 +50,7 @@ import me.sensta.ui.screen.user.LatestMessageDivider
 import me.sensta.ui.screen.user.OtherUserInfo
 import me.sensta.ui.screen.user.UserPhotoGrid
 import me.sensta.util.convertHtmlToText
+import me.sensta.util.toPreviewImagePath
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.ChatUiEvent
@@ -51,7 +66,38 @@ fun UserChatScreen(initialUserUid: Int = 0) {
     val selectedTab = rememberSaveable {
         mutableIntStateOf(if (initialUserUid > 0) MESSAGE_TAB else PHOTO_TAB)
     }
-    val latestPhoto = (userPosts as? TsboardResponse.Success)?.data?.firstOrNull()?.cover
+    var showProfileHeader by rememberSaveable { mutableStateOf(true) }
+    val scrollAccumulator = remember { mutableFloatStateOf(0f) }
+    val latestPhoto = (userPosts as? TsboardResponse.Success)
+        ?.data
+        ?.firstOrNull()
+        ?.cover
+        ?.toPreviewImagePath()
+    val profileScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (source != NestedScrollSource.UserInput || available.y == 0f) return Offset.Zero
+
+                val changedDirection =
+                    scrollAccumulator.floatValue != 0f &&
+                        (scrollAccumulator.floatValue > 0f) != (available.y > 0f)
+                if (changedDirection) scrollAccumulator.floatValue = 0f
+                scrollAccumulator.floatValue += available.y
+
+                when {
+                    scrollAccumulator.floatValue <= -PROFILE_HEADER_SCROLL_THRESHOLD -> {
+                        showProfileHeader = false
+                        scrollAccumulator.floatValue = 0f
+                    }
+                    scrollAccumulator.floatValue >= PROFILE_HEADER_SCROLL_THRESHOLD -> {
+                        showProfileHeader = true
+                        scrollAccumulator.floatValue = 0f
+                    }
+                }
+                return Offset.Zero
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         scrollBehavior.state.heightOffset = 0f
@@ -81,8 +127,18 @@ fun UserChatScreen(initialUserUid: Int = 0) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        OtherUserInfo(latestPhoto = latestPhoto)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(profileScrollConnection)
+    ) {
+        AnimatedVisibility(
+            visible = showProfileHeader,
+            enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+        ) {
+            OtherUserInfo(latestPhoto = latestPhoto)
+        }
 
         PrimaryTabRow(selectedTabIndex = selectedTab.intValue) {
             Tab(
@@ -186,3 +242,4 @@ private fun UserMessageTab() {
 
 private const val PHOTO_TAB = 0
 private const val MESSAGE_TAB = 1
+private const val PROFILE_HEADER_SCROLL_THRESHOLD = 42f
