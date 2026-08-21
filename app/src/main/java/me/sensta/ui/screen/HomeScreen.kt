@@ -43,7 +43,7 @@ fun HomeScreen() {
     }
 
     LaunchedEffect(user) {
-        homeViewModel.refresh(resetPaging = true)
+        homeViewModel.refreshForUser(user.uid)
 
         if (user.token.isNotEmpty()) {
             notiViewModel.loadNotifications()

@@ -39,8 +39,13 @@ class HomeViewModel @Inject constructor(
     private val _bunch = mutableIntStateOf(0)
     val bunch: State<Int> get() = _bunch
 
+    private val _feedIndex = mutableIntStateOf(0)
+    val feedIndex: State<Int> get() = _feedIndex
+
     private val _uiEvent = MutableSharedFlow<HomeUiEvent>()
     val uiEvent get() = _uiEvent.asSharedFlow()
+    private var loadedForUserUid: Int? = null
+    private var pendingUserUid: Int? = null
 
     init {
         loadPhotos()
@@ -82,6 +87,10 @@ class HomeViewModel @Inject constructor(
                 }
             }
             _isLoadingMore.value = false
+            pendingUserUid?.let { userUid ->
+                pendingUserUid = null
+                refreshForUser(userUid)
+            }
         }
     }
 
@@ -89,6 +98,20 @@ class HomeViewModel @Inject constructor(
     fun refresh(resetPaging: Boolean = false) {
         if (resetPaging) _page.intValue = 1
         loadPhotos()
+    }
+
+    fun refreshForUser(userUid: Int) {
+        if (loadedForUserUid == userUid) return
+        if (_isLoadingMore.value) {
+            pendingUserUid = userUid
+            return
+        }
+        loadedForUserUid = userUid
+        refresh(resetPaging = true)
+    }
+
+    fun updateFeedIndex(index: Int) {
+        _feedIndex.intValue = index.coerceAtLeast(0)
     }
 
     // 게시글에 좋아요 누르기
