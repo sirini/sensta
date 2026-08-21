@@ -2,7 +2,7 @@
 
 ## 현재 목표
 
-- 실제 기기 통합 테스트와 스토어 자산을 준비하고 Sensta 2.0을 Google Play에 재출시한다.
+- Google Play 내부 테스트 심사를 통과한 Sensta 2.0을 실제 기기에서 검증하고 프로덕션에 재출시한다.
 
 ## 결정
 
@@ -16,7 +16,7 @@
 - Kotlin annotation processing은 KAPT 대신 KSP를 사용한다.
 - 최신 Nubo와 GOAPI의 API contract v1을 Android 네트워크 계층의 기준으로 삼는다.
 - 새로 작성하거나 의미를 바로잡는 코드 주석은 한국어로 작성한다.
-- 모든 기능 변경과 출시 검증 후 기능 동일성을 유지하는 별도 최종 리팩터링을 수행한다.
+- 출시 후보에 영향을 줄 수 있는 구조 리팩터링은 2.0 공개 후 별도 변경으로 수행한다.
 
 ## 완료
 
@@ -59,6 +59,10 @@
 - 상세 이미지의 좌우 letterbox를 제거하고 태그를 한 줄 가로 스크롤로 정리했다.
 - 카메라 조리개와 빛의 흐름을 결합한 새 adaptive launcher 아이콘을 적용했다.
 - README를 2.0 기능, 아키텍처, 개발 환경, Firebase, 실기기 테스트와 출시 흐름 중심으로 전면 개편했다.
+- 기존 PKCS12 업로드 키와 별칭 `sensta`를 복구하고 Windows 사용자 Gradle 설정으로 외부 서명을 연결했다.
+- `versionCode 20`의 서명된 release AAB를 생성하고 RSA 2048·SHA-256 서명과 2052-09-22까지의 인증서 유효기간을 확인했다.
+- Play Console의 기존 최신 `versionCode 3`보다 큰 `versionCode 20` App Bundle을 등록했다.
+- Play 개인정보처리방침 URL을 잘못된 `/policy`에서 공개 경로 `https://sensta.me/privacy`로 바로잡고 내부 테스트 변경사항을 심사에 제출했다.
 
 ## 검증
 
@@ -69,12 +73,13 @@
 - 라이브 게시글 7522의 이미지 2장·EXIF 응답과 게시글 7520의 댓글 응답을 확인했다.
 - Galaxy S25 Edge debug 앱과 `sensta.me` 웹에서 Google 로그인을 각각 확인했다.
 - 디자인·아이콘·README 반영 후 `./scripts/check.sh`의 단위 테스트, Lint, debug·release APK와 release App Bundle 빌드가 모두 성공했다.
+- Windows release AAB에서 `jarsigner -verify`의 `jar verified.` 결과를 확인했다.
 
 ## 다음 작업
 
-- Windows 빌드 환경에 기존 Play 업로드 키를 연결하고 서명된 release AAB의 인증서를 확인한다.
-- Galaxy S25 Edge와 에뮬레이터에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
-- Play Console의 기존 최신 `versionCode`와 업로드 인증서를 확인한다.
+- Play 내부 테스트 심사가 끝나면 Galaxy S25 Edge에 Play 배포판을 설치한다.
+- Play 배포판에서 Google 로그인·업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
+- Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 준비한다.
-- 모든 기능이 확정된 뒤 기능 동일성을 유지하는 최종 구조 리팩터링을 수행한다.
-- release 후보를 내부 테스트에 게시한 뒤 `feat/sensta-2.0`을 `main`에 병합한다.
+- 내부 테스트가 끝나면 같은 App Bundle을 프로덕션 트랙으로 승격하고 단계적으로 배포한다.
+- 2.0 공개 후 기능 동일성을 유지하는 구조 리팩터링을 별도 브랜치에서 수행한다.

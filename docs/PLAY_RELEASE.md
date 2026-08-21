@@ -12,6 +12,10 @@
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
 
+2026-08-21에 기존 Play 업로드 키로 서명한 `versionCode 20` App Bundle을 Play Console이 수락했으며,
+개인정보처리방침 URL을 `https://sensta.me/privacy`로 바로잡아 내부 테스트 심사에 제출했다. 기존 공개
+버전은 `1.0.2`(`versionCode 3`)이다.
+
 2026년 8월 31일부터 일반 모바일 앱의 신규 제출과 업데이트는 API 36 이상이 필요하므로 현재 설정은
 [Google Play 대상 API 정책](https://support.google.com/googleplay/android-developer/answer/11926878)을
 충족한다.
@@ -37,9 +41,15 @@ SENSTA_KEY_PASSWORD=키-비밀번호
 ./scripts/check.sh
 source ./scripts/android-env.sh
 $ANDROID_HOME/build-tools/37.0.0/apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
+$JAVA_HOME/bin/jarsigner -verify app/build/outputs/bundle/release/app-release.aab
 ```
 
-Play Console에 등록된 최신 `versionCode`가 20 이상이면 코드 값을 그보다 크게 올린 뒤 다시 빌드한다.
+Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용할 수 있다. AAB 검증 결과에
+`jar verified.`가 있어야 하며, 자체 서명된 업로드 인증서의 PKIX chain·timestamp 경고는 Play가 최종
+배포 APK를 앱 서명 키로 다시 서명하는 과정과 구분한다.
+
+Play Console에 등록된 기존 최신 `versionCode`는 3으로 확인했다. 이후 빌드에서는 20보다 큰 코드 값을
+사용한다.
 
 ## 제출 전에 외부에서 준비할 항목
 

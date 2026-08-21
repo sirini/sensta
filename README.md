@@ -134,6 +134,8 @@ SENSTA_KEY_PASSWORD=key-password
 source ./scripts/android-env.sh
 $ANDROID_HOME/build-tools/37.0.0/apksigner verify --verbose \
   app/build/outputs/apk/release/app-release.apk
+$JAVA_HOME/bin/jarsigner -verify \
+  app/build/outputs/bundle/release/app-release.aab
 ```
 
 최종 AAB는 `app/build/outputs/bundle/release/app-release.aab`에 생성됩니다. 기존 Play 앱의 최신
