@@ -2,20 +2,12 @@ package me.sensta.viewmodel
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,11 +16,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.data.util.Upload
-import me.domain.model.auth.TsboardSigninResult
-import me.domain.model.auth.TsboardUpdateUserInfoParam
-import me.domain.model.auth.TsboardVerifyCodeParam
+import me.domain.model.auth.NuboSigninResult
+import me.domain.model.auth.NuboUpdateUserInfoParam
+import me.domain.model.auth.NuboVerifyCodeParam
 import me.domain.model.auth.emptyUser
-import me.domain.model.common.TsboardResponseNothing
+import me.domain.model.common.NuboResponseNothing
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.CheckEmailUseCase
 import me.domain.usecase.auth.CheckNameUseCase
@@ -42,7 +35,9 @@ import me.domain.usecase.auth.SignInWithGoogleUseCase
 import me.domain.usecase.auth.SignUpUseCase
 import me.domain.usecase.auth.UpdateAccessTokenUseCase
 import me.domain.usecase.auth.UpdateUserInfoUseCase
-import me.sensta.R
+import me.sensta.auth.GoogleCredentialClient
+import me.sensta.auth.GoogleCredentialResult
+import me.sensta.diagnostics.AppDiagnostics
 import me.sensta.push.PushTokenManager
 import me.sensta.policy.CommunityPolicyManager
 import me.sensta.util.CustomTime
@@ -69,12 +64,9 @@ class AuthViewModel @Inject constructor(
     private val updateUserInfoUseCase: UpdateUserInfoUseCase,
     private val verifyCodeUseCase: CheckVerificationCodeUseCase,
     private val pushTokenManager: PushTokenManager,
-    private val communityPolicyManager: CommunityPolicyManager
+    private val communityPolicyManager: CommunityPolicyManager,
+    private val googleCredentialClient: GoogleCredentialClient
 ) : ViewModel() {
-    private companion object {
-        const val TAG = "AuthViewModel"
-    }
-
     private val _id = mutableStateOf("")
     val id: State<String> get() = _id
 
@@ -88,7 +80,7 @@ class AuthViewModel @Inject constructor(
     val name: State<String> get() = _name
 
     private val _user = mutableStateOf(emptyUser)
-    val user: State<TsboardSigninResult> get() = _user
+    val user: State<NuboSigninResult> get() = _user
 
     private val _loginState = mutableStateOf<LoginState>(LoginState.InputEmail)
     val loginState: State<LoginState> get() = _loginState
@@ -136,7 +128,7 @@ class AuthViewModel @Inject constructor(
     }
 
     // 회원가입 시 아이디 확인
-    private fun checkIDForSignup(checkEmailData: TsboardResponseNothing) {
+    private fun checkIDForSignup(checkEmailData: NuboResponseNothing) {
         viewModelScope.launch {
             when {
                 !checkEmailData.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
@@ -147,7 +139,7 @@ class AuthViewModel @Inject constructor(
     }
 
     // 로그인 시 아이디 확인
-    private fun checkIDForLogin(checkEmailData: TsboardResponseNothing) {
+    private fun checkIDForLogin(checkEmailData: NuboResponseNothing) {
         viewModelScope.launch {
             when {
                 !checkEmailData.success -> _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
@@ -238,7 +230,7 @@ class AuthViewModel @Inject constructor(
 
             _isLoading.value = true
             verifyCodeUseCase(
-                TsboardVerifyCodeParam(
+                NuboVerifyCodeParam(
                     target = _targetUserUid.intValue,
                     code = _otp.value,
                     email = _id.value,
@@ -310,7 +302,7 @@ class AuthViewModel @Inject constructor(
                         _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(result.error))
                     }
                 }
-                if (response is me.domain.repository.TsboardResponse.Error) {
+                if (response is me.domain.repository.NuboResponse.Error) {
                     _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(response.message))
                 }
             }
@@ -362,84 +354,42 @@ class AuthViewModel @Inject constructor(
     // 구글 계정으로 로그인하기
     fun signInWithGoogle(context: Context) {
         _isLoading.value = true
-
-        val credentialManager = CredentialManager.create(context)
-        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            // FCM용 Firebase 프로젝트와 별개로 GOAPI가 검증하는 기존 Web OAuth client를 사용한다.
-            .setServerClientId(context.getString(R.string.google_web_client_id))
-            .setAutoSelectEnabled(false)
-            .build()
-        val request: GetCredentialRequest = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
         viewModelScope.launch {
             try {
-                val result = credentialManager.getCredential(
-                    request = request,
-                    context = context
-                )
-                when (val credential = result.credential) {
-                    is CustomCredential -> {
-                        if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                            val googleIdTokenCredential =
-                                GoogleIdTokenCredential.createFrom(credential.data)
-                            val idToken = googleIdTokenCredential.idToken
-
-                            signInWithGoogleUseCase(idToken).collect {
-                                it.handle { resp ->
-                                    if (null == resp.result) {
-                                        _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
-                                    } else {
-                                        _user.value = resp.result!!
-                                        pushTokenManager.synchronize()
-                                        _loginState.value = LoginState.LoginCompleted
-                                    }
-                                }
-                            }
-                        } else {
-                            _uiLoginEvent.emit(
-                                LoginUiEvent.FailedToLoginByGoogle(
-                                    "Google 로그인 응답 형식을 확인할 수 없습니다."
-                                )
-                            )
-                        }
-                    }
-
-                    else -> {
-                        _uiLoginEvent.emit(
-                            LoginUiEvent.FailedToLoginByGoogle(
-                                "Google 계정 인증 정보를 받지 못했습니다."
-                            )
-                        )
-                    }
+                when (val credential = googleCredentialClient.requestIdToken(context)) {
+                    is GoogleCredentialResult.Success -> authenticateWithGoogle(credential.idToken)
+                    is GoogleCredentialResult.Failure -> _uiLoginEvent.emit(
+                        LoginUiEvent.FailedToLoginByGoogle(credential.message)
+                    )
                 }
-            } catch (e: NoCredentialException) {
-                Log.w(TAG, "Google 계정 credential을 찾지 못했습니다.", e)
-                _uiLoginEvent.emit(
-                    LoginUiEvent.FailedToLoginByGoogle(
-                        "사용할 수 있는 Google 계정을 찾지 못했습니다. 기기 계정과 OAuth 설정을 확인해주세요."
-                    )
-                )
-            } catch (e: GetCredentialException) {
-                Log.w(TAG, "Google Credential Manager 인증에 실패했습니다.", e)
-                _uiLoginEvent.emit(
-                    LoginUiEvent.FailedToLoginByGoogle(
-                        "Google 계정 인증을 완료하지 못했습니다. 잠시 후 다시 시도해주세요."
-                    )
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "Google 로그인 응답 처리에 실패했습니다.", e)
-                _uiLoginEvent.emit(
-                    LoginUiEvent.FailedToLoginByGoogle(
-                        "Google 로그인 응답을 처리하지 못했습니다."
-                    )
-                )
             } finally {
                 _isLoading.value = false
             }
         }
+    }
+
+    private suspend fun authenticateWithGoogle(idToken: String) {
+        signInWithGoogleUseCase(idToken).collect { response ->
+            when (response) {
+                NuboResponse.Loading -> Unit
+                is NuboResponse.Error -> {
+                    AppDiagnostics.report("NUBO Google 로그인", response)
+                    _uiLoginEvent.emit(LoginUiEvent.FailedToLoginByGoogle(response.message))
+                }
+                is NuboResponse.Success -> completeGoogleLogin(response.data)
+            }
+        }
+    }
+
+    private suspend fun completeGoogleLogin(response: me.domain.model.auth.NuboSignin) {
+        val signedInUser = response.result
+        if (signedInUser == null) {
+            _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(response.error))
+            return
+        }
+        _user.value = signedInUser
+        pushTokenManager.synchronize()
+        _loginState.value = LoginState.LoginCompleted
     }
 
     // 회원정보 등록 및 필요시 이메일로 전달된 인증 코드 받기
@@ -479,7 +429,7 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = true
 
             updateAccessToken()
-            val param = TsboardUpdateUserInfoParam(
+            val param = NuboUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = name,
                 signature = _user.value.signature,
@@ -507,7 +457,7 @@ class AuthViewModel @Inject constructor(
         _isLoading.value = true
 
         viewModelScope.launch {
-            val param = TsboardUpdateUserInfoParam(
+            val param = NuboUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
                 signature = signature,
@@ -571,7 +521,7 @@ class AuthViewModel @Inject constructor(
                 _isLoading.value = false
                 return@launch
             }
-            val param = TsboardUpdateUserInfoParam(
+            val param = NuboUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = _user.value.name,
                 signature = _user.value.signature,

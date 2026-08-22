@@ -27,12 +27,13 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
-import me.domain.model.photo.TsboardImage
+import me.domain.model.photo.NuboImage
+import me.sensta.diagnostics.AppDiagnostics
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.ui.theme.LocalSenstaExtendedColors
 
 @Composable
-fun PostCarousel(images: List<TsboardImage>) {
+fun PostCarousel(images: List<NuboImage>) {
     val pagerState = rememberPagerState(0) { images.size }
     val commonViewModel = LocalCommonViewModel.current
     val extendedColors = LocalSenstaExtendedColors.current
@@ -56,9 +57,13 @@ fun PostCarousel(images: List<TsboardImage>) {
             .background(extendedColors.media)
     ) {
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
+            val imagePath = images[page].thumbnail.large
             AsyncImage(
-                model = Env.DOMAIN + images[page].thumbnail.large,
+                model = Env.DOMAIN + imagePath,
                 contentDescription = "Image ${page + 1}",
+                onError = { state ->
+                    AppDiagnostics.reportImage(imagePath, state.result.throwable)
+                },
                 modifier = Modifier.fillMaxSize().pointerInput(images[page].thumbnail.large) {
                     detectTapGestures {
                         commonViewModel.openFullScreen(images[page].thumbnail.large)

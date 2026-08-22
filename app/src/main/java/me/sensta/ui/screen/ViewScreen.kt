@@ -10,7 +10,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
-import me.domain.repository.TsboardResponse
+import me.domain.repository.NuboResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
@@ -118,12 +118,12 @@ fun ViewScreen(initialPostUid: Int = 0) {
 
     // 게시글 가져오기 성공 시에만 내용 표시
     when (val postViewResponse = post) {
-        is TsboardResponse.Loading -> LoadingScreen()
-        is TsboardResponse.Success -> {
+        is NuboResponse.Loading -> LoadingScreen()
+        is NuboResponse.Success -> {
             val postView = postViewResponse.data
             val commentResponse = comments
 
-            if (commentResponse is TsboardResponse.Success) {
+            if (commentResponse is NuboResponse.Success) {
                 val commentList = commentResponse.data
                 LazyColumn {
                     item { ViewPost(postView) }
@@ -132,6 +132,6 @@ fun ViewScreen(initialPostUid: Int = 0) {
             }
         }
 
-        is TsboardResponse.Error -> ErrorScreen()
+        is NuboResponse.Error -> ErrorScreen()
     }
 }

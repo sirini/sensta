@@ -3,7 +3,7 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.0.0` (`versionCode 20`)
+- 버전: `2.0.1` (`versionCode 21`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
@@ -15,6 +15,10 @@
 2026-08-21에 기존 Play 업로드 키로 서명한 `versionCode 20` App Bundle을 Play Console이 수락했으며,
 개인정보처리방침 URL을 `https://sensta.me/privacy`로 바로잡아 내부 테스트 심사에 제출했다. 기존 공개
 버전은 `1.0.2`(`versionCode 3`)이다.
+
+`versionCode 20`에서는 Retrofit 2.9.0의 불완전한 R8 full mode 규칙 때문에 suspend API 반환 타입이
+제거되어 앱 시작 시 사진 목록 요청 자체가 만들어지지 않았다. 2.0.1은 누락된 제네릭 보존 규칙을
+추가하고 로컬 축소 QA APK에서 목록 HTTP 200과 사진 표시를 확인한 뒤 올리는 교정 버전이다.
 
 2026년 8월 31일부터 일반 모바일 앱의 신규 제출과 업데이트는 API 36 이상이 필요하므로 현재 설정은
 [Google Play 대상 API 정책](https://support.google.com/googleplay/android-developer/answer/11926878)을
@@ -48,8 +52,7 @@ Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용�
 `jar verified.`가 있어야 하며, 자체 서명된 업로드 인증서의 PKIX chain·timestamp 경고는 Play가 최종
 배포 APK를 앱 서명 키로 다시 서명하는 과정과 구분한다.
 
-Play Console에 등록된 기존 최신 `versionCode`는 3으로 확인했다. 이후 빌드에서는 20보다 큰 코드 값을
-사용한다.
+Play Console 내부 테스트의 최신 빌드는 `versionCode 20`이다. 이후 빌드에서는 20보다 큰 코드 값을 사용한다.
 
 ## 제출 전에 외부에서 준비할 항목
 

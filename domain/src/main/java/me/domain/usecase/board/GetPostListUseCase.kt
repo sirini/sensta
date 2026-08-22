@@ -1,13 +1,13 @@
 package me.domain.usecase.board
 
 import kotlinx.coroutines.flow.flow
-import me.domain.model.board.TsboardGetPostsParam
-import me.domain.repository.TsboardBoardRepository
+import me.domain.model.board.NuboGetPostsParam
+import me.domain.repository.NuboBoardRepository
 import javax.inject.Inject
 
 // 게시글 목록 가져오기
 class GetPostListUseCase @Inject constructor(
-    private val repository: TsboardBoardRepository
+    private val repository: NuboBoardRepository
 ) {
     operator fun invoke(
         page: Int,
@@ -17,7 +17,7 @@ class GetPostListUseCase @Inject constructor(
     ) = flow {
         emit(
             repository.getPosts(
-                TsboardGetPostsParam(
+                NuboGetPostsParam(
                     page = page,
                     option = option,
                     keyword = keyword,

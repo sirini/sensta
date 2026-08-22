@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.env.Env
-import me.domain.model.board.TsboardBoardViewResponse
-import me.domain.repository.TsboardResponse
+import me.domain.model.board.NuboBoardViewResponse
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.RemovePostUseCase
@@ -26,8 +26,8 @@ class PostViewViewModel @Inject constructor(
     private val removePostUseCase: RemovePostUseCase
 ) : ViewModel() {
     private var _post =
-        mutableStateOf<TsboardResponse<TsboardBoardViewResponse>>(TsboardResponse.Loading)
-    val post: State<TsboardResponse<TsboardBoardViewResponse>> get() = _post
+        mutableStateOf<NuboResponse<NuboBoardViewResponse>>(NuboResponse.Loading)
+    val post: State<NuboResponse<NuboBoardViewResponse>> get() = _post
 
     private val _openedPosts = mutableListOf<Int>()
     private val _uiEvent = MutableSharedFlow<ViewUiEvent>()

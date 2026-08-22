@@ -1,7 +1,7 @@
 package me.data.remote.dto.common
 
 import kotlinx.serialization.Serializable
-import me.domain.model.common.TsboardResponseNothing
+import me.domain.model.common.NuboResponseNothing
 
 @Serializable
 data class BooleanResponseDto(
@@ -12,7 +12,7 @@ data class BooleanResponseDto(
 )
 
 // 기존 도메인 경계를 유지하면서 최신 API의 불리언 결과를 문자열로 전달한다.
-fun BooleanResponseDto.toEntity() = TsboardResponseNothing(
+fun BooleanResponseDto.toEntity() = NuboResponseNothing(
     success = success,
     error = error,
     code = code,

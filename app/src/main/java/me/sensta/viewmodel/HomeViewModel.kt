@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.env.Env
-import me.domain.model.board.TsboardPost
-import me.domain.repository.TsboardResponse
-import me.domain.repository.handle
+import me.domain.model.board.NuboPost
+import me.domain.repository.NuboResponse
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
 import me.domain.usecase.board.UpdateLikePostUseCase
+import me.sensta.diagnostics.AppDiagnostics
 import me.sensta.viewmodel.uievent.HomeUiEvent
 import javax.inject.Inject
 
@@ -27,8 +27,8 @@ class HomeViewModel @Inject constructor(
     private val updateLikePostUseCase: UpdateLikePostUseCase
 ) : ViewModel() {
     private val _posts =
-        mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
-    val posts: State<TsboardResponse<List<TsboardPost>>> get() = _posts
+        mutableStateOf<NuboResponse<List<NuboPost>>>(NuboResponse.Loading)
+    val posts: State<NuboResponse<List<NuboPost>>> get() = _posts
 
     private val _isLoadingMore = mutableStateOf(false)
     val isLoadingMore: State<Boolean> get() = _isLoadingMore
@@ -47,50 +47,56 @@ class HomeViewModel @Inject constructor(
     private var loadedForUserUid: Int? = null
     private var pendingUserUid: Int? = null
 
-    init {
-        loadPhotos()
-    }
-
-    // 갤러리 사진 목록 가져오기
+    // 첫 화면과 다음 페이지가 같은 흐름을 쓰되 상태 갱신은 작은 함수에 맡긴다.
     private fun loadPhotos() {
         if (_isLoadingMore.value) return
 
         viewModelScope.launch {
-            if (_page.intValue == 1) {
-                _posts.value = TsboardResponse.Loading
-                _page.intValue = 1
-            }
-            _isLoadingMore.value = true
-
-            val token = getUserInfoUseCase().first().token
-            getPostListUseCase(
-                page = _page.intValue,
-                option = 0,
-                keyword = "",
-                token = token
-            ).collect {
-                it.handle { resp ->
-                    if (_page.intValue == 1) {
-                        _posts.value = TsboardResponse.Success(resp)
-                        _bunch.intValue = resp.size
-                    } else {
-                        // 이전 게시글들을 이어서 붙여나가기
-                        val currentPosts =
-                            (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
-                        resp.ifEmpty {
-                            _posts.value = TsboardResponse.Success(currentPosts)
-                            return@handle
+            prepareLoadingState()
+            try {
+                val token = getUserInfoUseCase().first().token
+                getPostListUseCase(
+                    page = _page.intValue,
+                    option = 0,
+                    keyword = "",
+                    token = token
+                ).collect { response ->
+                    when (response) {
+                        NuboResponse.Loading -> Unit
+                        is NuboResponse.Success -> applyLoadedPosts(response.data)
+                        is NuboResponse.Error -> {
+                            AppDiagnostics.report("홈 사진 목록", response)
+                            _posts.value = response
                         }
-                        _posts.value = TsboardResponse.Success(currentPosts + resp)
                     }
-                    if (resp.isNotEmpty()) _page.intValue++
                 }
+            } finally {
+                finishLoading()
             }
-            _isLoadingMore.value = false
-            pendingUserUid?.let { userUid ->
-                pendingUserUid = null
-                refreshForUser(userUid)
-            }
+        }
+    }
+
+    private fun prepareLoadingState() {
+        if (_page.intValue == 1) _posts.value = NuboResponse.Loading
+        _isLoadingMore.value = true
+    }
+
+    private fun applyLoadedPosts(newPosts: List<NuboPost>) {
+        if (_page.intValue == 1) {
+            _posts.value = NuboResponse.Success(newPosts)
+            _bunch.intValue = newPosts.size
+        } else {
+            val currentPosts = (_posts.value as? NuboResponse.Success)?.data.orEmpty()
+            _posts.value = NuboResponse.Success(currentPosts + newPosts)
+        }
+        if (newPosts.isNotEmpty()) _page.intValue++
+    }
+
+    private fun finishLoading() {
+        _isLoadingMore.value = false
+        pendingUserUid?.let { userUid ->
+            pendingUserUid = null
+            refreshForUser(userUid)
         }
     }
 
@@ -125,14 +131,18 @@ class HomeViewModel @Inject constructor(
                 postUid = postUid,
                 liked = liked,
                 token = token
-            ).collect { result ->
-                result.handle { resp ->
-                    if (resp.success) {
+            ).collect { response ->
+                when (response) {
+                    NuboResponse.Loading -> Unit
+                    is NuboResponse.Error -> AppDiagnostics.report("게시글 좋아요", response)
+                    is NuboResponse.Success -> {
+                        if (response.data.success) {
                         if (liked) {
                             _uiEvent.emit(HomeUiEvent.LikePost)
                         } else {
                             _uiEvent.emit(HomeUiEvent.CancelLikePost)
                         }
+                    }
                     }
                 }
             }

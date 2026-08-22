@@ -21,13 +21,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import me.data.env.Env
-import me.domain.model.common.TsboardWriter
+import me.domain.model.common.NuboWriter
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @Composable
-fun PostCardHeader(writer: TsboardWriter) {
+fun PostCardHeader(writer: NuboWriter) {
     val navController = LocalNavController.current
     val userViewModel = LocalUserChatViewModel.current
     Row(

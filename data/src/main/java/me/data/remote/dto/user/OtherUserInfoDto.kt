@@ -1,8 +1,8 @@
 package me.data.remote.dto.user
 
 import kotlinx.serialization.Serializable
-import me.domain.model.user.TsboardOtherUserInfo
-import me.domain.model.user.TsboardOtherUserInfoResult
+import me.domain.model.user.NuboOtherUserInfo
+import me.domain.model.user.NuboOtherUserInfoResult
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -30,7 +30,7 @@ data class OtherUserInfoResultDto(
 )
 
 // 다른 사용자의 기본 정보 응답을 엔티티로 변환하는 매퍼
-fun OtherUserInfoDto.toEntity() = TsboardOtherUserInfo(
+fun OtherUserInfoDto.toEntity() = NuboOtherUserInfo(
     success = success,
     error = error,
     code = code,
@@ -38,7 +38,7 @@ fun OtherUserInfoDto.toEntity() = TsboardOtherUserInfo(
 )
 
 // 다른 사용자의 기본 정보를 엔티티로 변환하는 매퍼
-fun OtherUserInfoResultDto.toEntity() = TsboardOtherUserInfoResult(
+fun OtherUserInfoResultDto.toEntity() = NuboOtherUserInfoResult(
     uid = uid,
     name = name,
     profile = profile,

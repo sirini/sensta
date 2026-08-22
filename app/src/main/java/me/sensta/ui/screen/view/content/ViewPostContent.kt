@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
-import me.domain.model.board.TsboardBoardViewResult
+import me.domain.model.board.NuboBoardViewResult
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.util.CustomTime
@@ -35,7 +35,7 @@ import me.sensta.viewmodel.local.LocalExplorerViewModel
 import java.util.Locale
 
 @Composable
-fun ViewPostContent(result: TsboardBoardViewResult) {
+fun ViewPostContent(result: NuboBoardViewResult) {
     val navController = LocalNavController.current
     val explorerViewModel = LocalExplorerViewModel.current
     val tagScrollState = rememberScrollState()

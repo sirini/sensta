@@ -1,9 +1,9 @@
 package me.data.remote.dto.board
 
 import kotlinx.serialization.Serializable
-import me.domain.model.board.TsboardConfig
-import me.domain.model.board.TsboardLevel
-import me.domain.model.board.TsboardPoint
+import me.domain.model.board.NuboConfig
+import me.domain.model.board.NuboLevel
+import me.domain.model.board.NuboPoint
 
 // 게시판 설정 JSON 응답 정의
 @Serializable
@@ -50,7 +50,7 @@ data class PointDto(
 )
 
 // Config 응답을 엔티티로 변환하는 매퍼
-fun ConfigDto.toEntity() = TsboardConfig(
+fun ConfigDto.toEntity() = NuboConfig(
     uid = uid,
     id = id,
     type = type,
@@ -63,7 +63,7 @@ fun ConfigDto.toEntity() = TsboardConfig(
 )
 
 // Level 응답을 엔티티로 변환하는 매퍼
-fun LevelDto.toEntity() = TsboardLevel(
+fun LevelDto.toEntity() = NuboLevel(
     view = view,
     write = write,
     comment = comment,
@@ -72,7 +72,7 @@ fun LevelDto.toEntity() = TsboardLevel(
 )
 
 // Point 응답을 엔티티로 변환하는 매퍼
-fun PointDto.toEntity() = TsboardPoint(
+fun PointDto.toEntity() = NuboPoint(
     view = view,
     write = write,
     comment = comment,

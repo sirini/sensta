@@ -6,10 +6,10 @@ import me.data.remote.dto.common.TagDto
 import me.data.remote.dto.common.toEntity
 import me.data.remote.dto.photo.ImageDto
 import me.data.remote.dto.photo.toEntity
-import me.domain.model.board.TsboardBoardViewResponse
-import me.domain.model.board.TsboardBoardViewResult
-import me.domain.model.board.TsboardBoardViewWriterLatestComment
-import me.domain.model.board.TsboardBoardViewWriterLatestPost
+import me.domain.model.board.NuboBoardViewResponse
+import me.domain.model.board.NuboBoardViewResult
+import me.domain.model.board.NuboBoardViewWriterLatestComment
+import me.domain.model.board.NuboBoardViewWriterLatestPost
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -58,7 +58,7 @@ data class BoardViewWriterLatestCommentDto(
 )
 
 // 게시글 열람하기 결과를 엔티티로 변환하는 매퍼
-fun BoardViewResponseDto.toEntity() = TsboardBoardViewResponse(
+fun BoardViewResponseDto.toEntity() = NuboBoardViewResponse(
     success = success,
     error = error,
     code = code,
@@ -66,7 +66,7 @@ fun BoardViewResponseDto.toEntity() = TsboardBoardViewResponse(
 )
 
 // 게시글 보기 Result 응답을 엔티티로 변환하는 매퍼
-fun BoardViewResultDto.toEntity() = TsboardBoardViewResult(
+fun BoardViewResultDto.toEntity() = NuboBoardViewResult(
     config = config.toEntity(),
     post = post.toEntity(),
     images = images.map { it.toEntity() },
@@ -79,7 +79,7 @@ fun BoardViewResultDto.toEntity() = TsboardBoardViewResult(
 )
 
 // 게시글 작성자의 최근글 응답을 엔티티로 변환하는 매퍼
-fun BoardViewWriterLatestPostDto.toEntity() = TsboardBoardViewWriterLatestPost(
+fun BoardViewWriterLatestPostDto.toEntity() = NuboBoardViewWriterLatestPost(
     board = board.toEntity(),
     postUid = postUid,
     like = like,
@@ -89,7 +89,7 @@ fun BoardViewWriterLatestPostDto.toEntity() = TsboardBoardViewWriterLatestPost(
 )
 
 // 게시글 작성자의 최근 댓글 응답을 엔티티로 변환하는 매퍼
-fun BoardViewWriterLatestCommentDto.toEntity() = TsboardBoardViewWriterLatestComment(
+fun BoardViewWriterLatestCommentDto.toEntity() = NuboBoardViewWriterLatestComment(
     board = board.toEntity(),
     postUid = postUid,
     like = like,

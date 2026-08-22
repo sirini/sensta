@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import me.domain.model.home.TsboardNotification
-import me.domain.repository.TsboardResponse
+import me.domain.model.home.NuboNotification
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.home.CheckAllNotificationUseCase
@@ -35,10 +35,10 @@ class NotificationViewModel @Inject constructor(
     private val checkAllNotificationUseCase: CheckAllNotificationUseCase,
     private val pushEventBus: PushEventBus
 ) : ViewModel() {
-    private val _notifications = mutableStateOf<TsboardResponse<List<TsboardNotification>>>(
-        TsboardResponse.Loading
+    private val _notifications = mutableStateOf<NuboResponse<List<NuboNotification>>>(
+        NuboResponse.Loading
     )
-    val notifications: State<TsboardResponse<List<TsboardNotification>>> get() = _notifications
+    val notifications: State<NuboResponse<List<NuboNotification>>> get() = _notifications
 
     private val _hasUncheckedNotification = mutableStateOf(false)
     val hasUncheckedNotification: State<Boolean> get() = _hasUncheckedNotification
@@ -66,7 +66,7 @@ class NotificationViewModel @Inject constructor(
         viewModelScope.launch {
             val token = getUserInfoUseCase().first().token
             if (token.isEmpty()) {
-                _notifications.value = TsboardResponse.Success(emptyList())
+                _notifications.value = NuboResponse.Success(emptyList())
                 _hasUncheckedNotification.value = false
                 _isLoading.value = false
                 return@launch

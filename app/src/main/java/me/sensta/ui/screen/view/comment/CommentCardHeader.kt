@@ -24,10 +24,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
-import me.domain.model.board.TsboardComment
+import me.domain.model.board.NuboComment
 
 @Composable
-fun CommentCardHeader(comment: TsboardComment, likeState: Boolean, onLikeClick: () -> Unit) {
+fun CommentCardHeader(comment: NuboComment, likeState: Boolean, onLikeClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

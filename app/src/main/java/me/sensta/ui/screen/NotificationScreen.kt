@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import me.domain.repository.TsboardResponse
+import me.domain.repository.NuboResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
@@ -57,8 +57,8 @@ fun NotificationScreen() {
     }
 
     when (val notificationResponse = notis) {
-        is TsboardResponse.Loading -> LoadingScreen()
-        is TsboardResponse.Success -> NotificationList(notificationResponse.data)
-        is TsboardResponse.Error -> ErrorScreen()
+        is NuboResponse.Loading -> LoadingScreen()
+        is NuboResponse.Success -> NotificationList(notificationResponse.data)
+        is NuboResponse.Error -> ErrorScreen()
     }
 }

@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.domain.model.home.NotificationType
-import me.domain.model.home.TsboardNotification
+import me.domain.model.home.NuboNotification
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
@@ -41,7 +41,7 @@ import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationList(notifications: List<TsboardNotification>) {
+fun NotificationList(notifications: List<NuboNotification>) {
     val navController = LocalNavController.current
     val notiViewModel = LocalNotificationViewModel.current
     val userViewModel = LocalUserChatViewModel.current

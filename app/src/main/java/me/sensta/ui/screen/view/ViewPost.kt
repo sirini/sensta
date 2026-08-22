@@ -6,7 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import me.domain.model.board.TsboardBoardViewResponse
+import me.domain.model.board.NuboBoardViewResponse
 import me.sensta.ui.screen.home.post.PostCardHeader
 import me.sensta.ui.screen.home.post.PostCarousel
 import me.sensta.ui.screen.view.content.ViewPostCenterButtons
@@ -16,7 +16,7 @@ import me.sensta.ui.screen.view.content.ViewPostLikeButton
 
 @Composable
 fun ViewPost(
-    postView: TsboardBoardViewResponse
+    postView: NuboBoardViewResponse
 ) {
     Text(
         text = postView.result.post.title,

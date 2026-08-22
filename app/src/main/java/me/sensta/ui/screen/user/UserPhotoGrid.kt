@@ -33,7 +33,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import me.data.env.Env
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.NuboPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.LocalSenstaExtendedColors
@@ -42,7 +42,7 @@ import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @OptIn(FlowPreview::class)
 @Composable
-fun UserPhotoGrid(posts: List<TsboardPost>) {
+fun UserPhotoGrid(posts: List<NuboPost>) {
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
     val userViewModel = LocalUserChatViewModel.current

@@ -3,7 +3,7 @@ package me.data.remote.dto.board
 import kotlinx.serialization.Serializable
 import me.data.remote.dto.common.WriterDto
 import me.data.remote.dto.common.toEntity
-import me.domain.model.board.TsboardComment
+import me.domain.model.board.NuboComment
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -23,7 +23,7 @@ data class CommentDto(
 )
 
 // 댓글 JSON 응답을 엔티티로 변환하는 매퍼
-fun CommentDto.toEntity() = TsboardComment(
+fun CommentDto.toEntity() = NuboComment(
     uid = uid,
     replyUid = replyUid,
     postUid = postUid,

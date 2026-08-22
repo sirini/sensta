@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import me.domain.repository.TsboardResponse
+import me.domain.repository.NuboResponse
 import me.sensta.ui.screen.home.PhotoError
 import me.sensta.ui.screen.home.PhotoList
 import me.sensta.util.AppNotification
@@ -56,8 +56,11 @@ fun HomeScreen() {
 
     // 사진 목록 가져오기
     when (val photoResponse = posts) {
-        is TsboardResponse.Loading -> LoadingScreen()
-        is TsboardResponse.Success -> PhotoList(photoResponse.data)
-        is TsboardResponse.Error -> PhotoError(viewModel = homeViewModel)
+        is NuboResponse.Loading -> LoadingScreen()
+        is NuboResponse.Success -> PhotoList(photoResponse.data)
+        is NuboResponse.Error -> PhotoError(
+            message = photoResponse.message,
+            onRetry = { homeViewModel.refresh(resetPaging = true) }
+        )
     }
 }

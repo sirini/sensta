@@ -4,7 +4,7 @@
 가득 채우는 세로 피드, 작품 탐색, 사진가 프로필과 1:1 대화를 하나의 흐름으로 연결합니다. 로그인하지
 않아도 공개 작품을 감상할 수 있으며, 계정으로 사진을 공유하고 다른 사진가와 교류할 수 있습니다.
 
-현재 버전은 **2.0.0**(`versionCode 20`)이며 Android 8(API 26) 이상을 지원합니다. Android 17
+현재 버전은 **2.0.1**(`versionCode 21`)이며 Android 8(API 26) 이상을 지원합니다. Android 17
 SDK(API 37)로 컴파일하고 Google Play 대상 API는 Android 16(API 36)입니다.
 
 ## Sensta 2.0
@@ -104,9 +104,9 @@ adb devices
 adb -d install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Galaxy S25 Edge에서는 로그인·세션 복원, JPEG/HEIF 다중 업로드, EXIF, 댓글·좋아요, 1:1 대화,
+Android 실제 기기에서는 로그인·세션 복원, JPEG/HEIF 다중 업로드, EXIF, 댓글·좋아요, 1:1 대화,
 포그라운드·백그라운드 알림, 신고·차단과 계정 삭제까지 확인합니다. 테스트 데이터의 준비부터 로그 수집,
-debug 앱 제거 방법은 [Galaxy 실제 기기 테스트](docs/DEVICE_TESTING.md)에 정리되어 있습니다.
+debug 앱 제거 방법은 [Android 실제 기기 테스트](docs/DEVICE_TESTING.md)에 정리되어 있습니다.
 
 ## 배포와 Google Play 재출시
 
@@ -115,7 +115,7 @@ debug 앱 제거 방법은 [Galaxy 실제 기기 테스트](docs/DEVICE_TESTING.
 
 1. 운영 DB와 uploads를 외부 저장소에 백업합니다.
 2. [운영 서버 배포](docs/SERVER_DEPLOYMENT.md)에 따라 NUBO 통합 릴리스를 적용하고 readiness와 버전을 확인합니다.
-3. Galaxy 실제 기기에서 핵심 사용자 여정과 Firebase 알림을 회귀 테스트합니다.
+3. Android 실제 기기에서 핵심 사용자 여정과 Firebase 알림을 회귀 테스트합니다.
 4. 기존 Play 업로드 키로 서명한 release AAB를 만들고 서명을 검증합니다.
 5. Play 내부 테스트에서 Data safety, 계정 삭제, UGC 정책과 스토어 자산을 확인한 뒤 단계적으로 출시합니다.
 
@@ -144,8 +144,10 @@ $JAVA_HOME/bin/jarsigner -verify \
 
 ## 다른 NUBO 커뮤니티에 적용하기
 
-이 저장소는 NUBO 기반 사진 커뮤니티용 Android 앱의 참고 구현으로 사용할 수 있습니다. 포크한 뒤
-적어도 다음 항목을 서비스에 맞게 바꿉니다.
+이 저장소는 NUBO를 사용하는 웹사이트에서 Sensta와 같은 커뮤니티 전용 Android 앱을 개발하는 방법을
+보여주는 참고 구현입니다. Sensta 앱을 거의 그대로 복제해 이름과 서버 주소만 바꿔 출시하기보다는,
+각 커뮤니티의 목적과 이용자 경험에 맞는 화면 구성·기능·브랜드를 설계해 고유한 앱으로 발전시키는 것을
+권장합니다. 참고하여 개발할 때는 적어도 다음 항목을 서비스에 맞게 바꿉니다.
 
 | 항목 | 변경 위치 |
 | --- | --- |
@@ -165,7 +167,7 @@ $JAVA_HOME/bin/jarsigner -verify \
 | [프로젝트 상태](docs/PROJECT_STATUS.md) | 2.0 결정, 완료 작업과 남은 출시 작업 |
 | [2.0 로드맵](docs/SENSTA_2_ROADMAP.md) | 단계별 개발 목표와 범위 |
 | [Firebase 설정](docs/FIREBASE_SETUP.md) | Android 앱 등록, FCM과 GOAPI 서비스 계정 |
-| [실제 기기 테스트](docs/DEVICE_TESTING.md) | Galaxy 연결, 설치, 업로드와 회귀 시나리오 |
+| [실제 기기 테스트](docs/DEVICE_TESTING.md) | Android 기기 연결, 설치, 업로드와 회귀 시나리오 |
 | [운영 서버 배포](docs/SERVER_DEPLOYMENT.md) | NUBO·GOAPI 업데이트와 배포 후 점검 |
 | [Play 재출시](docs/PLAY_RELEASE.md) | 업로드 서명, 정책, 스토어 제출 순서 |
 

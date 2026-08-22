@@ -1,8 +1,8 @@
 package me.data.remote.dto.user
 
 import kotlinx.serialization.Serializable
-import me.domain.model.user.TsboardChatHistory
-import me.domain.model.user.TsboardChatHistoryResponse
+import me.domain.model.user.NuboChatHistory
+import me.domain.model.user.NuboChatHistoryResponse
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -25,7 +25,7 @@ data class ChatHistoryResultDto(
 )
 
 // 상대방과의 최근 대화 기록 응답을 엔티티로 변환하는 매퍼
-fun ChatHistoryListResponseDto.toEntity() = TsboardChatHistoryResponse(
+fun ChatHistoryListResponseDto.toEntity() = NuboChatHistoryResponse(
     success = success,
     error = error,
     code = code,
@@ -33,7 +33,7 @@ fun ChatHistoryListResponseDto.toEntity() = TsboardChatHistoryResponse(
 )
 
 // 상대방과의 대화 내용을 엔티티로 변환하는 매퍼
-fun ChatHistoryResultDto.toEntity() = TsboardChatHistory(
+fun ChatHistoryResultDto.toEntity() = NuboChatHistory(
     uid = uid,
     userUid = userUid,
     message = message,

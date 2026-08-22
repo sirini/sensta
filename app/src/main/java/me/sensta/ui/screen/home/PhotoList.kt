@@ -16,14 +16,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.NuboPost
 import me.sensta.ui.screen.home.post.PostCard
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoList(posts: List<TsboardPost>) {
+fun PhotoList(posts: List<NuboPost>) {
     val context = LocalContext.current
     val homeViewModel = LocalHomeViewModel.current
     val isLoading by homeViewModel.isLoadingMore

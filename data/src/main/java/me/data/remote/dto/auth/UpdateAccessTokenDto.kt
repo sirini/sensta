@@ -1,8 +1,8 @@
 package me.data.remote.dto.auth
 
 import kotlinx.serialization.Serializable
-import me.domain.model.auth.TsboardAuthTokenPair
-import me.domain.model.auth.TsboardUpdateAccessToken
+import me.domain.model.auth.NuboAuthTokenPair
+import me.domain.model.auth.NuboUpdateAccessToken
 
 // 리프레시 토큰으로 새 액세스 토큰 발급 JSON 응답
 @Serializable
@@ -23,9 +23,9 @@ data class AuthTokenPairDto(
 data class MobileRefreshRequestDto(val refresh: String)
 
 // 액세스 토큰 응답 엔티티로 변환하는 매퍼
-fun UpdateAccessTokenDto.toEntity() = TsboardUpdateAccessToken(
+fun UpdateAccessTokenDto.toEntity() = NuboUpdateAccessToken(
     success = success,
     error = error,
     code = code,
-    result = result?.let { TsboardAuthTokenPair(token = it.token, refresh = it.refresh) }
+    result = result?.let { NuboAuthTokenPair(token = it.token, refresh = it.refresh) }
 )

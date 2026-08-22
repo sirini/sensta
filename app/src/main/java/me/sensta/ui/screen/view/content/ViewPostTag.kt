@@ -18,10 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import me.domain.model.common.TsboardTag
+import me.domain.model.common.NuboTag
 
 @Composable
-fun ViewPostTag(tag: TsboardTag, onTagClick: () -> Unit = {}) {
+fun ViewPostTag(tag: NuboTag, onTagClick: () -> Unit = {}) {
     Button(
         onClick = onTagClick,
         contentPadding = PaddingValues(0.dp),

@@ -41,7 +41,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import me.domain.repository.TsboardResponse
+import me.domain.repository.NuboResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.user.ChatInputBar
 import me.sensta.ui.screen.user.ChatMyMessage
@@ -68,7 +68,7 @@ fun UserChatScreen(initialUserUid: Int = 0) {
     }
     var showProfileHeader by rememberSaveable { mutableStateOf(true) }
     val scrollAccumulator = remember { mutableFloatStateOf(0f) }
-    val latestPhoto = (userPosts as? TsboardResponse.Success)
+    val latestPhoto = (userPosts as? NuboResponse.Success)
         ?.data
         ?.firstOrNull()
         ?.cover
@@ -156,9 +156,9 @@ fun UserChatScreen(initialUserUid: Int = 0) {
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab.intValue) {
                 PHOTO_TAB -> when (val response = userPosts) {
-                    is TsboardResponse.Loading -> LoadingScreen()
-                    is TsboardResponse.Success -> UserPhotoGrid(response.data)
-                    is TsboardResponse.Error -> Box(
+                    is NuboResponse.Loading -> LoadingScreen()
+                    is NuboResponse.Success -> UserPhotoGrid(response.data)
+                    is NuboResponse.Error -> Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(24.dp)

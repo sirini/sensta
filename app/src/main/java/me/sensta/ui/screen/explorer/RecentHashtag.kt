@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import me.domain.model.common.TsboardTag
+import me.domain.model.common.NuboTag
 import me.sensta.ui.screen.view.content.ViewPostTag
 import me.sensta.viewmodel.local.LocalExplorerViewModel
 
@@ -48,7 +48,7 @@ fun RecentHashtag() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             recentHashtags.forEach { t ->
-                ViewPostTag(TsboardTag(uid = t.uid, name = t.name)) {
+                ViewPostTag(NuboTag(uid = t.uid, name = t.name)) {
                     explorerViewModel.search(
                         option = explorerViewModel.hashtagOption,
                         keyword = t.name

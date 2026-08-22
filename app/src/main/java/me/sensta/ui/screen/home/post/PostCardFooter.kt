@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.NuboPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.LocalSenstaExtendedColors
@@ -43,7 +43,7 @@ import me.sensta.viewmodel.local.LocalUserChatViewModel
 
 @Composable
 fun PostCardFooter(
-    post: TsboardPost,
+    post: NuboPost,
     onViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {

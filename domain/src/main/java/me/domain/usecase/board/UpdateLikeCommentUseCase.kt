@@ -1,13 +1,13 @@
 package me.domain.usecase.board
 
 import kotlinx.coroutines.flow.flow
-import me.domain.model.board.TsboardUpdateLikeParam
-import me.domain.repository.TsboardBoardRepository
+import me.domain.model.board.NuboUpdateLikeParam
+import me.domain.repository.NuboBoardRepository
 import javax.inject.Inject
 
 // 댓글에 좋아요 클릭하기
 class UpdateLikeCommentUseCase @Inject constructor(
-    private val repository: TsboardBoardRepository
+    private val repository: NuboBoardRepository
 ) {
     operator fun invoke(
         boardUid: Int,
@@ -17,7 +17,7 @@ class UpdateLikeCommentUseCase @Inject constructor(
     ) = flow {
         emit(
             repository.updateLikeComment(
-                TsboardUpdateLikeParam(
+                NuboUpdateLikeParam(
                     boardUid = boardUid,
                     targetUid = commentUid,
                     liked = if (liked) 1 else 0,

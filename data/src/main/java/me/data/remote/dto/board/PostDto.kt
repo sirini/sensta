@@ -3,8 +3,8 @@ package me.data.remote.dto.board
 import kotlinx.serialization.Serializable
 import me.data.remote.dto.common.WriterDto
 import me.data.remote.dto.common.toEntity
-import me.domain.model.board.TsboardCategory
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.NuboCategory
+import me.domain.model.board.NuboPost
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -34,7 +34,7 @@ data class CategoryDto(
 )
 
 // 게시글 JSON 응답을 엔티티로 변환하는 매퍼
-fun PostDto.toEntity() = TsboardPost(
+fun PostDto.toEntity() = NuboPost(
     uid = uid,
     title = title,
     content = content,
@@ -50,8 +50,7 @@ fun PostDto.toEntity() = TsboardPost(
 )
 
 // 게시글 카테고리 JSON 응답을 엔티티로 변환하는 매퍼
-fun CategoryDto.toEntity() = TsboardCategory(
+fun CategoryDto.toEntity() = NuboCategory(
     uid = uid,
     name = name
 )
-

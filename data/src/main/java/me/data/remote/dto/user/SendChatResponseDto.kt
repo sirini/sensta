@@ -1,7 +1,7 @@
 package me.data.remote.dto.user
 
 import kotlinx.serialization.Serializable
-import me.domain.model.user.TsboardSendChatResponse
+import me.domain.model.user.NuboSendChatResponse
 
 // 상대에게 메시지 보내고 받은 JSON 응답
 @Serializable
@@ -20,7 +20,7 @@ data class SendChatRequestDto(
 )
 
 // 응답을 엔티티로 변환하는 매퍼
-fun SendChatResponseDto.toEntity() = TsboardSendChatResponse(
+fun SendChatResponseDto.toEntity() = NuboSendChatResponse(
     success = success,
     error = error,
     code = code,

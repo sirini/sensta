@@ -10,11 +10,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import me.domain.model.photo.TsboardImage
+import me.domain.model.photo.NuboImage
 import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @Composable
-fun ViewPostExifDescription(images: List<TsboardImage>) {
+fun ViewPostExifDescription(images: List<NuboImage>) {
     val commonViewModel = LocalCommonViewModel.current
     val image = images[commonViewModel.pagerIndex.intValue]
 

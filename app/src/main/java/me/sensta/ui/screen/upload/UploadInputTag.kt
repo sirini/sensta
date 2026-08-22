@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import me.data.env.Env
-import me.domain.model.common.TsboardTag
+import me.domain.model.common.NuboTag
 import me.sensta.ui.screen.view.content.ViewPostTag
 import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.viewmodel.local.LocalUploadViewModel
@@ -90,7 +90,7 @@ fun UploadInputTag() {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             tags.forEach { tag ->
-                ViewPostTag(TsboardTag(uid = 0, name = tag)) {
+                ViewPostTag(NuboTag(uid = 0, name = tag)) {
                     uploadViewModel.removeTag(tag)
                 }
             }

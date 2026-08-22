@@ -1,8 +1,8 @@
 package me.data.remote.dto.board
 
 import kotlinx.serialization.Serializable
-import me.domain.model.board.TsboardBoardListResponse
-import me.domain.model.board.TsboardBoardListResult
+import me.domain.model.board.NuboBoardListResponse
+import me.domain.model.board.NuboBoardListResult
 
 // 게시글 목록 가져오기 JSON 응답 정의
 @Serializable
@@ -25,7 +25,7 @@ data class BoardListResultDto(
 )
 
 // 게시글 목록 가져오기 전체 응답을 엔티티로 변환하는 매퍼
-fun BoardListResponseDto.toEntity() = TsboardBoardListResponse(
+fun BoardListResponseDto.toEntity() = NuboBoardListResponse(
     success = success,
     error = error,
     code = code,
@@ -33,7 +33,7 @@ fun BoardListResponseDto.toEntity() = TsboardBoardListResponse(
 )
 
 // Result 응답을 엔티티로 변환하는 매퍼
-fun BoardListResultDto.toEntity() = TsboardBoardListResult(
+fun BoardListResultDto.toEntity() = NuboBoardListResult(
     totalPostCount = totalPostCount,
     config = config.toEntity(),
     notices = notices.map { it.toEntity() },

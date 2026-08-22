@@ -3,8 +3,8 @@ package me.data.remote.dto.home
 import kotlinx.serialization.Serializable
 import me.data.remote.dto.common.WriterSimpleDto
 import me.data.remote.dto.common.toEntity
-import me.domain.model.home.TsboardNotification
-import me.domain.model.home.TsboardNotificationResponse
+import me.domain.model.home.NuboNotification
+import me.domain.model.home.NuboNotificationResponse
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -31,7 +31,7 @@ data class NotificationResultDto(
 )
 
 // 알림 내역 가져오기에 대한 응답을 엔티티로 변환하는 매퍼
-fun NotificationListResponseDto.toEntity() = TsboardNotificationResponse(
+fun NotificationListResponseDto.toEntity() = NuboNotificationResponse(
     success = success,
     error = error,
     code = code,
@@ -39,7 +39,7 @@ fun NotificationListResponseDto.toEntity() = TsboardNotificationResponse(
 )
 
 // 알림 항목에 대해 엔티티로 변환하는 매퍼
-fun NotificationResultDto.toEntity() = TsboardNotification(
+fun NotificationResultDto.toEntity() = NuboNotification(
     uid = uid,
     fromUser = fromUser.toEntity(),
     type = type,

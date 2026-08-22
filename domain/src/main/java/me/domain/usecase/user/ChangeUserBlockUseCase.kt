@@ -1,12 +1,12 @@
 package me.domain.usecase.user
 
 import kotlinx.coroutines.flow.flow
-import me.domain.repository.TsboardUserChatRepository
+import me.domain.repository.NuboUserChatRepository
 import javax.inject.Inject
 
 // 상대방 차단 상태를 변경한다.
 class ChangeUserBlockUseCase @Inject constructor(
-    private val repository: TsboardUserChatRepository
+    private val repository: NuboUserChatRepository
 ) {
     operator fun invoke(targetUserUid: Int, blocked: Boolean, token: String) = flow {
         emit(

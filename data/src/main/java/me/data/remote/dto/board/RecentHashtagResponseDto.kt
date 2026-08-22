@@ -1,8 +1,8 @@
 package me.data.remote.dto.board
 
 import kotlinx.serialization.Serializable
-import me.domain.model.board.TsboardRecentHashtag
-import me.domain.model.board.TsboardRecentHashtagResponse
+import me.domain.model.board.NuboRecentHashtag
+import me.domain.model.board.NuboRecentHashtagResponse
 
 // 최근에 작성된 해시태그들 가져오기에서의 JSON 응답 정의
 @Serializable
@@ -22,7 +22,7 @@ data class RecentHashtagResult(
 )
 
 // 최근 해시태그의 결과를 엔티티로 매핑
-fun RecentHashtagResponseDto.toEntity() = TsboardRecentHashtagResponse(
+fun RecentHashtagResponseDto.toEntity() = NuboRecentHashtagResponse(
     success = success,
     error = error,
     code = code,
@@ -30,9 +30,8 @@ fun RecentHashtagResponseDto.toEntity() = TsboardRecentHashtagResponse(
 )
 
 // 최근 해시태그의 결과 엔티티
-fun RecentHashtagResult.toEntity() = TsboardRecentHashtag(
+fun RecentHashtagResult.toEntity() = NuboRecentHashtag(
     uid = uid,
     name = name,
     postUid = postUid
 )
-

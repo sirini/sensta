@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import me.domain.model.board.TsboardPost
-import me.domain.model.common.TsboardWriter
-import me.domain.model.user.TsboardChatHistory
-import me.domain.model.user.TsboardOtherUserInfoResult
-import me.domain.repository.TsboardResponse
+import me.domain.model.board.NuboPost
+import me.domain.model.common.NuboWriter
+import me.domain.model.user.NuboChatHistory
+import me.domain.model.user.NuboOtherUserInfoResult
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
@@ -44,7 +44,7 @@ class UserChatViewModel @Inject constructor(
 ) : ViewModel() {
     private val _otherUser =
         mutableStateOf(
-            TsboardOtherUserInfoResult(
+            NuboOtherUserInfoResult(
                 uid = 0,
                 name = "",
                 profile = "",
@@ -56,11 +56,11 @@ class UserChatViewModel @Inject constructor(
                 blocked = false
             )
         )
-    val otherUser: State<TsboardOtherUserInfoResult> get() = _otherUser
+    val otherUser: State<NuboOtherUserInfoResult> get() = _otherUser
 
     private val _userPosts =
-        mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
-    val userPosts: State<TsboardResponse<List<TsboardPost>>> get() = _userPosts
+        mutableStateOf<NuboResponse<List<NuboPost>>>(NuboResponse.Loading)
+    val userPosts: State<NuboResponse<List<NuboPost>>> get() = _userPosts
     private val _userPostPage = mutableIntStateOf(1)
     private val _isLoadingUserPosts = mutableStateOf(false)
     private var userPostTargetUid = 0
@@ -71,8 +71,8 @@ class UserChatViewModel @Inject constructor(
     private val _chatMessage = mutableStateOf("")
     val chatMessage: State<String> get() = _chatMessage
 
-    private val _chatHistory = MutableStateFlow<List<TsboardChatHistory>>(emptyList())
-    val chatHistory: MutableStateFlow<List<TsboardChatHistory>> get() = _chatHistory
+    private val _chatHistory = MutableStateFlow<List<NuboChatHistory>>(emptyList())
+    val chatHistory: MutableStateFlow<List<NuboChatHistory>> get() = _chatHistory
 
     private val _isLoadingInfo = mutableStateOf(false)
     val isLoadingInfo: State<Boolean> get() = _isLoadingInfo
@@ -133,7 +133,7 @@ class UserChatViewModel @Inject constructor(
     }
 
     // 다른 사용자의 기본 정보 열어보기
-    fun loadOtherUserInfo(user: TsboardWriter) {
+    fun loadOtherUserInfo(user: NuboWriter) {
         _isLoadingInfo.value = true
         resetUserSafetyStatus()
         _otherUser.value = _otherUser.value.copy(
@@ -197,7 +197,7 @@ class UserChatViewModel @Inject constructor(
                     if (resp.success && resp.result > 0) {
                         val updated = _chatHistory.value.toMutableList()
                         updated.add(
-                            TsboardChatHistory(
+                            NuboChatHistory(
                                 uid = resp.result,
                                 userUid = userInfo.uid,
                                 message = outgoingMessage,
@@ -235,7 +235,7 @@ class UserChatViewModel @Inject constructor(
         _isReported.value = false
         _isBlockedByMe.value = false
         _chatHistory.value = emptyList()
-        _userPosts.value = TsboardResponse.Loading
+        _userPosts.value = NuboResponse.Loading
         _isLoadingUserPosts.value = false
         userPostTargetUid = 0
         userPostWriterName = ""
@@ -254,7 +254,7 @@ class UserChatViewModel @Inject constructor(
             userPostTargetUid = targetUserUid
             userPostWriterName = writerName
             _userPostPage.intValue = 1
-            _userPosts.value = TsboardResponse.Loading
+            _userPosts.value = NuboResponse.Loading
             hasMoreUserPosts = true
         } else if (_isLoadingUserPosts.value || !hasMoreUserPosts) {
             return
@@ -273,22 +273,22 @@ class UserChatViewModel @Inject constructor(
             ).collect { response ->
                 if (requestId != userPostRequestId) return@collect
                 _userPosts.value = when (response) {
-                    is TsboardResponse.Success -> {
+                    is NuboResponse.Success -> {
                         val filtered = response.data.filter { it.writer.uid == targetUserUid }
-                        val current = (_userPosts.value as? TsboardResponse.Success)?.data.orEmpty()
+                        val current = (_userPosts.value as? NuboResponse.Success)?.data.orEmpty()
                         if (response.data.isNotEmpty()) {
                             _userPostPage.intValue++
                         } else {
                             hasMoreUserPosts = false
                         }
-                        TsboardResponse.Success(
+                        NuboResponse.Success(
                             if (page == 1) filtered else current + filtered
                         )
                     }
-                    is TsboardResponse.Error -> {
+                    is NuboResponse.Error -> {
                         if (page == 1) response else _userPosts.value
                     }
-                    is TsboardResponse.Loading -> TsboardResponse.Loading
+                    is NuboResponse.Loading -> NuboResponse.Loading
                 }
             }
             if (requestId == userPostRequestId) _isLoadingUserPosts.value = false
@@ -317,7 +317,7 @@ class UserChatViewModel @Inject constructor(
                         _uiEvent.emit(ChatUiEvent.FailedToReport(result.error))
                     }
                 }
-                if (response is me.domain.repository.TsboardResponse.Error) {
+                if (response is me.domain.repository.NuboResponse.Error) {
                     _uiEvent.emit(ChatUiEvent.FailedToReport(response.message))
                 }
             }
@@ -346,7 +346,7 @@ class UserChatViewModel @Inject constructor(
                         _uiEvent.emit(ChatUiEvent.FailedToChangeBlock(result.error))
                     }
                 }
-                if (response is me.domain.repository.TsboardResponse.Error) {
+                if (response is me.domain.repository.NuboResponse.Error) {
                     _uiEvent.emit(ChatUiEvent.FailedToChangeBlock(response.message))
                 }
             }

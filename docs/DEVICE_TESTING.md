@@ -1,4 +1,4 @@
-# Galaxy S25 Edge 실제 기기 테스트
+# Android 실제 기기 테스트
 
 debug 앱은 `me.sensta.debug`로 빌드되므로 Play 앱 `me.sensta`를 지우지 않고 Galaxy S25 Edge에 함께
 설치할 수 있습니다. debug 앱도 기본적으로 실제 `https://sensta.me`를 사용하므로 테스트 사진과 계정은
@@ -55,6 +55,22 @@ adb -d shell monkey -p me.sensta.debug 1
 `adb -s SERIAL`을 사용합니다. 앱 목록에는 Play 앱과 debug 앱이 같은 이름으로 보일 수 있으므로 앱
 정보의 패키지 이름으로 구분합니다.
 
+### 축소·난독화 QA APK
+
+Play와 같은 R8 설정을 로컬에서 먼저 확인할 때는 `qa`를 사용합니다. `qa`는 `me.sensta.debug`로
+설치되지만 release처럼 비디버그·코드 축소·리소스 축소가 활성화됩니다.
+
+Firebase에 등록한 인증서가 Windows Android Studio의 debug 키라면 WSL 빌드에 그 키를 지정합니다.
+
+```bash
+export SENSTA_QA_STORE_FILE=/mnt/c/Users/사용자명/.android/debug.keystore
+./gradlew :app:assembleQa
+adb -d install -r app/build/outputs/apk/qa/app-qa.apk
+```
+
+기존 debug 앱이 다른 키로 서명됐다면 제거 후 설치해야 하며, 이때 debug 앱의 로컬 세션은 삭제됩니다.
+Play 앱 `me.sensta`와 운영 데이터에는 영향이 없습니다.
+
 ## 4. 사진 업로드 시나리오
 
 한 번에 최대 9장, 합계 100MB까지 선택할 수 있습니다. 다음 순서로 각각 새 게시글을 만듭니다.
@@ -84,8 +100,11 @@ adb -d shell monkey -p me.sensta.debug 1
 
 ```bash
 adb -d logcat -c
-adb -d logcat | rg 'AndroidRuntime|FATAL EXCEPTION|me.sensta'
+adb -d logcat | rg 'Sensta-Nubo|Sensta-App|Sensta-GoogleAuth|AndroidRuntime|FATAL EXCEPTION'
 ```
+
+`Sensta-Nubo`는 본문·인증값 없이 API 경로, HTTP 상태와 소요 시간만 기록합니다. `Sensta-App`은 화면
+작업과 이미지 로딩 실패를 기록하므로 목록 요청, 응답 변환, 이미지 다운로드 문제를 구분할 수 있습니다.
 
 테스트가 끝나면 debug 앱만 제거할 수 있습니다.
 

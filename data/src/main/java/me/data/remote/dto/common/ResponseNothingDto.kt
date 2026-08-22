@@ -1,7 +1,7 @@
 package me.data.remote.dto.common
 
 import kotlinx.serialization.Serializable
-import me.domain.model.common.TsboardResponseNothing
+import me.domain.model.common.NuboResponseNothing
 
 // result에 아무것도 없을 때 사용하는 DTO
 @Serializable
@@ -13,7 +13,7 @@ data class ResponseNothingDto(
 )
 
 // result에 값이 있을 때 사용하는 엔티티 매퍼
-fun ResponseNothingDto.toEntity() = TsboardResponseNothing(
+fun ResponseNothingDto.toEntity() = NuboResponseNothing(
     success = success,
     error = error,
     code = code,

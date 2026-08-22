@@ -1,12 +1,12 @@
 package me.domain.usecase.home
 
 import kotlinx.coroutines.flow.flow
-import me.domain.repository.TsboardNotificationRepository
+import me.domain.repository.NuboNotificationRepository
 import javax.inject.Inject
 
 // 지정된 알림글을 읽음 처리하기
 class CheckNotificationUseCase @Inject constructor(
-    private val repository: TsboardNotificationRepository
+    private val repository: NuboNotificationRepository
 ) {
     operator fun invoke(
         token: String,

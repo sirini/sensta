@@ -27,7 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import me.domain.repository.TsboardResponse
+import me.domain.repository.NuboResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.explorer.GridImage
 import me.sensta.ui.screen.explorer.RecentHashtag
@@ -87,7 +87,7 @@ fun ExplorerScreen() {
             RecentHashtag()
 
             when (val postResponse = posts) {
-                is TsboardResponse.Loading -> {
+                is NuboResponse.Loading -> {
                     if (!notFound) {
                         LoadingScreen()
                     } else {
@@ -109,12 +109,12 @@ fun ExplorerScreen() {
                     }
                 }
 
-                is TsboardResponse.Success -> {
+                is NuboResponse.Success -> {
                     GridImage(postResponse.data)
                     notFound = false
                 }
 
-                is TsboardResponse.Error -> ErrorScreen()
+                is NuboResponse.Error -> ErrorScreen()
             }
         }
 

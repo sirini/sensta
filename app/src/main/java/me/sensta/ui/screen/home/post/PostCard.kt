@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import me.data.env.Env
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.NuboPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
@@ -28,7 +28,7 @@ import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.util.toPreviewImagePath
 
 @Composable
-fun PostCard(post: TsboardPost) {
+fun PostCard(post: NuboPost) {
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
     val onMedia = LocalSenstaExtendedColors.current.onMedia

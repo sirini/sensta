@@ -3,8 +3,8 @@ package me.data.remote.dto.home
 import kotlinx.serialization.Serializable
 import me.data.remote.dto.board.ConfigDto
 import me.data.remote.dto.board.toEntity
-import me.domain.model.home.TsboardHomeLatestResponse
-import me.domain.model.home.TsboardHomeLatestResult
+import me.domain.model.home.NuboHomeLatestResponse
+import me.domain.model.home.NuboHomeLatestResult
 
 // 지정된 게시판의 최신글 가져오는 JSON 응답
 @Serializable
@@ -23,7 +23,7 @@ data class HomeLatestResultDto(
 )
 
 // 지정된 게시판의 최신글을 엔티티로 변환하는 매퍼
-fun HomeLatestResponseDto.toEntity() = TsboardHomeLatestResponse(
+fun HomeLatestResponseDto.toEntity() = NuboHomeLatestResponse(
     success = success,
     error = error,
     code = code,
@@ -31,7 +31,7 @@ fun HomeLatestResponseDto.toEntity() = TsboardHomeLatestResponse(
 )
 
 // 지정된 게시판의 최신글 결과를 엔티티로 변환하는 매퍼
-fun HomeLatestResultDto.toEntity() = TsboardHomeLatestResult(
+fun HomeLatestResultDto.toEntity() = NuboHomeLatestResult(
     items = items.map { it.toEntity() },
     config = config.toEntity()
 )

@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Sensta</string>
-    <!-- GOAPI의 OAUTH_GOOGLE_CLIENT_ID와 같은 기존 senstagram Web OAuth client ID -->
-    <string name="google_web_client_id">955290530916-kdfl7ciihb0t48sl1sm6nrck1drhj428.apps.googleusercontent.com</string>
+    <!-- GOAPI의 OAUTH_GOOGLE_CLIENT_ID와 동일한 운영 Web OAuth client ID -->
+    <string name="google_web_client_id">181040903577-u0rle15ct3lhfqjlimerklkt5ceu7j5n.apps.googleusercontent.com</string>
 </resources>

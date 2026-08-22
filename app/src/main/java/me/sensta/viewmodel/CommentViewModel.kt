@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.env.Env
-import me.domain.model.board.TsboardComment
-import me.domain.repository.TsboardResponse
+import me.domain.model.board.NuboComment
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.RemoveCommentUseCase
@@ -30,8 +30,8 @@ class CommentViewModel @Inject constructor(
     private val writeCommentUseCase: WriteCommentUseCase
 ) : ViewModel() {
     private val _comments =
-        mutableStateOf<TsboardResponse<List<TsboardComment>>>(TsboardResponse.Loading)
-    val comments: State<TsboardResponse<List<TsboardComment>>> get() = _comments
+        mutableStateOf<NuboResponse<List<NuboComment>>>(NuboResponse.Loading)
+    val comments: State<NuboResponse<List<NuboComment>>> get() = _comments
 
     private val _uiEvent = MutableSharedFlow<CommentUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()

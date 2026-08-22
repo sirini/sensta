@@ -3,7 +3,7 @@ package me.data.remote.dto.photo
 import kotlinx.serialization.Serializable
 import me.data.remote.dto.common.ImageFileDto
 import me.data.remote.dto.common.toEntity
-import me.domain.model.photo.TsboardImage
+import me.domain.model.photo.NuboImage
 
 // 썸네일 이미지, AI 설명 JSON 응답 정의
 @Serializable
@@ -22,7 +22,7 @@ data class PhotoImageThumbnailDto(
 )
 
 // 갤러리의 개별 게시글에 대한 첨부 이미지를 엔티티로 변환하는 매퍼
-fun ImageDto.toEntity() = TsboardImage(
+fun ImageDto.toEntity() = NuboImage(
     file = file.toEntity(),
     thumbnail = thumbnail.toEntity(),
     exif = exif.toEntity(),
@@ -30,7 +30,7 @@ fun ImageDto.toEntity() = TsboardImage(
 )
 
 // 썸네일을 엔티티로 변환
-fun PhotoImageThumbnailDto.toEntity() = me.domain.model.photo.TsboardThumbnail(
+fun PhotoImageThumbnailDto.toEntity() = me.domain.model.photo.NuboThumbnail(
     large = large,
     small = small
 )

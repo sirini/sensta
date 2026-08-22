@@ -8,7 +8,7 @@ import com.google.android.gms.tasks.Task
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.suspendCancellableCoroutine
-import me.domain.repository.TsboardResponse
+import me.domain.repository.NuboResponse
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.home.RegisterPushDeviceUseCase
 import me.domain.usecase.home.UnregisterPushDeviceUseCase
@@ -39,7 +39,7 @@ class PushTokenManager @Inject constructor(
     suspend fun register(deviceToken: String): Boolean {
         val accessToken = getUserInfoUseCase().first().token
         if (accessToken.isBlank() || deviceToken.isBlank()) return false
-        return registerPushDeviceUseCase(deviceToken, accessToken) is TsboardResponse.Success
+        return registerPushDeviceUseCase(deviceToken, accessToken) is NuboResponse.Success
     }
 
     suspend fun unregister(accessToken: String): Boolean {
@@ -47,7 +47,7 @@ class PushTokenManager @Inject constructor(
         val installationId = runCatching { FirebaseInstallations.getInstance().id.await() }
             .getOrNull() ?: return false
         val unregistered =
-            unregisterPushDeviceUseCase(installationId, accessToken) is TsboardResponse.Success
+            unregisterPushDeviceUseCase(installationId, accessToken) is NuboResponse.Success
         if (unregistered) runCatching { FirebaseMessaging.getInstance().unregister().await() }
         return unregistered
     }

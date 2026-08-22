@@ -11,8 +11,8 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import me.domain.model.home.TsboardNotification
-import me.domain.repository.TsboardResponse
+import me.domain.model.home.NuboNotification
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.sensta.R
 import me.sensta.push.PushEvent
@@ -45,7 +45,7 @@ object AppNotification {
     // 새로운 알림이 있다면 앱 알림으로 업데이트하기
     suspend fun check(
         context: Context,
-        noti: TsboardResponse<List<TsboardNotification>>
+        noti: NuboResponse<List<NuboNotification>>
     ) {
         if (hasPermission(context)) {
             var uncheckedNotiUid = 0

@@ -1,7 +1,7 @@
 package me.data.remote.dto.user
 
 import kotlinx.serialization.Serializable
-import me.domain.model.user.TsboardUserSafetyStatus
+import me.domain.model.user.NuboUserSafetyStatus
 
 @Serializable
 data class UserSafetyStatusResponseDto(
@@ -29,7 +29,7 @@ data class UserTargetRequestDto(
     val targetUserUid: Int
 )
 
-fun UserSafetyStatusDto.toEntity() = TsboardUserSafetyStatus(
+fun UserSafetyStatusDto.toEntity() = NuboUserSafetyStatus(
     isReported = isReported,
     isBlockedByMe = isBannedByMe
 )

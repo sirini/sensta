@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
-import me.domain.model.board.TsboardComment
+import me.domain.model.board.NuboComment
 import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
 import me.sensta.viewmodel.local.LocalAuthViewModel
@@ -31,7 +31,7 @@ import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 
 @Composable
-fun CommentCardBody(comment: TsboardComment, likeCount: Int) {
+fun CommentCardBody(comment: NuboComment, likeCount: Int) {
     val context = LocalContext.current
     val authViewModel = LocalAuthViewModel.current
     val commentViewModel = LocalCommentViewModel.current

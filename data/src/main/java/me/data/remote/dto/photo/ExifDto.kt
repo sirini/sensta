@@ -1,7 +1,7 @@
 package me.data.remote.dto.photo
 
 import kotlinx.serialization.Serializable
-import me.domain.model.photo.TsboardExif
+import me.domain.model.photo.NuboExif
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -20,7 +20,7 @@ data class ExifDto(
 )
 
 // EXIF를 엔티티로 변환하는 매퍼
-fun ExifDto.toEntity() = TsboardExif(
+fun ExifDto.toEntity() = NuboExif(
     make = make,
     model = model,
     aperture = aperture,

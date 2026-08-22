@@ -5,7 +5,7 @@ import me.data.remote.dto.board.CategoryDto
 import me.data.remote.dto.board.toEntity
 import me.data.remote.dto.common.WriterDto
 import me.data.remote.dto.common.toEntity
-import me.domain.model.home.TsboardLatestPost
+import me.domain.model.home.NuboLatestPost
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -31,7 +31,7 @@ data class LatestPostDto(
 )
 
 // 최근글 응답을 엔티티로 변환
-fun LatestPostDto.toEntity() = TsboardLatestPost(
+fun LatestPostDto.toEntity() = NuboLatestPost(
     uid = uid,
     title = title,
     content = content,

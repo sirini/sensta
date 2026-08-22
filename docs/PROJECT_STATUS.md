@@ -16,7 +16,7 @@
 - Kotlin annotation processing은 KAPT 대신 KSP를 사용한다.
 - 최신 Nubo와 GOAPI의 API contract v1을 Android 네트워크 계층의 기준으로 삼는다.
 - 새로 작성하거나 의미를 바로잡는 코드 주석은 한국어로 작성한다.
-- 출시 후보에 영향을 줄 수 있는 구조 리팩터링은 2.0 공개 후 별도 변경으로 수행한다.
+- 2.0.1 교정판부터 기능별 API·세션·인증 책임을 분리하고 축소 QA를 출시 전 필수 단계로 둔다.
 
 ## 완료
 
@@ -63,6 +63,10 @@
 - `versionCode 20`의 서명된 release AAB를 생성하고 RSA 2048·SHA-256 서명과 2052-09-22까지의 인증서 유효기간을 확인했다.
 - Play Console의 기존 최신 `versionCode 3`보다 큰 `versionCode 20` App Bundle을 등록했다.
 - Play 개인정보처리방침 URL을 잘못된 `/policy`에서 공개 경로 `https://sensta.me/privacy`로 바로잡고 내부 테스트 변경사항을 심사에 제출했다.
+- 코드와 파일에 남아 있던 이전 백엔드 명칭을 현재 연동 대상인 `Nubo`로 교체했다.
+- API 인터페이스를 인증·게시글·알림·사용자 기능으로 분리하고 로컬 세션 저장소와 Google Credential 처리를 분리했다.
+- API·화면·이미지 실패 진단 로그와 재시도 UI, release와 같은 R8 설정의 설치용 `qa` 빌드를 추가했다.
+- Play v20의 사진 미표시 원인을 Retrofit suspend 제네릭 서명이 제거되는 R8 문제로 확인하고 보존 규칙을 추가했다.
 
 ## 검증
 
@@ -74,6 +78,7 @@
 - Galaxy S25 Edge debug 앱과 `sensta.me` 웹에서 Google 로그인을 각각 확인했다.
 - 디자인·아이콘·README 반영 후 `./scripts/check.sh`의 단위 테스트, Lint, debug·release APK와 release App Bundle 빌드가 모두 성공했다.
 - Windows release AAB에서 `jarsigner -verify`의 `jar verified.` 결과를 확인했다.
+- Galaxy S25 Edge에서 비디버그·축소 QA APK의 `/goapi/board/list` HTTP 200과 사진 표시를 확인했다.
 
 ## 다음 작업
 
@@ -82,4 +87,4 @@
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 준비한다.
 - 내부 테스트가 끝나면 같은 App Bundle을 프로덕션 트랙으로 승격하고 단계적으로 배포한다.
-- 2.0 공개 후 기능 동일성을 유지하는 구조 리팩터링을 별도 브랜치에서 수행한다.
+- versionCode 21 교정판의 Google 로그인과 핵심 회귀 테스트를 마친 뒤 Play 내부 테스트에 올린다.

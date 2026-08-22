@@ -1,8 +1,8 @@
 package me.data.remote.dto.auth
 
 import kotlinx.serialization.Serializable
-import me.domain.model.auth.TsboardSignup
-import me.domain.model.auth.TsboardSignupResult
+import me.domain.model.auth.NuboSignup
+import me.domain.model.auth.NuboSignupResult
 
 // 회원가입 후에 받을 JSON 응답 정의
 @Serializable
@@ -22,7 +22,7 @@ data class SignupResultDto(
 )
 
 // 회원가입 시 받을 응답을 엔티티로 변환하는 매퍼
-fun SignupDto.toEntity() = TsboardSignup(
+fun SignupDto.toEntity() = NuboSignup(
     success = success,
     error = error,
     code = code,
@@ -30,7 +30,7 @@ fun SignupDto.toEntity() = TsboardSignup(
 )
 
 // 회원가입 시 메일 인증 여부를 포함한 결과를 엔티티로 변환하는 매퍼
-fun SignupResultDto.toEntity() = TsboardSignupResult(
+fun SignupResultDto.toEntity() = NuboSignupResult(
     target = target,
     requiresVerification = requiresVerification,
     completed = completed

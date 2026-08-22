@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
-import me.domain.model.board.TsboardPost
+import me.domain.model.board.NuboPost
 import me.sensta.ui.common.CommonDialog
 import me.sensta.ui.common.UserReportDialog
 import me.sensta.ui.navigation.Screen
@@ -39,7 +39,7 @@ import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.ChatUiEvent
 
 @Composable
-fun ViewPostLikeButton(post: TsboardPost) {
+fun ViewPostLikeButton(post: NuboPost) {
     val navController = LocalNavController.current
     val homeViewModel = LocalHomeViewModel.current
     val authViewModel = LocalAuthViewModel.current

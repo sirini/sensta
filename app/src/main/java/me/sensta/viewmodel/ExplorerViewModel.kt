@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.data.env.Env
-import me.domain.model.board.TsboardPost
-import me.domain.model.board.TsboardRecentHashtag
-import me.domain.repository.TsboardResponse
+import me.domain.model.board.NuboPost
+import me.domain.model.board.NuboRecentHashtag
+import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
@@ -34,8 +34,8 @@ class ExplorerViewModel @Inject constructor(
     val contentOption = 1
 
     private var _posts =
-        mutableStateOf<TsboardResponse<List<TsboardPost>>>(TsboardResponse.Loading)
-    val posts: State<TsboardResponse<List<TsboardPost>>> get() = _posts
+        mutableStateOf<NuboResponse<List<NuboPost>>>(NuboResponse.Loading)
+    val posts: State<NuboResponse<List<NuboPost>>> get() = _posts
 
     private val _isLoadingMore = mutableStateOf(false)
 
@@ -51,8 +51,8 @@ class ExplorerViewModel @Inject constructor(
     private val _bunch = mutableIntStateOf(0)
     val bunch: State<Int> get() = _bunch
 
-    private val _recentHashtags = mutableStateOf<List<TsboardRecentHashtag>>(emptyList())
-    val recentHashtags: State<List<TsboardRecentHashtag>> get() = _recentHashtags
+    private val _recentHashtags = mutableStateOf<List<NuboRecentHashtag>>(emptyList())
+    val recentHashtags: State<List<NuboRecentHashtag>> get() = _recentHashtags
 
     private val _uiEvent = MutableSharedFlow<ExplorerUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
@@ -68,7 +68,7 @@ class ExplorerViewModel @Inject constructor(
         viewModelScope.launch {
             // 처음 로딩할 때는 Loading 상태로 두기
             if (_page.intValue == 1) {
-                _posts.value = TsboardResponse.Loading
+                _posts.value = NuboResponse.Loading
             }
             _isLoadingMore.value = true
 
@@ -94,12 +94,12 @@ class ExplorerViewModel @Inject constructor(
                     } else {
                         // 이전 게시글들을 이어서 붙여나가기
                         val currentPosts =
-                            (_posts.value as TsboardResponse.Success<List<TsboardPost>>).data
+                            (_posts.value as NuboResponse.Success<List<NuboPost>>).data
                         resp.ifEmpty {
-                            _posts.value = TsboardResponse.Success(currentPosts)
+                            _posts.value = NuboResponse.Success(currentPosts)
                             return@handle
                         }
-                        _posts.value = TsboardResponse.Success(currentPosts + resp)
+                        _posts.value = NuboResponse.Success(currentPosts + resp)
                     }
                     _page.intValue++
                 }

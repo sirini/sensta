@@ -16,11 +16,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import me.domain.model.board.TsboardComment
+import me.domain.model.board.NuboComment
 import me.sensta.viewmodel.local.LocalCommentViewModel
 
 @Composable
-fun CommentCard(comment: TsboardComment) {
+fun CommentCard(comment: NuboComment) {
     val context = LocalContext.current
     val commentViewModel = LocalCommentViewModel.current
 

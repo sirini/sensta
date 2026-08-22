@@ -18,8 +18,8 @@ android {
         applicationId = "me.sensta"
         minSdk = 26
         targetSdk = 36
-        versionCode = 20
-        versionName = "2.0.0"
+        versionCode = 21
+        versionName = "2.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,6 +53,19 @@ android {
                 keyPassword = requireNotNull(keyPasswordValue)
             }
         }
+
+        // QA는 Firebase에 등록된 개발용 키를 지정할 수 있고, 없으면 기본 debug 키를 쓴다.
+        providers.gradleProperty("SENSTA_QA_STORE_FILE")
+            .orElse(providers.environmentVariable("SENSTA_QA_STORE_FILE"))
+            .orNull
+            ?.let { qaStorePath ->
+                create("qa") {
+                    storeFile = file(qaStorePath)
+                    storePassword = "android"
+                    keyAlias = "androiddebugkey"
+                    keyPassword = "android"
+                }
+            }
     }
 
     buildTypes {
@@ -73,6 +86,14 @@ android {
                 "proguard-rules.pro"
             )
             resValue("string", "version", defaultConfig.versionName ?: "1.0.0")
+        }
+        create("qa") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-qa"
+            isDebuggable = false
+            signingConfig = signingConfigs.findByName("qa") ?: signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
         }
     }
     compileOptions {

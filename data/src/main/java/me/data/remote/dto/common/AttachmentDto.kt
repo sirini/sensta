@@ -1,7 +1,7 @@
 package me.data.remote.dto.common
 
 import kotlinx.serialization.Serializable
-import me.domain.model.common.TsboardAttachment
+import me.domain.model.common.NuboAttachment
 
 // 일반 첨부 파일 JSON 응답
 @Serializable
@@ -12,7 +12,7 @@ data class AttachmentDto(
 )
 
 // 일반 첨부 파일 정보를 엔티티로 변환하는 매퍼
-fun AttachmentDto.toEntity() = TsboardAttachment(
+fun AttachmentDto.toEntity() = NuboAttachment(
     uid = uid,
     name = name,
     size = size

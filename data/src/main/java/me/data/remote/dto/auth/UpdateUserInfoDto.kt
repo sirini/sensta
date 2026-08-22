@@ -1,7 +1,7 @@
 package me.data.remote.dto.auth
 
 import kotlinx.serialization.Serializable
-import me.domain.model.auth.TsboardUpdateUserInfo
+import me.domain.model.auth.NuboUpdateUserInfo
 
 // 사용자의 정보 업데이트 요청에 대한 JSON 응답
 @Serializable
@@ -13,7 +13,7 @@ data class UpdateUserInfoDto(
 )
 
 // 사용자의 정보 업데이트 요청에 대한 응답 DTO를 엔티티로 변환
-fun UpdateUserInfoDto.toEntity() = TsboardUpdateUserInfo(
+fun UpdateUserInfoDto.toEntity() = NuboUpdateUserInfo(
     success = success,
     error = error,
     code = code,

@@ -1,8 +1,8 @@
 package me.data.remote.dto.auth
 
 import kotlinx.serialization.Serializable
-import me.domain.model.auth.TsboardSignin
-import me.domain.model.auth.TsboardSigninResult
+import me.domain.model.auth.NuboSignin
+import me.domain.model.auth.NuboSigninResult
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -34,7 +34,7 @@ data class SigninResultDto(
 )
 
 // 로그인 후에 받을 전체 응답을 엔티티로 변환하는 매퍼
-fun SigninDto.toEntity() = TsboardSignin(
+fun SigninDto.toEntity() = NuboSignin(
     success = success,
     error = error,
     code = code,
@@ -42,7 +42,7 @@ fun SigninDto.toEntity() = TsboardSignin(
 )
 
 // 로그인 후에 받을 결과를 엔티티로 변환하는 매퍼
-fun SigninResultDto.toEntity() = TsboardSigninResult(
+fun SigninResultDto.toEntity() = NuboSigninResult(
     uid = uid,
     name = name,
     profile = profile,
