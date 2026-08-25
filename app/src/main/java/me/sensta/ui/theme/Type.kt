@@ -18,6 +18,11 @@ val robotoSlabFontFamily = FontFamily(
     Font(R.font.robotoslab_extra_bold, FontWeight.ExtraBold),
 )
 
+// 홈 피드 워드마크에만 사용하는 Oleo Script
+val oleoScriptFontFamily = FontFamily(
+    Font(R.font.oleo_script_bold, FontWeight.Bold),
+)
+
 // Pretendard 폰트 패밀리
 val pretendardFontFamily = FontFamily(
     Font(R.font.pretendard_extra_light, FontWeight.ExtraLight),

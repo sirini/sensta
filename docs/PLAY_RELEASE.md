@@ -3,7 +3,7 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.0.1` (`versionCode 21`)
+- 버전: `2.0.2` (`versionCode 22`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
@@ -13,8 +13,8 @@
 - 릴리스 코드·리소스 축소: 활성화
 
 2026-08-21에 기존 Play 업로드 키로 서명한 `versionCode 20` App Bundle을 Play Console이 수락했으며,
-개인정보처리방침 URL을 `https://sensta.me/privacy`로 바로잡아 내부 테스트 심사에 제출했다. 기존 공개
-버전은 `1.0.2`(`versionCode 3`)이다.
+개인정보처리방침 URL을 `https://sensta.me/privacy`로 바로잡아 내부 테스트 심사에 제출했다. 당시 공개
+버전은 `1.0.2`(`versionCode 3`)였다.
 
 `versionCode 20`에서는 Retrofit 2.9.0의 불완전한 R8 full mode 규칙 때문에 suspend API 반환 타입이
 제거되어 앱 시작 시 사진 목록 요청 자체가 만들어지지 않았다. 2.0.1은 누락된 제네릭 보존 규칙을
@@ -52,7 +52,21 @@ Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용�
 `jar verified.`가 있어야 하며, 자체 서명된 업로드 인증서의 PKIX chain·timestamp 경고는 Play가 최종
 배포 APK를 앱 서명 키로 다시 서명하는 과정과 구분한다.
 
-Play Console 내부 테스트의 최신 빌드는 `versionCode 20`이다. 이후 빌드에서는 20보다 큰 코드 값을 사용한다.
+## 현재 Play 배포 상태
+
+`versionCode 21`은 2026-08-22 16:10(KST)에 대한민국 대상 프로덕션 트랙으로 100% 게시되었다. Play
+Console에서 트랙 `활성`, `Google Play에 제공됨`, 대상 국가/지역 대한민국, 지원 Android 기기 17,678대를
+확인했다.
+
+`versionCode 22`는 GOAPI의 원본 경로 비노출 계약에 맞춘 게시글 상세 복구, Oleo Script 워드마크와
+버전 정보 위치 개선을 담은 2.0.2 업데이트 후보다. 서명·축소 빌드와 실제 기기 검증을 마친 뒤 Play
+Console에 새 업데이트로 제출한다. 검증된 AAB SHA-256은
+`4811a4942e5278e823c8bda02b16d65eb0dcd2d0ae35a3dd82a87f404eb00b42`다.
+
+게시 당일 저녁에는 한국 대상 공개 상세 URL도 아직 HTTP 404를 반환했다. 설정을 다시 변경하거나 새 출시를
+만들기보다 먼저 24시간 동안 스토어 전파를 기다린다. 게시 후 24~48시간이 지나도 직접 링크가 열리지 않으면
+패키지 `me.sensta`, 버전 코드 21, 게시 시각과 Play Console 상태를 첨부해 지원팀에 문의한다. 직접 링크가
+열린 뒤에는 별도로 Play 검색 색인 반영 여부를 확인한다.
 
 ## 제출 전에 외부에서 준비할 항목
 

@@ -2,7 +2,8 @@
 
 ## 현재 목표
 
-- Google Play 내부 테스트 심사를 통과한 Sensta 2.0을 실제 기기에서 검증하고 프로덕션에 재출시한다.
+- 게시글 상세 통신 회귀와 워드마크를 개선한 Sensta 2.0.2(`versionCode 22`)를 검증하고 Google Play에
+  업데이트한다.
 
 ## 결정
 
@@ -67,6 +68,15 @@
 - API 인터페이스를 인증·게시글·알림·사용자 기능으로 분리하고 로컬 세션 저장소와 Google Credential 처리를 분리했다.
 - API·화면·이미지 실패 진단 로그와 재시도 UI, release와 같은 R8 설정의 설치용 `qa` 빌드를 추가했다.
 - Play v20의 사진 미표시 원인을 Retrofit suspend 제네릭 서명이 제거되는 R8 문제로 확인하고 보존 규칙을 추가했다.
+- `versionCode 21` 교정판을 대한민국 대상 프로덕션 트랙에 100% 출시했다. Play Console에서 2026-08-22
+  16:10(KST) 게시, `Google Play에 제공됨`, 지원 Android 기기 17,678대를 확인했다.
+- GOAPI 1.2.26부터 게시글 상세 응답에서 원본 저장 경로를 숨기는 계약에 맞춰 이미지 파일 모델을 UID만
+  요구하도록 수정하고, 상세 화면이 역직렬화 오류로 통신 실패처럼 보이던 회귀를 고쳤다.
+- 홈 피드와 화면 상단의 SENSTA 워드마크, 가입 완료 제목을 Oleo Script Bold로 통일했다. 피드에서는
+  그림자와 자간을 없애고 낮은 불투명도를 유지했으며 공식 Google Fonts 파일과 OFL 1.1 라이선스를 앱에 포함했다.
+- 모든 화면 상단의 버전 칩을 제거하고, 로그인 후 내정보의 `앱 정보 > 버전`에서 기존 상세 버전·정책
+  화면으로 이동하도록 정보 구조를 정리했다.
+- 게시글 상세 계약 복구와 브랜드 개선을 Google Play에 배포하기 위해 버전을 2.0.2(`versionCode 22`)로 올렸다.
 
 ## 검증
 
@@ -79,12 +89,24 @@
 - 디자인·아이콘·README 반영 후 `./scripts/check.sh`의 단위 테스트, Lint, debug·release APK와 release App Bundle 빌드가 모두 성공했다.
 - Windows release AAB에서 `jarsigner -verify`의 `jar verified.` 결과를 확인했다.
 - Galaxy S25 Edge에서 비디버그·축소 QA APK의 `/goapi/board/list` HTTP 200과 사진 표시를 확인했다.
+- 운영 `/goapi/board/view` 응답의 `images[].file`이 UID만 포함하는 형태를 확인하고 같은 형태의 상세 이미지
+  계약 테스트를 추가했다.
+- 원본 경로 비노출 계약 수정 후 `./scripts/check.sh`의 전체 단위 테스트, Debug Lint, Debug·QA·Release
+  APK와 Release App Bundle 빌드를 통과했다.
+- 홈 워드마크 변경 후 Debug APK 빌드와 Debug Lint를 통과하고 Galaxy S25 Edge에 같은 개발 키로 덮어썼다.
+- 상단 워드마크와 버전 정보 위치 변경 후 Debug APK 빌드·Lint를 통과하고 Galaxy S25 Edge에서 로그인 전
+  `SENSTA / PROFILE` 조합과 상단 버전 제거를 확인했다.
+- 2.0.2는 `./scripts/check.sh`의 전체 단위 테스트, Debug Lint, Debug·QA·Release APK와 Release AAB
+  빌드를 통과했다. Release APK/AAB를 기존 Play 업로드 인증서로 다시 서명해 APK v2 서명과 AAB
+  `jar verified.`, versionCode 22·versionName 2.0.2를 확인했다.
+- 서명된 2.0.2 AAB SHA-256은 `4811a4942e5278e823c8bda02b16d65eb0dcd2d0ae35a3dd82a87f404eb00b42`이며,
+  Galaxy S25 Edge에는 2.0.2-debug(`versionCode 22`)를 기존 개발 키로 덮어썼다.
 
 ## 다음 작업
 
-- Play 내부 테스트 심사가 끝나면 Galaxy S25 Edge에 Play 배포판을 설치한다.
+- 2.0.2 서명 AAB를 Play Console에 올리고 내부 테스트에서 게시글 상세, 워드마크와 앱 정보 이동을 확인한다.
+- 내부 테스트 검증 후 2.0.2를 프로덕션에 게시하고 Galaxy S25 Edge의 Play 배포판으로 핵심 흐름을 재확인한다.
 - Play 배포판에서 Google 로그인·업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
-- 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 준비한다.
-- 내부 테스트가 끝나면 같은 App Bundle을 프로덕션 트랙으로 승격하고 단계적으로 배포한다.
-- versionCode 21 교정판의 Google 로그인과 핵심 회귀 테스트를 마친 뒤 Play 내부 테스트에 올린다.
+- 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
+- Play 정책 상태에서 `versionCode 22`의 API 36 반영 상태를 확인한다.

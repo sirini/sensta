@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +22,7 @@ import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.ui.theme.LocalSenstaExtendedColors
-import me.sensta.ui.theme.robotoSlabFontFamily
+import me.sensta.ui.theme.oleoScriptFontFamily
 import me.sensta.util.toPreviewImagePath
 
 @Composable
@@ -50,13 +48,12 @@ fun PostCard(post: NuboPost) {
         Text(
             text = Env.TITLE.uppercase(),
             style = MaterialTheme.typography.titleMedium.copy(
-                fontFamily = robotoSlabFontFamily,
+                fontFamily = oleoScriptFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                letterSpacing = 1.1.sp,
-                shadow = Shadow(Color.Black.copy(alpha = 0.55f), Offset(0f, 2f), 4f)
+                fontSize = 18.sp,
+                letterSpacing = 0.sp
             ),
-            color = onMedia.copy(alpha = 0.72f),
+            color = onMedia.copy(alpha = 0.6f),
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 18.dp, top = 14.dp)

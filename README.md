@@ -4,7 +4,7 @@
 가득 채우는 세로 피드, 작품 탐색, 사진가 프로필과 1:1 대화를 하나의 흐름으로 연결합니다. 로그인하지
 않아도 공개 작품을 감상할 수 있으며, 계정으로 사진을 공유하고 다른 사진가와 교류할 수 있습니다.
 
-현재 버전은 **2.0.1**(`versionCode 21`)이며 Android 8(API 26) 이상을 지원합니다. Android 17
+현재 버전은 **2.0.2**(`versionCode 22`)이며 Android 8(API 26) 이상을 지원합니다. Android 17
 SDK(API 37)로 컴파일하고 Google Play 대상 API는 Android 16(API 36)입니다.
 
 ## Sensta 2.0

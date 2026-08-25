@@ -91,11 +91,11 @@ class BoardContractDtoTest {
     }
 
     @Test
-    fun `게시글 상세 이미지와 EXIF 응답을 읽는다`() {
+    fun `원본 경로를 숨긴 게시글 상세 이미지와 EXIF 응답을 읽는다`() {
         val image = json.decodeFromString<ImageDto>(
             """
             {
-              "file": {"uid":7069,"path":"/upload/attachments/photo.jpeg"},
+              "file": {"uid":7069},
               "thumbnail": {
                 "large":"/upload/thumbnails/large.webp",
                 "small":"/upload/thumbnails/small.webp"

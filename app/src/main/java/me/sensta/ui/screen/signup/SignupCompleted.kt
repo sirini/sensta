@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
-import me.sensta.ui.theme.robotoSlabFontFamily
+import me.sensta.ui.theme.oleoScriptFontFamily
 import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
@@ -39,7 +39,7 @@ fun SignupCompleted() {
         Text(
             text = "WELCOME TO SENSTA!",
             modifier = Modifier.padding(bottom = 16.dp),
-            fontFamily = robotoSlabFontFamily
+            fontFamily = oleoScriptFontFamily
         )
 
         Icon(

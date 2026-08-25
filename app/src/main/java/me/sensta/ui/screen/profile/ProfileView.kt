@@ -30,7 +30,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import me.sensta.R
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.util.CustomTime
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import java.util.Locale
@@ -38,12 +42,18 @@ import java.util.Locale
 @Composable
 fun ProfileView() {
     val context = LocalContext.current
+    val navController = LocalNavController.current
     val authViewModel = LocalAuthViewModel.current
     val user by authViewModel.user
 
     var isEditNameDialog by remember { mutableStateOf(false) }
     var isEditSignatureDialog by remember { mutableStateOf(false) }
     var isDeleteAccountDialog by remember { mutableStateOf(false) }
+    val openVersion = {
+        navController.navigate(Screen.Version.route) {
+            launchSingleTop = true
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -161,6 +171,23 @@ fun ProfileView() {
                     name = "관리자",
                     value = if (user.admin) "관리자님, 환영합니다" else "일반 회원"
                 )
+            }
+
+            Text(
+                text = "앱 정보",
+                modifier = Modifier.padding(top = 32.dp, bottom = 8.dp, start = 8.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { openVersion() }
+            ) {
+                ProfileViewItem(
+                    name = "버전",
+                    value = "v${stringResource(R.string.version).removeSuffix("-debug")}"
+                ) { openVersion() }
             }
 
             Button(
