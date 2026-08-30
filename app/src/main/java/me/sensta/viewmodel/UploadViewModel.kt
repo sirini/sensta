@@ -19,6 +19,8 @@ import me.data.env.Env
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.WritePostUseCase
+import me.sensta.editor.PhotoEditorState
+import me.sensta.editor.PhotoRenderer
 import me.sensta.viewmodel.state.UploadState
 import me.sensta.viewmodel.uievent.UploadUiEvent
 import me.sensta.policy.CommunityPolicyManager
@@ -35,6 +37,8 @@ class UploadViewModel @Inject constructor(
 
     private val _uris = mutableStateOf<List<Uri>>(emptyList())
     val uris: State<List<Uri>> get() = _uris
+
+    val photoEditor = PhotoEditorState()
 
     private val _uploadState = mutableStateOf<UploadState>(UploadState.SelectImage)
     val uploadState: State<UploadState> get() = _uploadState
@@ -78,7 +82,8 @@ class UploadViewModel @Inject constructor(
     }
 
     // 업로드가 완료되면 uris를 비워주기
-    fun clearPreviousUpload() {
+    fun clearPreviousUpload(context: Context) {
+        photoEditor.clear(context)
         _uploadState.value = UploadState.SelectImage
         _uris.value = emptyList()
         _title.value = ""
@@ -106,22 +111,35 @@ class UploadViewModel @Inject constructor(
     }
 
     // 이미지 파일들의 Uri를 저장하기
-    fun setUris(uris: List<Uri>, context: Context) {
+    fun setUris(uris: List<Uri>) {
+        _uris.value = uris
+        photoEditor.setPhotos(uris)
+    }
+
+    fun finishEditing(context: Context) {
+        if (_isLoading.value) return
         viewModelScope.launch {
-            val totalSize = withContext(Dispatchers.IO) {
-                uris.sumOf { uri ->
-                    context.contentResolver.query(
-                        uri, arrayOf(OpenableColumns.SIZE), null, null, null
-                    )?.use { cursor ->
-                        if (cursor.moveToFirst()) cursor.getLong(0) else 0L
-                    } ?: 0L
+            _isLoading.value = true
+            try {
+                val prepared = withContext(Dispatchers.IO) {
+                    photoEditor.photos.value.map { photo ->
+                        if (photo.renderedUri != null) photo
+                        else photo.copy(renderedUri = PhotoRenderer.render(context, photo))
+                    }
                 }
-            }
-            // 허용된 파일 크기보다 클 경우 알려주기
-            if (totalSize > Env.MAX_UPLOAD_SIZE) {
-                _uiEvent.emit(UploadUiEvent.FileSizeExceeded(totalSize, Env.MAX_UPLOAD_SIZE))
-            } else {
-                _uris.value = uris
+                val totalSize = prepared.sumOf { photo -> uriSize(context, photo.uploadUri) }
+                if (totalSize > Env.MAX_UPLOAD_SIZE) {
+                    _uiEvent.emit(UploadUiEvent.FileSizeExceeded(totalSize, Env.MAX_UPLOAD_SIZE))
+                } else {
+                    photoEditor.setPrepared(prepared)
+                    _uploadState.value = UploadState.InputTitle
+                }
+            } catch (error: Exception) {
+                _uiEvent.emit(
+                    UploadUiEvent.FailedToEdit(error.localizedMessage ?: "알 수 없는 오류")
+                )
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -157,13 +175,14 @@ class UploadViewModel @Inject constructor(
                 title = _title.value.trim(),
                 content = _content.value.trim(),
                 tags = _tags.value,
-                attachments = _uris.value,
+                attachments = photoEditor.uploadUris,
                 token = token
             ).collect {
                 it.handle { resp ->
                     if (resp.success) {
                         _uiEvent.emit(UploadUiEvent.PostUploaded)
                         _uploadedPostUid.intValue = resp.result
+                        photoEditor.clearFiles(context)
                     } else {
                         _uiEvent.emit(UploadUiEvent.FailedToUpload(resp.error))
                         _uploadedPostUid.intValue = 0
@@ -172,5 +191,20 @@ class UploadViewModel @Inject constructor(
             }
             _isLoading.value = false
         }
+    }
+
+    private fun uriSize(context: Context, uri: Uri): Long {
+        if (uri.scheme == "file") return uri.path?.let { java.io.File(it).length() } ?: 0L
+        return runCatching {
+            context.contentResolver.query(
+                uri,
+                arrayOf(OpenableColumns.SIZE),
+                null,
+                null,
+                null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getLong(0) else 0L
+            } ?: 0L
+        }.getOrDefault(0L)
     }
 }

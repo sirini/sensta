@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.yalantis.ucrop.UCrop
@@ -34,7 +35,7 @@ import me.sensta.viewmodel.local.LocalAuthViewModel
 import java.io.File
 
 @Composable
-fun ProfileViewImage() {
+fun ProfileViewImage(imageSize: Dp = 160.dp) {
     val authViewModel = LocalAuthViewModel.current
     val context = LocalContext.current
     val user by authViewModel.user
@@ -73,24 +74,24 @@ fun ProfileViewImage() {
 
     Box(
         modifier = Modifier
-            .width(180.dp)
-            .height(160.dp),
+            .width(imageSize + 20.dp)
+            .height(imageSize),
         contentAlignment = Alignment.Center
     ) {
         // 프로필 이미지 혹은 빈 아이콘 보여주기
         if (user.profile.isEmpty()) {
             Icon(
                 imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Edit profile",
+                contentDescription = "프로필 이미지 편집",
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(160.dp)
+                modifier = Modifier.size(imageSize)
             )
         } else {
             AsyncImage(
                 model = Env.DOMAIN + user.profile,
                 contentDescription = user.name,
                 modifier = Modifier
-                    .size(160.dp)
+                    .size(imageSize)
                     .clip(CircleShape)
             )
         }
@@ -108,7 +109,7 @@ fun ProfileViewImage() {
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit profile",
+                    contentDescription = "프로필 이미지 편집",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )

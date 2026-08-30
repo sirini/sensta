@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -40,7 +39,7 @@ import me.sensta.viewmodel.local.LocalAuthViewModel
 import java.util.Locale
 
 @Composable
-fun ProfileView() {
+fun ProfileInfoTab() {
     val context = LocalContext.current
     val navController = LocalNavController.current
     val authViewModel = LocalAuthViewModel.current
@@ -61,10 +60,6 @@ fun ProfileView() {
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ProfileViewImage()
-
         Column(
             modifier = Modifier
                 .padding(horizontal = 24.dp, vertical = 24.dp)

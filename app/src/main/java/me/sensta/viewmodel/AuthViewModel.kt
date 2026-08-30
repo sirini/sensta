@@ -278,6 +278,7 @@ class AuthViewModel @Inject constructor(
             if (accessToken.isNotBlank()) {
                 pushTokenManager.unregister(accessToken)
             }
+            googleCredentialClient.clearCredentialState()
             _user.value = emptyUser
             clearUserInfoUseCase()
         }
@@ -294,6 +295,7 @@ class AuthViewModel @Inject constructor(
                 response.handle { result ->
                     if (result.success) {
                         // 서버에서 기기 등록도 함께 삭제하므로 별도의 해제 호출은 하지 않는다.
+                        googleCredentialClient.clearCredentialState()
                         _user.value = emptyUser
                         clearUserInfoUseCase()
                         _loginState.value = LoginState.InputEmail
@@ -384,6 +386,7 @@ class AuthViewModel @Inject constructor(
     private suspend fun completeGoogleLogin(response: me.domain.model.auth.NuboSignin) {
         val signedInUser = response.result
         if (signedInUser == null) {
+            AppDiagnostics.report("NUBO Google 로그인", response.error)
             _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(response.error))
             return
         }

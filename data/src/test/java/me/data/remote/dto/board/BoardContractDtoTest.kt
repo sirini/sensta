@@ -155,6 +155,66 @@ class BoardContractDtoTest {
     }
 
     @Test
+    fun `내 작품 스튜디오의 누적 성과와 페이지를 읽는다`() {
+        val response = json.decodeFromString<StudioResponseDto>(
+            """
+            {
+              "success":true,
+              "error":"",
+              "code":0,
+              "result":{
+                "summary":{
+                  "postCount":12,
+                  "photoCount":26,
+                  "viewCount":1520,
+                  "likeCount":341,
+                  "commentCount":78
+                },
+                "posts":{
+                  "page":1,
+                  "limit":20,
+                  "totalCount":12,
+                  "hasNext":false,
+                  "items":[{
+                    "uid":7522,
+                    "title":"여름 오후",
+                    "cover":"/upload/thumbnails/summer.webp",
+                    "submitted":1788012345000,
+                    "modified":1788012345000,
+                    "status":0,
+                    "imageCount":3,
+                    "hit":210,
+                    "like":42,
+                    "comment":8
+                  }]
+                }
+              }
+            }
+            """.trimIndent()
+        ).toEntity()
+
+        assertEquals(12L, response.summary.postCount)
+        assertEquals(26L, response.summary.photoCount)
+        assertEquals(1520L, response.summary.viewCount)
+        assertEquals(341L, response.summary.likeCount)
+        assertEquals(78L, response.summary.commentCount)
+        assertFalse(response.posts.hasNext)
+        assertEquals(3L, response.posts.items.single().imageCount)
+        assertEquals("/upload/thumbnails/summer.webp", response.posts.items.single().cover)
+    }
+
+    @Test
+    fun `내 작품 스튜디오 오류 응답은 result 없이도 읽는다`() {
+        val response = json.decodeFromString<StudioResponseDto>(
+            """{"success":false,"error":"invalid sort","code":3}"""
+        )
+
+        assertFalse(response.success)
+        assertEquals(3, response.code)
+        assertEquals(null, response.result)
+    }
+
+    @Test
     fun `글쓰기 오류 응답에 result가 없어도 역직렬화한다`() {
         val response = json.decodeFromString<WriteResponseDto>(
             """{"success":false,"error":"invalid title","code":1}"""

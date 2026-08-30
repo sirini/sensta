@@ -57,7 +57,7 @@ fun UploadInputTitle() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        UploadBottomRow(onBack = { uploadViewModel.setUploadState(UploadState.SelectImage) }) {
+        UploadBottomRow(onBack = { uploadViewModel.setUploadState(UploadState.EditImage) }) {
             if (title.trim().length < 2) {
                 Toast.makeText(context, "사진의 제목을 입력해주세요.", Toast.LENGTH_SHORT).show()
             } else {

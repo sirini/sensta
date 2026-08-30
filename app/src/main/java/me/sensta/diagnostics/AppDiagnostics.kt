@@ -11,6 +11,10 @@ object AppDiagnostics {
         Log.e(TAG, "$operation 실패: ${error.message}", error.cause)
     }
 
+    fun report(operation: String, message: String) {
+        Log.e(TAG, "$operation 실패: $message")
+    }
+
     fun reportImage(path: String, error: Throwable?) {
         // 쿼리 문자열은 토큰이 포함될 수 있으므로 로그에서 제거한다.
         val safePath = path.substringBefore('?')

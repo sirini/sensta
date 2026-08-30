@@ -7,6 +7,7 @@ import me.data.remote.dto.board.CommentLikeRequestDto
 import me.data.remote.dto.board.CommentListResponseDto
 import me.data.remote.dto.board.RecentHashtagResponseDto
 import me.data.remote.dto.board.RemovePostRequestDto
+import me.data.remote.dto.board.StudioResponseDto
 import me.data.remote.dto.board.WriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.home.HomeLatestResponseDto
@@ -26,6 +27,16 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface NuboBoardApi {
+    // 로그인한 사용자의 작품과 누적 성과 가져오기
+    @GET("board/my/studio")
+    suspend fun getMyStudio(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String,
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("sort") sort: String
+    ): StudioResponseDto
+
     // 게시글 목록 가져오기
     @GET("board/list")
     suspend fun getPosts(

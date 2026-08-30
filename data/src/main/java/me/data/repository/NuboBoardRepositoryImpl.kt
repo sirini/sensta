@@ -16,6 +16,8 @@ import me.domain.model.board.NuboComment
 import me.domain.model.board.NuboGetPostsParam
 import me.domain.model.board.NuboPost
 import me.domain.model.board.NuboRecentHashtagResponse
+import me.domain.model.board.NuboStudio
+import me.domain.model.board.NuboStudioParam
 import me.domain.model.board.NuboUpdateLikeParam
 import me.domain.model.board.NuboWriteCommentParam
 import me.domain.model.board.NuboWritePostParam
@@ -30,6 +32,26 @@ import javax.inject.Inject
 class NuboBoardRepositoryImpl @Inject constructor(
     private val api: NuboBoardApi
 ) : NuboBoardRepository {
+
+    // 로그인한 사용자의 작품과 누적 성과 가져오기
+    override suspend fun getMyStudio(param: NuboStudioParam): NuboResponse<NuboStudio> {
+        return try {
+            val response = api.getMyStudio(
+                authorization = param.token.toAuthorizationHeader(),
+                id = Env.BOARD_ID,
+                page = param.page,
+                limit = param.limit,
+                sort = param.sort.queryValue
+            )
+            if (!response.success || response.result == null) {
+                NuboResponse.Error(response.error.ifBlank { "작품 정보를 불러오지 못했습니다" })
+            } else {
+                NuboResponse.Success(response.toEntity())
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "An unexpected error occurred", cause = e)
+        }
+    }
 
     // 게시글에 달린 댓글 목록 가져오기
     override suspend fun getComments(

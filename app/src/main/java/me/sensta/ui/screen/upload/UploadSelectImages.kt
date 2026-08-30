@@ -43,7 +43,7 @@ fun UploadSelectImages() {
     val gridState = rememberLazyGridState()
     val pickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(Env.MAX_UPLOAD_COUNT)
-    ) { uris -> uploadViewModel.setUris(uris, context) }
+    ) { uris -> uploadViewModel.setUris(uris) }
 
     Column(
         modifier = Modifier
@@ -92,7 +92,7 @@ fun UploadSelectImages() {
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             } else {
-                uploadViewModel.setUploadState(UploadState.InputTitle)
+                uploadViewModel.setUploadState(UploadState.EditImage)
             }
         }
     }

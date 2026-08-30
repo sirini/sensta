@@ -1,5 +1,6 @@
 package me.sensta.ui.screen
 
+import android.app.Activity
 import android.text.format.Formatter
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,12 +32,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import me.data.env.Env
+import me.sensta.editor.PhotoCrop
+import me.sensta.editor.PhotoEditCache
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.screen.upload.UploadCompleted
 import me.sensta.ui.screen.upload.UploadInputContent
 import me.sensta.ui.screen.upload.UploadInputTag
 import me.sensta.ui.screen.upload.UploadInputTitle
+import me.sensta.ui.screen.upload.UploadPhotoEditor
 import me.sensta.ui.screen.upload.UploadSelectImages
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalUploadViewModel
@@ -54,7 +58,22 @@ fun UploadScreen() {
     val isLoading by uploadViewModel.isLoading
     val pickerLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(Env.MAX_UPLOAD_COUNT)
-    ) { uris -> uploadViewModel.setUris(uris, context) }
+    ) { uris -> uploadViewModel.setUris(uris) }
+    val cropLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val output = result.data?.let(com.yalantis.ucrop.UCrop::getOutput)
+        val photoIndex = output?.let(PhotoEditCache::cropPhotoIndex)
+        if (result.resultCode == Activity.RESULT_OK && output != null && photoIndex != null) {
+            uploadViewModel.photoEditor.applyCrop(photoIndex, output)
+        } else {
+            PhotoEditCache.delete(output)
+            val error = result.data?.let(com.yalantis.ucrop.UCrop::getError)
+            if (error != null || result.resultCode == com.yalantis.ucrop.UCrop.RESULT_ERROR) {
+                Toast.makeText(context, "사진을 자르지 못했습니다", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
     val uploadState by uploadViewModel.uploadState
 
     LaunchedEffect(Unit) {
@@ -68,7 +87,7 @@ fun UploadScreen() {
         }
 
         // 이전에 업로드 했던 uris 비우기
-        uploadViewModel.clearPreviousUpload()
+        uploadViewModel.clearPreviousUpload(context)
 
         // 로그인 했으면 이미지 선택하는 런처 실행
         pickerLauncher.launch(
@@ -120,6 +139,14 @@ fun UploadScreen() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+
+                is UploadUiEvent.FailedToEdit -> {
+                    Toast.makeText(
+                        context,
+                        "사진을 편집하지 못했습니다 (${event.message})",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
@@ -169,6 +196,10 @@ fun UploadScreen() {
                 ) { currentUploadState ->
                     when (currentUploadState) {
                         UploadState.SelectImage -> UploadSelectImages()
+                        UploadState.EditImage -> UploadPhotoEditor { index, source ->
+                            val destination = PhotoEditCache.createCropUri(context, index)
+                            cropLauncher.launch(PhotoCrop.createIntent(context, source, destination))
+                        }
                         UploadState.InputTitle -> UploadInputTitle()
                         UploadState.InputContent -> UploadInputContent()
                         UploadState.InputTag -> UploadInputTag()

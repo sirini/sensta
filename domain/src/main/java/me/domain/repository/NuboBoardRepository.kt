@@ -5,6 +5,8 @@ import me.domain.model.board.NuboComment
 import me.domain.model.board.NuboGetPostsParam
 import me.domain.model.board.NuboPost
 import me.domain.model.board.NuboRecentHashtagResponse
+import me.domain.model.board.NuboStudio
+import me.domain.model.board.NuboStudioParam
 import me.domain.model.board.NuboUpdateLikeParam
 import me.domain.model.board.NuboWriteCommentParam
 import me.domain.model.board.NuboWritePostParam
@@ -14,6 +16,7 @@ import me.domain.model.home.NuboLatestPost
 
 // 게시글 관련 인터페이스
 interface NuboBoardRepository {
+    suspend fun getMyStudio(param: NuboStudioParam): NuboResponse<NuboStudio>
     suspend fun getComments(postUid: Int, token: String): NuboResponse<List<NuboComment>>
     suspend fun getHomeLatestPosts(
         limit: Int,
