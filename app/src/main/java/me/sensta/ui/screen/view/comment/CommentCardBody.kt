@@ -11,15 +11,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
@@ -28,28 +31,27 @@ import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
-import me.sensta.viewmodel.local.LocalCommonViewModel
+import me.sensta.ui.common.CommonDialog
+import me.sensta.ui.screen.view.ViewPostCommentDialog
 
 @Composable
 fun CommentCardBody(comment: NuboComment, likeCount: Int) {
-    val context = LocalContext.current
     val authViewModel = LocalAuthViewModel.current
     val commentViewModel = LocalCommentViewModel.current
-    val commonViewModel = LocalCommonViewModel.current
-    val postUid by commonViewModel.postUid
     val user by authViewModel.user
+    var showEditDialog by remember(comment.uid) { mutableStateOf(false) }
+    var showDeleteDialog by remember(comment.uid) { mutableStateOf(false) }
+    val text = comment.content.parseAsHtml(
+        HtmlCompat.FROM_HTML_MODE_LEGACY,
+        null,
+        NewlineTagHandler()
+    ).toString()
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
     ) {
-        val text = comment.content.parseAsHtml(
-            HtmlCompat.FROM_HTML_MODE_LEGACY,
-            null,
-            NewlineTagHandler()
-        ).toString()
-
         Text(text = text)
         Spacer(modifier = Modifier.height(8.dp))
         Row(
@@ -74,21 +76,57 @@ fun CommentCardBody(comment: NuboComment, likeCount: Int) {
             }
 
             Row {
-                if (comment.writer.uid == user.uid) {
-                    IconButton(onClick = {
-                        commentViewModel.remove(
-                            removeTargetUid = comment.uid,
-                            postUid = postUid
+                if (
+                    comment.writer.uid == user.uid &&
+                    comment.status == 0 &&
+                    comment.content != "(deleted)"
+                ) {
+                    IconButton(onClick = { showEditDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Edit,
+                            contentDescription = "댓글 수정",
+                            modifier = Modifier.size(16.dp)
                         )
+                    }
+                    IconButton(onClick = {
+                        showDeleteDialog = true
                     }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "more",
+                            contentDescription = "댓글 삭제",
                             modifier = Modifier.size(16.dp),
                         )
                     }
                 }
             }
+        }
+    }
+
+    if (showEditDialog) {
+        ViewPostCommentDialog(
+            onDismissRequest = { showEditDialog = false },
+            initialText = text,
+            label = "수정할 댓글을 입력해 주세요",
+            minimumLength = 2
+        ) { content ->
+            commentViewModel.modify(comment.uid, comment.postUid, content)
+            showEditDialog = false
+        }
+    }
+
+    if (showDeleteDialog) {
+        CommonDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            onConfirm = {
+                commentViewModel.remove(
+                    removeTargetUid = comment.uid,
+                    postUid = comment.postUid
+                )
+                showDeleteDialog = false
+            },
+            icon = Icons.Default.Delete
+        ) {
+            Text("이 댓글을 삭제할까요?")
         }
     }
 }

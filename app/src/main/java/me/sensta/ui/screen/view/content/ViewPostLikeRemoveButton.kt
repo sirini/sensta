@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Report
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,29 +27,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
-import me.domain.model.board.NuboPost
+import me.domain.model.board.NuboBoardViewResult
 import me.sensta.ui.common.CommonDialog
 import me.sensta.ui.common.UserReportDialog
-import me.sensta.ui.navigation.Screen
-import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalPostViewViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.ChatUiEvent
+import me.sensta.ui.screen.view.ViewPostEditDialog
 
 @Composable
-fun ViewPostLikeButton(post: NuboPost) {
-    val navController = LocalNavController.current
+fun ViewPostLikeButton(result: NuboBoardViewResult) {
+    val post = result.post
     val homeViewModel = LocalHomeViewModel.current
     val authViewModel = LocalAuthViewModel.current
     val postViewViewModel = LocalPostViewViewModel.current
     val userChatViewModel = LocalUserChatViewModel.current
     val context = LocalContext.current
     val userInfo by authViewModel.user
-    var likeState by remember { mutableStateOf(post.liked) }
-    var likeCount by remember { mutableIntStateOf(post.like) }
     var isReallyRemove by remember { mutableStateOf(false) }
+    var isEditDialogVisible by remember { mutableStateOf(false) }
     var isReportDialogVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -78,16 +76,9 @@ fun ViewPostLikeButton(post: NuboPost) {
         ) {
             Column(verticalArrangement = Arrangement.Center) {
                 IconButton(onClick = {
-                    likeState = !likeState
-                    homeViewModel.like(post.uid, likeState)
-
-                    if (likeState) {
-                        likeCount++
-                    } else {
-                        likeCount--
-                    }
+                    homeViewModel.like(post.uid, !post.liked, post.like)
                 }) {
-                    if (likeState) {
+                    if (post.liked) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "좋아요 취소",
@@ -104,10 +95,23 @@ fun ViewPostLikeButton(post: NuboPost) {
                         )
                     }
                 }
-                Text(text = "${likeCount}개 좋아요", style = MaterialTheme.typography.bodySmall)
+                Text(text = "${post.like}개 좋아요", style = MaterialTheme.typography.bodySmall)
             }
 
             if (userInfo.uid == post.writer.uid) {
+                Column(modifier = Modifier.padding(start = 12.dp)) {
+                    IconButton(onClick = { isEditDialogVisible = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Edit,
+                            contentDescription = "사진 정보 수정",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Text(
+                        text = "수정하기",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
                 Column(modifier = Modifier.padding(start = 12.dp)) {
                     IconButton(onClick = {
                         isReallyRemove = true
@@ -148,10 +152,6 @@ fun ViewPostLikeButton(post: NuboPost) {
             onConfirm = {
                 postViewViewModel.remove(post.uid)
                 isReallyRemove = false
-                navController.navigate(Screen.Home.route) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
             },
             icon = Icons.Outlined.Delete,
             content = {
@@ -161,6 +161,23 @@ fun ViewPostLikeButton(post: NuboPost) {
                 )
             }
         )
+    }
+
+    if (isEditDialogVisible) {
+        ViewPostEditDialog(
+            result = result,
+            onDismissRequest = { isEditDialogVisible = false }
+        ) { title, content, tags ->
+            postViewViewModel.modify(
+                postUid = post.uid,
+                categoryUid = post.category.uid,
+                status = post.status,
+                title = title,
+                content = content,
+                tags = tags
+            )
+            isEditDialogVisible = false
+        }
     }
 
 

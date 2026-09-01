@@ -1,9 +1,9 @@
-# Sensta 2.0 프로젝트 상태
+# Sensta 2.1 프로젝트 상태
 
 ## 현재 목표
 
-- 게시글 상세 통신 회귀와 워드마크를 개선한 Sensta 2.0.2(`versionCode 22`)를 검증하고 Google Play에
-  업데이트한다.
+- Google 로그인 복구와 내 작품 스튜디오 실기기 검증을 마친 2.1.1(`versionCode 24`) 작업본의
+  회귀 테스트를 확정하고 다음 출시 버전을 결정한다.
 
 ## 결정
 
@@ -18,6 +18,15 @@
 - 최신 Nubo와 GOAPI의 API contract v1을 Android 네트워크 계층의 기준으로 삼는다.
 - 새로 작성하거나 의미를 바로잡는 코드 주석은 한국어로 작성한다.
 - 2.0.1 교정판부터 기능별 API·세션·인증 책임을 분리하고 축소 QA를 출시 전 필수 단계로 둔다.
+- 2.1 사진 자르기는 원본·4:5·3:4 비율만 제공하고 필터는 원본 포함 6종과 0~100% 강도로 제한한다.
+- 원본 파일은 수정하지 않고 편집본만 앱 캐시에 만들며 촬영·노출 EXIF는 유지하되 공개 업로드에는
+  정확한 GPS 위치를 승계하지 않는다. 위치 정보가 없는 무편집 사진은 재인코딩하지 않는다.
+- 2.1 이후 경쟁력 개선은 먼저 Sensta Android 앱만으로 끝낼 수 있는 공유·접근성·업로드 신뢰성부터
+  진행하고, 팔로우·피드백·전시 커뮤니티처럼 서버 데이터 모델이 필요한 기능은 별도 검토한다.
+- 사용자가 직접 누르는 Google 로그인 버튼에는 Credential Manager의 button flow를 사용하고,
+  로그아웃과 계정 삭제 시 credential provider의 활성 상태도 함께 초기화한다.
+- 현재 `sensta.me`의 수동 GOAPI 운영은 `/var/www/sensta.me`에서
+  `NUBO_ENV_FILE="$PWD/.env" ./bin/goapi`로 실행하며 `/etc/nubo/nubo.env`는 사용하지 않는다.
 
 ## 완료
 
@@ -77,6 +86,20 @@
 - 모든 화면 상단의 버전 칩을 제거하고, 로그인 후 내정보의 `앱 정보 > 버전`에서 기존 상세 버전·정책
   화면으로 이동하도록 정보 구조를 정리했다.
 - 게시글 상세 계약 복구와 브랜드 개선을 Google Play에 배포하기 위해 버전을 2.0.2(`versionCode 22`)로 올렸다.
+- 다중 사진별 자르기·회전·좌우 반전·초기화와 필터 강도 조절 화면을 업로드 흐름에 추가했다.
+- 편집본을 최대 3,072픽셀 작업 비트맵에서 JPEG 품질 95로 한 번만 렌더링하고 주요 EXIF와 결과 크기·방향을 기록하도록 했다.
+- 파일 URI 편집본도 기존 multipart 업로드 준비 과정에서 안전하게 이름과 확장자를 처리하도록 보강했다.
+- 홈 피드와 게시글 상세에 Android 시스템 공유를 연결해 제목과 공개 웹 주소를 다른 앱으로 전달하도록 했다.
+- 게시글 상세와 전체 화면 사진의 TalkBack 설명에 서버의 AI 이미지 설명을 사용하고, 설명이 없으면 제목과
+  사진 순번으로 대체하도록 했다.
+- GPS가 있는 무편집 JPEG는 원본 해상도와 이미지 데이터를 유지한 사본에서 정확한 위치 EXIF만 제거하고,
+  직접 수정하기 어려운 형식은 방향을 픽셀에 반영한 JPEG로 렌더링하도록 보강했다. GPS가 없는 무편집
+  사진은 원본 바이트를 그대로 유지한다.
+- Google Play 2.1.0의 Google 로그인 실패가 운영 GOAPI의 실제 `.env`에 Android ID token audience가
+  빠져 웹용 client ID로 fallback한 문제임을 확인하고 `OAUTH_GOOGLE_ANDROID_CLIENT_ID`를 추가했다.
+- GOAPI의 인증 기반 `GET /board/my/studio` 계약을 Android 데이터·도메인 계층에 연결하고, 내정보의
+  기본 화면을 프로필·누적 성과·작품별 조회/좋아요/댓글/업로드일과 네 가지 정렬을 제공하는 스튜디오로
+  개편했다. 기존 계정 상세와 수정·세션·탈퇴 기능은 `내 정보` 탭에 유지했다.
 
 ## 검증
 
@@ -101,12 +124,59 @@
   `jar verified.`, versionCode 22·versionName 2.0.2를 확인했다.
 - 서명된 2.0.2 AAB SHA-256은 `4811a4942e5278e823c8bda02b16d65eb0dcd2d0ae35a3dd82a87f404eb00b42`이며,
   Galaxy S25 Edge에는 2.0.2-debug(`versionCode 22`)를 기존 개발 키로 덮어썼다.
+- 2.1.0 사진 편집 구현 후 전체 단위 테스트, Debug Lint와 Debug·QA·Release APK 및 Release AAB 빌드를 통과했다.
+- Galaxy S25 Edge에서 사진 렌더러 계측 테스트 2개와 테스트 전용 이미지의 선택 → 4:5 자르기 →
+  회전·반전 → 따뜻함 54% → 제목 입력 전환을 확인했다. 축소 QA 앱에서도 3:4 자르기와 필름
+  76% 조합으로 같은 흐름을 통과했다. 결과 JPEG 크기·방향과 뒤로 이동 시 편집 상태 유지도 확인했으며
+  운영 업로드는 실행하지 않았다.
+- 기존 Play 업로드 키로 서명한 2.1.0 Release APK·AAB의 인증서를 확인하고 Galaxy S25 Edge를
+  비디버그·축소 `2.1.0-qa`로 복원했다.
+- 게시물 공유·AI 이미지 설명 접근성·GPS 제거 반영 후 `:app:testDebugUnitTest`의 단위 테스트 10개와
+  `:app:lintDebug`, Debug APK 및 Debug AndroidTest APK 빌드를 통과했다.
+- Windows ADB로 연결된 Galaxy S25 Edge에서 GPS 없는 원본 보존, GPS 포함 무편집 JPEG의 무손실
+  위치 제거, 편집 JPEG의 안전한 EXIF 유지와 위치 제거를 검증하는 계측 테스트 3개를 통과했다. 테스트
+  패키지를 제거하고 같은 개발 키로 서명한 최신 `2.1.0-qa`를 데이터 삭제 없이 복원했다.
+- 재시작된 운영 GOAPI PID의 CWD가 `/var/www/sensta.me`, 실행 파일이 `bin/goapi`, `NUBO_ENV_FILE`이
+  `/var/www/sensta.me/.env`임을 `/proc`에서 확인하고 공개 `/ready` 응답도 확인했다.
+- Galaxy S25 Edge의 축소 `2.1.1-qa`와 Google Play 설치본 `2.1.0`에서 Google 로그인을 각각 다시
+  실행했다. 두 앱 모두 `/goapi/auth/android/google`, push 기기 등록과 후속 조회가 HTTP 200으로
+  완료되어 기존 Play 배포판도 서버 설정만으로 복구됐음을 확인했다.
+- Google 로그인 복구 직후의 2.1.1 후보는 전체 단위 테스트, Debug Lint, Debug·QA·Release APK와 AndroidTest APK, Release
+  AAB 빌드를 통과했다. Release APK의 v2 서명과 AAB의 `jar verified.`, versionCode 24·versionName
+  2.1.1을 확인했으며 AAB SHA-256은
+  `228d12f30995a98f669a42cc1b90d19ed6e68271d812be64fc8f3617376f0532`다.
+- 운영 GOAPI 프로세스가 `/var/www/sensta.me/bin/goapi`를 `/var/www/sensta.me`에서 실행하고
+  `NUBO_ENV_FILE=/var/www/sensta.me/.env`를 읽는 것을 확인했다. 인증 없는 스튜디오 직접 요청은 401,
+  Galaxy S25 Edge의 축소 QA 앱은 `photo`, `limit=20`으로 recent/views/likes/comments 네 정렬과
+  89개 작품의 1~5페이지를 모두 HTTP 200으로 받았다. 마지막 페이지 뒤에는 6페이지를 요청하지 않았다.
+- 같은 기기에서 프로필 요약과 작품 썸네일·사진 수·업로드일·조회·좋아요·댓글, 정렬별 첫 작품 변경,
+  작품 상세 이동, 기존 `내 정보` 탭을 확인했다. Android 로그에 비정상 종료는 없었다.
+- 내 작품 스튜디오와 다크 테마 대비 보정 후 `test`, `lintDebug`, `assembleDebug`, `assembleQa`,
+  `assembleRelease`, `bundleRelease` 전체 게이트를 Windows PowerShell에서 다시 통과했다. 최종 QA APK는
+  기존 데이터 삭제 없이 Galaxy S25 Edge에 덮어쓰고 운영 스튜디오 요청 HTTP 200을 재확인했다.
 
 ## 다음 작업
 
-- 2.0.2 서명 AAB를 Play Console에 올리고 내부 테스트에서 게시글 상세, 워드마크와 앱 정보 이동을 확인한다.
-- 내부 테스트 검증 후 2.0.2를 프로덕션에 게시하고 Galaxy S25 Edge의 Play 배포판으로 핵심 흐름을 재확인한다.
-- Play 배포판에서 Google 로그인·업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
+- NUBO Web의 `/api/board/my/studio` 프록시 커밋은 아직 운영 웹에 배포되지 않아 404이므로, 웹에서도
+  같은 기능을 사용할 시 NUBO 배포 후 다시 검증한다. Android는 `/goapi` 직접 경로를 사용해 영향이 없다.
+- Android 앱 안에서 업로드 초안과 대기열을 영속화하고 WorkManager 기반 백그라운드 재시도·진행 상태를
+  제공할 수 있는지 현재 multipart 업로드 흐름을 기준으로 설계한다.
+- 시스템 공유 선택 화면, TalkBack 이미지 설명과 GPS 포함 실제 카메라 사진의 운영 업로드 결과를
+  실제 기기에서 수동 검증한다.
+- 기존 목록 API가 이미 제공하는 공지 데이터를 활용해 다음 달 사진전 안내를 앱 홈에서 노출하는 방안을
+  검토한다.
+- Galaxy 원본 HEIF와 EXIF가 풍부한 실제 JPEG, 9장 조합의 메모리 사용량과 100MB 경계를 추가 검증한다.
+- 운영 업로드가 허용된 테스트 계정으로 서버 변환과 상세 화면 EXIF를 확인한 뒤 Play 내부 테스트 배포 여부를 결정한다.
+- 프로덕션 2.0.2의 비정상 종료, ANR, 업로드 실패 지표를 계속 확인한다.
+- Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play 정책 상태에서 `versionCode 22`의 API 36 반영 상태를 확인한다.
+- Play 정책 상태에서 프로덕션 `versionCode 22`의 API 36 반영 상태를 확인한다.
+
+## 백엔드 검토가 필요한 후순위
+
+- 팔로우·팔로잉 관계와 팔로잉 전용 피드
+- 계정·기기 사이에 동기화되는 북마크와 컬렉션
+- 게시물별 피드백 허용 여부와 서버 검증
+- 전시 참가·작가·작품 묶음 등 사진전 전용 커뮤니티 데이터
+- 청크·재개 업로드처럼 서버 업로드 세션이 필요한 네트워크 복구

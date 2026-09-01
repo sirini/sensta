@@ -38,6 +38,14 @@ fun HomeScreen() {
                 is HomeUiEvent.CancelLikePost -> {
                     Toast.makeText(context, "좋아요를 취소했습니다", Toast.LENGTH_SHORT).show()
                 }
+
+                is HomeUiEvent.FailedToUpdateLike -> {
+                    Toast.makeText(
+                        context,
+                        "좋아요 변경에 실패했습니다 (${event.message})",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }

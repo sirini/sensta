@@ -1,5 +1,6 @@
 package me.sensta.ui.navigation
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,16 +24,19 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -74,6 +78,7 @@ import me.sensta.viewmodel.local.LocalNotificationViewModel
 import me.sensta.viewmodel.local.LocalPostViewViewModel
 import me.sensta.viewmodel.local.LocalUploadViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
+import me.sensta.viewmodel.uievent.CommentUiEvent
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Config : Screen("config", "설정", Icons.Default.Settings)
@@ -92,6 +97,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null) {
+    val context = LocalContext.current
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
     val commonViewModel: CommonViewModel = hiltViewModel()
@@ -109,6 +115,59 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val postUid by commonViewModel.postUid
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+
+    // 댓글 작성 다이얼로그는 모든 화면에서 열릴 수 있으므로 결과도 앱 공통 영역에서 처리한다.
+    LaunchedEffect(commentViewModel, snackbarHostState) {
+        commentViewModel.uiEvent.collect { event ->
+            when (event) {
+                CommentUiEvent.CancelLikeComment -> Toast.makeText(
+                    context,
+                    "좋아요를 취소했습니다",
+                    Toast.LENGTH_SHORT
+                ).show()
+                CommentUiEvent.LikeComment -> Toast.makeText(
+                    context,
+                    "댓글에 좋아요를 남겼습니다",
+                    Toast.LENGTH_SHORT
+                ).show()
+                CommentUiEvent.CommentRemoved -> Toast.makeText(
+                    context,
+                    "댓글이 삭제되었습니다",
+                    Toast.LENGTH_SHORT
+                ).show()
+                CommentUiEvent.WroteComment -> Toast.makeText(
+                    context,
+                    "댓글을 작성했습니다",
+                    Toast.LENGTH_SHORT
+                ).show()
+                CommentUiEvent.CommentEdited -> Toast.makeText(
+                    context,
+                    "댓글을 수정했습니다",
+                    Toast.LENGTH_SHORT
+                ).show()
+                is CommentUiEvent.FailedToRemoveComment -> snackbarHostState.showSnackbar(
+                    "댓글 삭제에 실패했습니다 (${event.message})",
+                    "확인",
+                    duration = SnackbarDuration.Short
+                )
+                is CommentUiEvent.FailedToWriteComment -> snackbarHostState.showSnackbar(
+                    "댓글 작성에 실패했습니다 (${event.message})",
+                    "확인",
+                    duration = SnackbarDuration.Short
+                )
+                is CommentUiEvent.FailedToEditComment -> snackbarHostState.showSnackbar(
+                    "댓글 수정에 실패했습니다 (${event.message})",
+                    "확인",
+                    duration = SnackbarDuration.Short
+                )
+                is CommentUiEvent.FailedToUpdateLike -> snackbarHostState.showSnackbar(
+                    "댓글 좋아요 변경에 실패했습니다 (${event.message})",
+                    "확인",
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
 
     CompositionLocalProvider(
         LocalNavController provides navController,

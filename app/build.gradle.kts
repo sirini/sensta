@@ -18,8 +18,8 @@ android {
         applicationId = "me.sensta"
         minSdk = 26
         targetSdk = 36
-        versionCode = 22
-        versionName = "2.0.2"
+        versionCode = 24
+        versionName = "2.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -146,6 +146,7 @@ dependencies {
 
     // uCrop
     implementation(libs.ucrop)
+    implementation(libs.androidx.exifinterface)
 
     // Worker
     implementation(libs.androidx.hilt.work)

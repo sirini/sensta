@@ -40,30 +40,43 @@ nuboctl update
 실행 중 외부 백업 완료 여부를 물으면 백업을 직접 확인한 뒤 빈 입력으로 진행합니다. `.env`, upload,
 DB와 기존 Nginx/TLS를 임의로 덮어쓰지 않습니다.
 
-Firebase 실시간 알림을 사용할 때는 서비스 계정 JSON을 웹 공개 경로와 Git 저장소 밖에 두고
-`/etc/nubo/nubo.env`에 다음 값을 설정합니다. 파일은 GOAPI systemd 서비스 계정이 읽을 수 있어야 합니다.
+현재 `sensta.me`는 systemd 설치 경로가 아니라 `/var/www/sensta.me`의 tmux 세션에서 GOAPI를 수동
+운영합니다. 환경변수는 같은 디렉터리의 `.env`에 두고 다음처럼 실행합니다.
+
+```bash
+cd /var/www/sensta.me
+NUBO_ENV_FILE="$PWD/.env" ./bin/goapi
+```
+
+이 구성에서는 `/etc/nubo/nubo.env`를 사용하지 않습니다. Firebase 서비스 계정 JSON은 웹 공개 경로와
+Git 저장소 밖에 두고, 실제로 읽는 `/var/www/sensta.me/.env`에 다음 값을 설정합니다. Google Android
+로그인의 ID token은 Web application OAuth client ID를 audience로 사용하므로 해당 값도 명시합니다.
 
 ```dotenv
 FIREBASE_PROJECT_ID=실제-Firebase-project-id
 FIREBASE_CREDENTIALS_FILE=/etc/nubo/firebase-service-account.json
+OAUTH_GOOGLE_ANDROID_CLIENT_ID=Web-application-OAuth-client-id
 ```
 
-설정 후 대표 서비스만 다시 시작합니다.
+`.env`는 프로세스 시작 시 읽으므로 값을 바꾼 뒤 tmux의 GOAPI 프로세스를 다시 시작합니다. 시작 후
+실제 경로는 다음처럼 확인할 수 있습니다.
 
 ```bash
-sudo systemctl restart nubo
+pid="$(pgrep -n -x goapi)"
+readlink -f "/proc/$pid/cwd"
+tr '\0' '\n' <"/proc/$pid/environ" | grep '^NUBO_ENV_FILE='
 ```
 
 ## 배포 후 확인
 
 ```bash
-sudo systemctl status nubo nubo-goapi nubo-web
-sudo /opt/nubo/current/nuboctl status
-sudo /opt/nubo/current/nuboctl doctor
-sudo journalctl -u nubo-goapi -u nubo-web --since "10 minutes ago"
+pgrep -a -x goapi
 curl -fsS https://sensta.me/ready
 curl -fsS https://sensta.me/version
 ```
+
+systemd 통합 배포로 다시 전환한 경우에만 `systemctl status nubo nubo-goapi nubo-web`, `nuboctl status`,
+`nuboctl doctor`와 journal을 추가로 확인합니다.
 
 `/version`의 release와 GOAPI commit이 방금 게시한 통합 릴리스와 일치해야 합니다. 이어서 별도 테스트
 계정으로 로그인·토큰 갱신, 사진 업로드, 댓글·좋아요, 1:1 대화, 신고·차단·해제, 로그아웃, FCM 수신을

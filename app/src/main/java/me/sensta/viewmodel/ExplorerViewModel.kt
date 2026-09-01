@@ -19,13 +19,18 @@ import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
 import me.domain.usecase.board.GetRecentHashtagListUseCase
 import me.sensta.viewmodel.uievent.ExplorerUiEvent
+import me.sensta.sync.BoardMutation
+import me.sensta.sync.BoardStateSync
+import me.sensta.sync.applyPostMutation
+import me.sensta.diagnostics.AppDiagnostics
 import javax.inject.Inject
 
 @HiltViewModel
 class ExplorerViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val getPostListUseCase: GetPostListUseCase,
-    private val getRecentHashtagListUseCase: GetRecentHashtagListUseCase
+    private val getRecentHashtagListUseCase: GetRecentHashtagListUseCase,
+    private val boardStateSync: BoardStateSync
 ) : ViewModel() {
     val aiDescOption = 12
     val hashtagOption = 3
@@ -38,6 +43,7 @@ class ExplorerViewModel @Inject constructor(
     val posts: State<NuboResponse<List<NuboPost>>> get() = _posts
 
     private val _isLoadingMore = mutableStateOf(false)
+    val isLoading: State<Boolean> get() = _isLoadingMore
 
     private val _option = mutableIntStateOf(aiDescOption)
     val option: State<Int> get() = _option
@@ -57,8 +63,12 @@ class ExplorerViewModel @Inject constructor(
     private val _uiEvent = MutableSharedFlow<ExplorerUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
 
+    private var refreshAfterCurrentLoad = false
+
     init {
-        loadPosts()
+        viewModelScope.launch {
+            boardStateSync.mutations.collect(::applyMutation)
+        }
     }
 
     // 게시글 목록 가져오기
@@ -66,45 +76,58 @@ class ExplorerViewModel @Inject constructor(
         if (_isLoadingMore.value) return
 
         viewModelScope.launch {
+            val requestRevision = boardStateSync.revision
+            val requestPage = _page.intValue
+            val requestOption = _option.intValue
+            val requestKeyword = _keyword.value
             // 처음 로딩할 때는 Loading 상태로 두기
-            if (_page.intValue == 1) {
+            if (requestPage == 1) {
                 _posts.value = NuboResponse.Loading
             }
             _isLoadingMore.value = true
 
-            val token = getUserInfoUseCase().first().token
-            getPostListUseCase(
-                page = _page.intValue,
-                option = _option.intValue,
-                keyword = _keyword.value,
-                token = token
-            ).collect {
-                it.handle { resp ->
-                    if (resp.isEmpty()) {
-                        if (_keyword.value.isEmpty()) {
-                            _uiEvent.emit(ExplorerUiEvent.UnableToFindPosts)
+            try {
+                val token = getUserInfoUseCase().first().token
+                getPostListUseCase(
+                    page = requestPage,
+                    option = requestOption,
+                    keyword = requestKeyword,
+                    token = token
+                ).collect { response ->
+                    when (response) {
+                        NuboResponse.Loading -> Unit
+                        is NuboResponse.Error -> {
+                            AppDiagnostics.report("탐색 사진 목록", response)
+                            _posts.value = response
                         }
-                        return@handle
-                    }
+                        is NuboResponse.Success -> {
+                            val posts = boardStateSync.applyToPosts(response.data, requestRevision)
+                            if (posts.isEmpty() && requestKeyword.isEmpty()) {
+                                _uiEvent.emit(ExplorerUiEvent.UnableToFindPosts)
+                            }
 
-                    if (_page.intValue == 1) {
-                        _posts.value = it
-                        _bunch.intValue = resp.size
-
-                    } else {
-                        // 이전 게시글들을 이어서 붙여나가기
-                        val currentPosts =
-                            (_posts.value as NuboResponse.Success<List<NuboPost>>).data
-                        resp.ifEmpty {
-                            _posts.value = NuboResponse.Success(currentPosts)
-                            return@handle
+                            if (requestPage == 1) {
+                                _posts.value = NuboResponse.Success(posts)
+                                _bunch.intValue = posts.size
+                            } else {
+                                val currentPosts =
+                                    (_posts.value as? NuboResponse.Success)?.data.orEmpty()
+                                _posts.value = NuboResponse.Success(
+                                    (currentPosts + posts).distinctBy(NuboPost::uid)
+                                )
+                            }
+                            if (response.data.isNotEmpty()) _page.intValue = requestPage + 1
                         }
-                        _posts.value = NuboResponse.Success(currentPosts + resp)
                     }
-                    _page.intValue++
+                }
+            } finally {
+                _isLoadingMore.value = false
+                if (refreshAfterCurrentLoad) {
+                    refreshAfterCurrentLoad = false
+                    _page.intValue = 1
+                    loadPosts()
                 }
             }
-            _isLoadingMore.value = false
         }
     }
 
@@ -125,8 +148,19 @@ class ExplorerViewModel @Inject constructor(
 
     // 게시글 목록 업데이트
     fun refresh(resetPaging: Boolean = false) {
-        if (resetPaging) _page.intValue = 1
+        if (resetPaging) {
+            _page.intValue = 1
+            if (_isLoadingMore.value) {
+                refreshAfterCurrentLoad = true
+                return
+            }
+        }
         loadPosts()
+    }
+
+    // 검색 중이 아닐 때 탐색 화면에 들어올 때마다 첫 페이지를 다시 받는다.
+    fun refreshOnEnter() {
+        if (_keyword.value.isBlank()) refresh(resetPaging = true)
     }
 
     // 게시글 검색 옵션 업데이트
@@ -145,5 +179,10 @@ class ExplorerViewModel @Inject constructor(
     // 검색어 업데이트
     fun setKeyword(keyword: String) {
         _keyword.value = keyword
+    }
+
+    private fun applyMutation(mutation: BoardMutation) {
+        val current = (_posts.value as? NuboResponse.Success)?.data ?: return
+        _posts.value = NuboResponse.Success(current.applyPostMutation(mutation))
     }
 }

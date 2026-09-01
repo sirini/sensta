@@ -20,8 +20,9 @@ import me.sensta.ui.screen.view.comment.CommentCard
 import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalPostViewViewModel
-import me.sensta.viewmodel.uievent.CommentUiEvent
+import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.uievent.ViewUiEvent
+import me.sensta.viewmodel.uievent.HomeUiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,13 +33,14 @@ fun ViewScreen(initialPostUid: Int = 0) {
     val commentViewModel = LocalCommentViewModel.current
     val scrollBehavior = LocalScrollBehavior.current
     val commonViewModel = LocalCommonViewModel.current
+    val homeViewModel = LocalHomeViewModel.current
     val snackbar = LocalSnackbar.current
     val postUid by commonViewModel.postUid
     val post by postViewViewModel.post
     val comments by commentViewModel.comments
     val requestedPostUid = initialPostUid.takeIf { it > 0 } ?: postUid
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(requestedPostUid) {
         // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
         scrollBehavior.state.heightOffset = 0f
 
@@ -46,44 +48,27 @@ fun ViewScreen(initialPostUid: Int = 0) {
         commonViewModel.updatePostUid(requestedPostUid)
         postViewViewModel.refresh(postUid = requestedPostUid)
         commentViewModel.refresh(postUid = requestedPostUid)
+    }
 
-        // CommentViewModel에서 전달된 이벤트들에 따라 메시지 출력하기
+    LaunchedEffect(Unit) {
         launch {
-            commentViewModel.uiEvent.collect { event ->
+            homeViewModel.uiEvent.collect { event ->
                 when (event) {
-                    is CommentUiEvent.CancelLikeComment -> {
-                        Toast.makeText(context, "좋아요를 취소했습니다", Toast.LENGTH_SHORT).show()
-                    }
-
-                    is CommentUiEvent.FailedToRemoveComment -> {
-                        snackbar.showSnackbar(
-                            "댓글 삭제에 실패했습니다 (${event.message})",
-                            "확인",
-                            duration = SnackbarDuration.Short
-                        )
-                    }
-
-                    is CommentUiEvent.LikeComment -> {
-                        Toast.makeText(context, "댓글에 좋아요를 남겼습니다", Toast.LENGTH_SHORT).show()
-                    }
-
-                    is CommentUiEvent.CommentRemoved -> {
-                        Toast.makeText(context, "댓글이 삭제되었습니다", Toast.LENGTH_SHORT).show()
-                        commentViewModel.refresh(postUid = requestedPostUid)
-                    }
-
-                    is CommentUiEvent.WroteComment -> {
-                        Toast.makeText(context, "댓글을 작성했습니다", Toast.LENGTH_SHORT).show()
-                        commentViewModel.refresh(postUid = requestedPostUid)
-                    }
-
-                    is CommentUiEvent.FailedToWriteComment -> {
-                        snackbar.showSnackbar(
-                            "댓글 작성에 실패했습니다 (${event.message})",
-                            "확인",
-                            duration = SnackbarDuration.Short
-                        )
-                    }
+                    is HomeUiEvent.LikePost -> Toast.makeText(
+                        context,
+                        "게시글에 좋아요를 남겼습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    is HomeUiEvent.CancelLikePost -> Toast.makeText(
+                        context,
+                        "좋아요를 취소했습니다",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    is HomeUiEvent.FailedToUpdateLike -> snackbar.showSnackbar(
+                        "좋아요 변경에 실패했습니다 (${event.message})",
+                        "확인",
+                        duration = SnackbarDuration.Short
+                    )
                 }
             }
         }
@@ -107,6 +92,21 @@ fun ViewScreen(initialPostUid: Int = 0) {
                     is ViewUiEvent.FailedToRemovePost -> {
                         snackbar.showSnackbar(
                             "게시글 삭제에 실패했습니다 (${event.message})",
+                            "확인",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+
+                    is ViewUiEvent.PostEdited -> {
+                        snackbar.showSnackbar(
+                            "게시글을 수정했습니다",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+
+                    is ViewUiEvent.FailedToEditPost -> {
+                        snackbar.showSnackbar(
+                            "게시글 수정에 실패했습니다 (${event.message})",
                             "확인",
                             duration = SnackbarDuration.Short
                         )

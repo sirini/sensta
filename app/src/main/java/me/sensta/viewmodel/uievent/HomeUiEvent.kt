@@ -4,4 +4,5 @@ package me.sensta.viewmodel.uievent
 sealed interface HomeUiEvent {
     data object LikePost : HomeUiEvent
     data object CancelLikePost : HomeUiEvent
+    data class FailedToUpdateLike(val message: String) : HomeUiEvent
 }

@@ -9,4 +9,5 @@ sealed interface UploadUiEvent {
     data class HashtagRemoved(val tag: String) : UploadUiEvent
     data object PostUploaded : UploadUiEvent
     data object CommunityPolicyRequired : UploadUiEvent
+    data class FailedToEdit(val message: String) : UploadUiEvent
 }

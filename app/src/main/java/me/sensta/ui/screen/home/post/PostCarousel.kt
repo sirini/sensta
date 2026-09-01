@@ -33,7 +33,7 @@ import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.ui.theme.LocalSenstaExtendedColors
 
 @Composable
-fun PostCarousel(images: List<NuboImage>) {
+fun PostCarousel(images: List<NuboImage>, postTitle: String) {
     val pagerState = rememberPagerState(0) { images.size }
     val commonViewModel = LocalCommonViewModel.current
     val extendedColors = LocalSenstaExtendedColors.current
@@ -57,16 +57,20 @@ fun PostCarousel(images: List<NuboImage>) {
             .background(extendedColors.media)
     ) {
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
-            val imagePath = images[page].thumbnail.large
+            val image = images[page]
+            val imagePath = image.thumbnail.large
+            val imageDescription = image.description.ifBlank {
+                "$postTitle 사진 ${page + 1}"
+            }
             AsyncImage(
                 model = Env.DOMAIN + imagePath,
-                contentDescription = "Image ${page + 1}",
+                contentDescription = imageDescription,
                 onError = { state ->
                     AppDiagnostics.reportImage(imagePath, state.result.throwable)
                 },
-                modifier = Modifier.fillMaxSize().pointerInput(images[page].thumbnail.large) {
+                modifier = Modifier.fillMaxSize().pointerInput(imagePath) {
                     detectTapGestures {
-                        commonViewModel.openFullScreen(images[page].thumbnail.large)
+                        commonViewModel.openFullScreen(imagePath, imageDescription)
                     }
                 },
                 contentScale = ContentScale.Crop

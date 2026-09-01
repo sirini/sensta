@@ -4,10 +4,13 @@ import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.profile.ProfileView
+import me.sensta.viewmodel.ProfileStudioViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
 import me.sensta.viewmodel.uievent.ProfileUiEvent
@@ -19,8 +22,16 @@ fun ProfileScreen() {
     val scrollBehavior = LocalScrollBehavior.current
     val authViewModel = LocalAuthViewModel.current
     val notiViewModel = LocalNotificationViewModel.current
+    val studioViewModel: ProfileStudioViewModel = hiltViewModel()
     val user by authViewModel.user
     val isLoading by authViewModel.isLoading
+    val studio by studioViewModel.uiState.collectAsState()
+
+    LaunchedEffect(user.uid, user.token) {
+        if (user.token.isNotBlank()) {
+            studioViewModel.refresh()
+        }
+    }
 
     LaunchedEffect(Unit) {
         // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
@@ -86,6 +97,11 @@ fun ProfileScreen() {
     when {
         isLoading -> LoadingScreen()
         user.token.isEmpty() -> LoginScreen()
-        else -> ProfileView()
+        else -> ProfileView(
+            studio = studio,
+            onRefreshStudio = studioViewModel::refresh,
+            onLoadMoreStudio = studioViewModel::loadMore,
+            onSelectSort = studioViewModel::selectSort
+        )
     }
 }

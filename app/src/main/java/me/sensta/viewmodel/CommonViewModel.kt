@@ -16,6 +16,9 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     private val _fullImagePath = mutableStateOf<String>("")
     val fullImagePath: State<String> get() = _fullImagePath
 
+    private val _fullImageContentDescription = mutableStateOf("")
+    val fullImageContentDescription: State<String> get() = _fullImageContentDescription
+
     private val _showFullScreen = mutableStateOf(false)
     val showFullScreen: State<Boolean> get() = _showFullScreen
 
@@ -48,14 +51,16 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     }
 
     // 이미지 전체 화면으로 보기
-    fun openFullScreen(imagePath: String) {
+    fun openFullScreen(imagePath: String, contentDescription: String) {
         _fullImagePath.value = imagePath
+        _fullImageContentDescription.value = contentDescription
         _showFullScreen.value = true
     }
 
     // 이미지 전체 화면 닫기
     fun closeFullScreen() {
         _fullImagePath.value = ""
+        _fullImageContentDescription.value = ""
         _showFullScreen.value = false
     }
 }

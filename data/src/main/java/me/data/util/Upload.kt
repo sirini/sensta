@@ -39,8 +39,15 @@ object Upload {
                 temporaryFile.outputStream().use { output -> input.copyTo(output) }
             }
 
-            val mediaType = resolver.getType(uri)?.toMediaTypeOrNull()
-                ?: "image/*".toMediaTypeOrNull()
+            val mediaType = resolver.getType(uri)
+                ?.toMediaTypeOrNull()
+                ?: if (suffix.equals(".jpg", ignoreCase = true) ||
+                    suffix.equals(".jpeg", ignoreCase = true)
+                ) {
+                    "image/jpeg".toMediaTypeOrNull()
+                } else {
+                    "image/*".toMediaTypeOrNull()
+                }
             val requestBody = temporaryFile.asRequestBody(mediaType)
             val uploadName = displayName ?: temporaryFile.name
             PreparedFile(
@@ -54,14 +61,18 @@ object Upload {
     }
 
     private fun getDisplayName(context: Context, uri: Uri): String? =
-        context.contentResolver.query(
-            uri,
-            arrayOf(OpenableColumns.DISPLAY_NAME),
-            null,
-            null,
-            null
-        )?.use { cursor ->
-            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (nameIndex >= 0 && cursor.moveToFirst()) cursor.getString(nameIndex) else null
+        if (uri.scheme == "file") {
+            uri.path?.let(::File)?.name
+        } else {
+            context.contentResolver.query(
+                uri,
+                arrayOf(OpenableColumns.DISPLAY_NAME),
+                null,
+                null,
+                null
+            )?.use { cursor ->
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0 && cursor.moveToFirst()) cursor.getString(nameIndex) else null
+            }
         }
 }

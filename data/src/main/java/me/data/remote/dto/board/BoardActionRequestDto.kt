@@ -24,3 +24,12 @@ data class RemovePostRequestDto(
     val boardUid: Int,
     val postUid: Int
 )
+
+// 댓글 수정 요청
+@Serializable
+data class ModifyCommentRequestDto(
+    val boardUid: Int,
+    val postUid: Int,
+    val modifyTargetUid: Int,
+    val content: String
+)

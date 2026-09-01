@@ -35,6 +35,7 @@ fun PostCardFullScreen() {
     val density = LocalDensity.current
     val commonViewModel = LocalCommonViewModel.current
     val fullImagePath by commonViewModel.fullImagePath
+    val fullImageContentDescription by commonViewModel.fullImageContentDescription
     val screenWidth = remember {
         with(density) { context.resources.displayMetrics.widthPixels }
     }
@@ -76,7 +77,7 @@ fun PostCardFullScreen() {
     ) {
         AsyncImage(
             model = Env.DOMAIN + fullImagePath,
-            contentDescription = "uploaded image",
+            contentDescription = fullImageContentDescription,
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .fillMaxSize()
@@ -96,7 +97,7 @@ fun PostCardFullScreen() {
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "close",
+                contentDescription = "전체 화면 닫기",
                 tint = Color.White
             )
         }

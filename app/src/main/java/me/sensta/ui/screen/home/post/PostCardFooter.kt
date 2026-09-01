@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,13 +22,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,6 +35,7 @@ import me.domain.model.board.NuboPost
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.LocalSenstaExtendedColors
+import me.sensta.util.sharePost
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalHomeViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
@@ -47,19 +46,15 @@ fun PostCardFooter(
     onViewClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val navController = LocalNavController.current
     val commonViewModel = LocalCommonViewModel.current
     val homeViewModel = LocalHomeViewModel.current
     val userViewModel = LocalUserChatViewModel.current
     val onMedia = LocalSenstaExtendedColors.current.onMedia
 
-    var likeState by remember(post.uid, post.liked) { mutableStateOf(post.liked) }
-    var likeCount by remember(post.uid, post.like) { mutableIntStateOf(post.like) }
-
     val doLike: () -> Unit = {
-        likeState = !likeState
-        homeViewModel.like(post.uid, likeState)
-        likeCount += if (likeState) 1 else -1
+        homeViewModel.like(post.uid, !post.liked, post.like)
     }
 
     Column(
@@ -121,14 +116,14 @@ fun PostCardFooter(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = doLike, modifier = Modifier.size(42.dp)) {
                     Icon(
-                        imageVector = if (likeState) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (likeState) "좋아요 취소" else "좋아요",
+                        imageVector = if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (post.liked) "좋아요 취소" else "좋아요",
                         modifier = Modifier.size(22.dp),
-                        tint = if (likeState) MaterialTheme.colorScheme.primary else onMedia
+                        tint = if (post.liked) MaterialTheme.colorScheme.primary else onMedia
                     )
                 }
                 Text(
-                    text = likeCount.toString(),
+                    text = post.like.toString(),
                     style = MaterialTheme.typography.labelLarge,
                     color = onMedia
                 )
@@ -151,6 +146,17 @@ fun PostCardFooter(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = { sharePost(context, post.uid, post.title) },
+                    modifier = Modifier.size(42.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "게시물 공유",
+                        modifier = Modifier.size(20.dp),
+                        tint = onMedia
+                    )
+                }
                 Icon(
                     imageVector = Icons.Default.Visibility,
                     contentDescription = null,
