@@ -3,15 +3,30 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.1.1` (`versionCode 24`)
+- 버전: `2.1.2` (`versionCode 25`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `2e36d31f712d06dcd379910dc1e8481b4dcdca7b3f638494c5f10770a049c257`
+- AAB SHA-256: `58008d2abb6cecfd5563dbd99d7e8665ee12e4119ea4742bce4b02e29e42ea0f`
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
+
+## 2.1.2 변경사항 노트
+
+권장 출시명은 `2.1.2 (25)`다. 아래 문안을 Play Console의 한국어 변경사항에 사용한다.
+
+```text
+<ko-KR>
+게시글과 댓글 수정·삭제 기능을 개선했습니다.
+
+• 좋아요와 댓글이 홈 및 상세 화면에 즉시 반영되도록 개선
+• 탐색 화면 진입 시 최신 게시글 자동 갱신
+• 게시글과 댓글 수정·삭제 안정성 개선
+• 전반적인 오류 처리와 사용성 개선
+</ko-KR>
+```
 
 ## 2.1.1 변경사항 노트
 
