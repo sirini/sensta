@@ -5,6 +5,7 @@ import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentLikeRequestDto
 import me.data.remote.dto.board.CommentListResponseDto
+import me.data.remote.dto.board.ModifyCommentRequestDto
 import me.data.remote.dto.board.RecentHashtagResponseDto
 import me.data.remote.dto.board.RemovePostRequestDto
 import me.data.remote.dto.board.StudioResponseDto
@@ -68,6 +69,21 @@ interface NuboBoardApi {
         @Body request: RemovePostRequestDto
     ): ResponseNothingDto
 
+    // 게시글 수정하기. 기존 첨부 사진은 서버에서 그대로 유지한다.
+    @Multipart
+    @PATCH("editor/modify")
+    suspend fun modifyPost(
+        @Header("Authorization") authorization: String,
+        @Part("boardUid") boardUid: RequestBody,
+        @Part("postUid") postUid: RequestBody,
+        @Part("categoryUid") categoryUid: RequestBody,
+        @Part("isNotice") isNotice: RequestBody,
+        @Part("isSecret") isSecret: RequestBody,
+        @Part("title") title: RequestBody,
+        @Part("content") content: RequestBody,
+        @Part("tags") tags: RequestBody
+    ): ResponseNothingDto
+
     // 게시글 상세 정보 가져오기
     @GET("board/view")
     suspend fun getPost(
@@ -90,6 +106,13 @@ interface NuboBoardApi {
         @Header("Authorization") authorization: String,
         @Query("boardUid") boardUid: Int,
         @Query("removeTargetUid") removeTargetUid: Int
+    ): ResponseNothingDto
+
+    // 댓글 수정하기
+    @PATCH("comment/modify")
+    suspend fun modifyComment(
+        @Header("Authorization") authorization: String,
+        @Body request: ModifyCommentRequestDto
     ): ResponseNothingDto
 
     // 댓글 작성하기

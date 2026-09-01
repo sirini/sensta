@@ -4,6 +4,7 @@ import me.data.env.Env
 import me.data.remote.api.NuboBoardApi
 import me.data.remote.dto.board.BoardLikeRequestDto
 import me.data.remote.dto.board.CommentLikeRequestDto
+import me.data.remote.dto.board.ModifyCommentRequestDto
 import me.data.remote.dto.board.RemovePostRequestDto
 import me.data.remote.dto.board.toEntity
 import me.data.remote.dto.common.toEntity
@@ -14,6 +15,8 @@ import kotlinx.coroutines.withContext
 import me.domain.model.board.NuboBoardViewResponse
 import me.domain.model.board.NuboComment
 import me.domain.model.board.NuboGetPostsParam
+import me.domain.model.board.NuboModifyCommentParam
+import me.domain.model.board.NuboModifyPostParam
 import me.domain.model.board.NuboPost
 import me.domain.model.board.NuboRecentHashtagResponse
 import me.domain.model.board.NuboStudio
@@ -173,6 +176,45 @@ class NuboBoardRepositoryImpl @Inject constructor(
             val response = api.removePost(
                 authorization = "Bearer $token",
                 request = RemovePostRequestDto(boardUid = boardUid, postUid = postUid)
+            )
+            NuboResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "An unexpected error occurred", cause = e)
+        }
+    }
+
+    // 기존 첨부 사진은 보내지 않으면 유지되므로 텍스트와 태그만 수정한다.
+    override suspend fun modifyPost(param: NuboModifyPostParam): NuboResponse<NuboResponseNothing> {
+        return try {
+            val response = api.modifyPost(
+                authorization = param.token.toAuthorizationHeader(),
+                boardUid = param.boardUid.toString().toRequestBody(),
+                postUid = param.postUid.toString().toRequestBody(),
+                categoryUid = param.categoryUid.toString().toRequestBody(),
+                isNotice = if (param.isNotice) "1".toRequestBody() else "0".toRequestBody(),
+                isSecret = if (param.isSecret) "1".toRequestBody() else "0".toRequestBody(),
+                title = param.title.toRequestBody(),
+                content = param.content.toRequestBody(),
+                tags = param.tags.joinToString(",").toRequestBody()
+            )
+            NuboResponse.Success(response.toEntity())
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "An unexpected error occurred", cause = e)
+        }
+    }
+
+    override suspend fun modifyComment(
+        param: NuboModifyCommentParam
+    ): NuboResponse<NuboResponseNothing> {
+        return try {
+            val response = api.modifyComment(
+                authorization = param.token.toAuthorizationHeader(),
+                request = ModifyCommentRequestDto(
+                    boardUid = param.boardUid,
+                    postUid = param.postUid,
+                    modifyTargetUid = param.commentUid,
+                    content = param.content
+                )
             )
             NuboResponse.Success(response.toEntity())
         } catch (e: Exception) {

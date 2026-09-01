@@ -3,6 +3,8 @@ package me.domain.repository
 import me.domain.model.board.NuboBoardViewResponse
 import me.domain.model.board.NuboComment
 import me.domain.model.board.NuboGetPostsParam
+import me.domain.model.board.NuboModifyCommentParam
+import me.domain.model.board.NuboModifyPostParam
 import me.domain.model.board.NuboPost
 import me.domain.model.board.NuboRecentHashtagResponse
 import me.domain.model.board.NuboStudio
@@ -47,6 +49,9 @@ interface NuboBoardRepository {
         postUid: Int,
         token: String
     ): NuboResponse<NuboResponseNothing>
+
+    suspend fun modifyPost(param: NuboModifyPostParam): NuboResponse<NuboResponseNothing>
+    suspend fun modifyComment(param: NuboModifyCommentParam): NuboResponse<NuboResponseNothing>
 
     suspend fun updateLikePost(param: NuboUpdateLikeParam): NuboResponse<NuboResponseNothing>
     suspend fun updateLikeComment(param: NuboUpdateLikeParam): NuboResponse<NuboResponseNothing>

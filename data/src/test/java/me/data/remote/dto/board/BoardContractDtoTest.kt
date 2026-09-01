@@ -91,6 +91,24 @@ class BoardContractDtoTest {
     }
 
     @Test
+    fun `댓글 수정 요청은 대상 댓글과 게시글을 함께 직렬화한다`() {
+        val body = json.parseToJsonElement(
+            json.encodeToString(
+                ModifyCommentRequestDto(
+                    boardUid = 2,
+                    postUid = 7522,
+                    modifyTargetUid = 231,
+                    content = "수정한 댓글"
+                )
+            )
+        ).jsonObject
+
+        assertEquals(2, body.getValue("boardUid").jsonPrimitive.int)
+        assertEquals(7522, body.getValue("postUid").jsonPrimitive.int)
+        assertEquals(231, body.getValue("modifyTargetUid").jsonPrimitive.int)
+    }
+
+    @Test
     fun `원본 경로를 숨긴 게시글 상세 이미지와 EXIF 응답을 읽는다`() {
         val image = json.decodeFromString<ImageDto>(
             """

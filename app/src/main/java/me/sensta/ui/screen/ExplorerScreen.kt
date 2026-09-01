@@ -20,9 +20,6 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,21 +38,21 @@ fun ExplorerScreen() {
     val context = LocalContext.current
     val scrollBehavior = LocalScrollBehavior.current
     val explorerViewModel = LocalExplorerViewModel.current
-    val isLoading by remember { mutableStateOf(false) }
+    val isLoading by explorerViewModel.isLoading
     val posts by explorerViewModel.posts
     val pullToRefreshState = rememberPullToRefreshState()
-    var notFound by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         // 스크롤 상태를 초기화해서 topBar가 펼쳐진 상태로 만들기
         scrollBehavior.state.heightOffset = 0f
+
+        explorerViewModel.refreshOnEnter()
 
         // ExplorerViewModel에서 전달된 이벤트들에 따라 메시지 출력하기
         explorerViewModel.uiEvent.collect { event ->
             when (event) {
                 is ExplorerUiEvent.UnableToFindPosts -> {
                     Toast.makeText(context, "게시글을 더 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
-                    notFound = true
                 }
 
                 is ExplorerUiEvent.UnableToFindRecentHashtags -> {
@@ -75,7 +72,7 @@ fun ExplorerScreen() {
             .pullToRefresh(
                 state = pullToRefreshState,
                 isRefreshing = isLoading,
-                onRefresh = { explorerViewModel.search(0, "") }
+                onRefresh = { explorerViewModel.search(explorerViewModel.aiDescOption, "") }
             )
     ) {
         Column(
@@ -88,9 +85,11 @@ fun ExplorerScreen() {
 
             when (val postResponse = posts) {
                 is NuboResponse.Loading -> {
-                    if (!notFound) {
-                        LoadingScreen()
-                    } else {
+                    LoadingScreen()
+                }
+
+                is NuboResponse.Success -> {
+                    if (postResponse.data.isEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Icon(
                             imageVector = Icons.Default.BrokenImage,
@@ -101,17 +100,13 @@ fun ExplorerScreen() {
                         Text(text = "게시글을 찾을 수 없습니다")
                         Spacer(modifier = Modifier.height(32.dp))
                         Button(onClick = {
-                            explorerViewModel.search(0, "")
-                            notFound = false
+                            explorerViewModel.search(explorerViewModel.aiDescOption, "")
                         }) {
                             Text(text = "검색 초기화")
                         }
+                    } else {
+                        GridImage(postResponse.data)
                     }
-                }
-
-                is NuboResponse.Success -> {
-                    GridImage(postResponse.data)
-                    notFound = false
                 }
 
                 is NuboResponse.Error -> ErrorScreen()

@@ -22,10 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,13 +53,8 @@ fun PostCardFooter(
     val userViewModel = LocalUserChatViewModel.current
     val onMedia = LocalSenstaExtendedColors.current.onMedia
 
-    var likeState by remember(post.uid, post.liked) { mutableStateOf(post.liked) }
-    var likeCount by remember(post.uid, post.like) { mutableIntStateOf(post.like) }
-
     val doLike: () -> Unit = {
-        likeState = !likeState
-        homeViewModel.like(post.uid, likeState)
-        likeCount += if (likeState) 1 else -1
+        homeViewModel.like(post.uid, !post.liked, post.like)
     }
 
     Column(
@@ -125,14 +116,14 @@ fun PostCardFooter(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = doLike, modifier = Modifier.size(42.dp)) {
                     Icon(
-                        imageVector = if (likeState) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = if (likeState) "좋아요 취소" else "좋아요",
+                        imageVector = if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (post.liked) "좋아요 취소" else "좋아요",
                         modifier = Modifier.size(22.dp),
-                        tint = if (likeState) MaterialTheme.colorScheme.primary else onMedia
+                        tint = if (post.liked) MaterialTheme.colorScheme.primary else onMedia
                     )
                 }
                 Text(
-                    text = likeCount.toString(),
+                    text = post.like.toString(),
                     style = MaterialTheme.typography.labelLarge,
                     color = onMedia
                 )
