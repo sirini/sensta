@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import me.data.env.Env
 import me.sensta.ui.common.CommonDialog
+import me.sensta.ui.common.AchievementShelf
 import me.sensta.ui.common.UserReportDialog
 import me.sensta.ui.theme.LocalSenstaExtendedColors
 import me.sensta.viewmodel.local.LocalAuthViewModel
@@ -135,6 +136,11 @@ fun OtherUserInfo(latestPhoto: String?) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)
+        )
+
+        AchievementShelf(
+            badges = otherUser.badges,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
         )
 
         if (!isMyProfile) {

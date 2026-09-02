@@ -6,6 +6,7 @@ import me.data.remote.dto.auth.toEntity
 import me.data.remote.dto.auth.MobileRefreshRequestDto
 import me.data.remote.dto.auth.DeleteAccountRequestDto
 import me.data.remote.dto.common.toEntity
+import me.data.remote.dto.common.AchievementAcknowledgeRequestDto
 import me.domain.model.auth.NuboSignin
 import me.domain.model.auth.NuboSigninResult
 import me.domain.model.auth.NuboSignup
@@ -15,6 +16,7 @@ import me.domain.model.auth.NuboUpdateUserInfoParam
 import me.domain.model.auth.NuboVerifyCodeParam
 import me.domain.model.auth.emptyUser
 import me.domain.model.common.NuboResponseNothing
+import me.domain.model.common.NuboBadge
 import me.domain.repository.NuboAuthRepository
 import me.domain.repository.NuboResponse
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -24,6 +26,35 @@ class NuboAuthRepositoryImpl @Inject constructor(
     private val api: NuboAuthApi,
     private val sessionStore: UserSessionStore
 ) : NuboAuthRepository {
+
+    override suspend fun getUnannouncedAchievements(token: String): NuboResponse<List<NuboBadge>> {
+        return try {
+            val response = api.getUnannouncedAchievements("Bearer $token")
+            if (response.success) {
+                NuboResponse.Success(response.result.map { it.toEntity() })
+            } else {
+                NuboResponse.Error(response.error.ifBlank { "업적을 불러오지 못했습니다" })
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "업적을 불러오지 못했습니다", cause = e)
+        }
+    }
+
+    override suspend fun acknowledgeAchievements(
+        token: String,
+        keys: List<String>
+    ): NuboResponse<NuboResponseNothing> {
+        return try {
+            NuboResponse.Success(
+                api.acknowledgeAchievements(
+                    authorization = "Bearer $token",
+                    request = AchievementAcknowledgeRequestDto(keys)
+                ).toEntity()
+            )
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "업적 확인을 저장하지 못했습니다", cause = e)
+        }
+    }
 
     // 이메일 주소를 쓸 수 있는지 확인하기
     override suspend fun checkEmail(email: String): NuboResponse<NuboResponseNothing> {

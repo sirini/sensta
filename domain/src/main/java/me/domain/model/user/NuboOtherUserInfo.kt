@@ -1,5 +1,6 @@
 package me.domain.model.user
 
+import me.domain.model.common.NuboBadge
 import java.time.LocalDateTime
 
 // 다른 사용자의 기본 정보 요청에 대한 응답 엔티티
@@ -20,5 +21,6 @@ data class NuboOtherUserInfoResult(
     val signup: LocalDateTime,
     val signin: LocalDateTime,
     val admin: Boolean,
-    val blocked: Boolean
+    val blocked: Boolean,
+    val badges: List<NuboBadge> = emptyList()
 )

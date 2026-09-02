@@ -12,6 +12,7 @@ import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.profile.ProfileView
 import me.sensta.viewmodel.ProfileStudioViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAchievementViewModel
 import me.sensta.viewmodel.local.LocalNotificationViewModel
 import me.sensta.viewmodel.uievent.ProfileUiEvent
 
@@ -21,15 +22,18 @@ fun ProfileScreen() {
     val context = LocalContext.current
     val scrollBehavior = LocalScrollBehavior.current
     val authViewModel = LocalAuthViewModel.current
+    val achievementViewModel = LocalAchievementViewModel.current
     val notiViewModel = LocalNotificationViewModel.current
     val studioViewModel: ProfileStudioViewModel = hiltViewModel()
     val user by authViewModel.user
     val isLoading by authViewModel.isLoading
     val studio by studioViewModel.uiState.collectAsState()
+    val achievements by achievementViewModel.profileBadges
 
     LaunchedEffect(user.uid, user.token) {
         if (user.token.isNotBlank()) {
             studioViewModel.refresh()
+            achievementViewModel.loadProfileAchievements(user.uid)
         }
     }
 
@@ -99,6 +103,7 @@ fun ProfileScreen() {
         user.token.isEmpty() -> LoginScreen()
         else -> ProfileView(
             studio = studio,
+            achievements = achievements,
             onRefreshStudio = studioViewModel::refresh,
             onLoadMoreStudio = studioViewModel::loadMore,
             onSelectSort = studioViewModel::selectSort

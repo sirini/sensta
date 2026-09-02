@@ -95,6 +95,16 @@ class SocialContractDtoTest {
     }
 
     @Test
+    fun `공개 사용자 정보의 전체 업적을 보존한다`() {
+        val response = json.decodeFromString<OtherUserInfoDto>(
+            """{"success":true,"error":"","code":0,"result":{"uid":7,"name":"사진가","profile":"","level":1,"signature":"","signup":1000,"signin":2000,"admin":false,"blocked":false,"badges":[{"key":"sensta-app","name":"SENSTA 포토그래퍼","description":"앱으로 사진을 공유했습니다.","iconKey":"aperture","earnedAt":1000}]}}"""
+        )
+
+        val user = requireNotNull(response.result).toEntity()
+        assertEquals("sensta-app", user.badges.single().key)
+    }
+
+    @Test
     fun `사용자 안전 상태 응답을 앱 모델로 변환한다`() {
         val response = json.decodeFromString<UserSafetyStatusResponseDto>(
             """{"success":true,"error":"","code":0,"result":{"isReported":true,"isBannedByMe":true}}"""

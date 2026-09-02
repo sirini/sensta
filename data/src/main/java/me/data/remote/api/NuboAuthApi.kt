@@ -7,6 +7,8 @@ import me.data.remote.dto.auth.SignupDto
 import me.data.remote.dto.auth.UpdateAccessTokenDto
 import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.common.BooleanResponseDto
+import me.data.remote.dto.common.AchievementAcknowledgeRequestDto
+import me.data.remote.dto.common.AchievementListResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -15,12 +17,24 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.HTTP
 import retrofit2.http.Header
+import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
 
 interface NuboAuthApi {
+    @GET("auth/user/achievements")
+    suspend fun getUnannouncedAchievements(
+        @Header("Authorization") authorization: String
+    ): AchievementListResponseDto
+
+    @PATCH("auth/user/achievements")
+    suspend fun acknowledgeAchievements(
+        @Header("Authorization") authorization: String,
+        @Body request: AchievementAcknowledgeRequestDto
+    ): ResponseNothingDto
+
     // 구글 로그인 후 id_token값 전송하고 토큰 받아오기
     @FormUrlEncoded
     @POST("auth/android/google")

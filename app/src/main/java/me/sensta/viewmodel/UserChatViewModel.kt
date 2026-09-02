@@ -53,7 +53,8 @@ class UserChatViewModel @Inject constructor(
                 signup = LocalDateTime.now(),
                 signin = LocalDateTime.now(),
                 admin = false,
-                blocked = false
+                blocked = false,
+                badges = emptyList()
             )
         )
     val otherUser: State<NuboOtherUserInfoResult> get() = _otherUser

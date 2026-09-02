@@ -3,6 +3,8 @@ package me.data.remote.dto.user
 import kotlinx.serialization.Serializable
 import me.domain.model.user.NuboOtherUserInfo
 import me.domain.model.user.NuboOtherUserInfoResult
+import me.data.remote.dto.common.BadgeDto
+import me.data.remote.dto.common.toEntity
 import java.time.Instant
 import java.time.ZoneOffset
 
@@ -26,7 +28,8 @@ data class OtherUserInfoResultDto(
     val signup: Long,
     val signin: Long,
     val admin: Boolean,
-    val blocked: Boolean
+    val blocked: Boolean,
+    val badges: List<BadgeDto> = emptyList()
 )
 
 // 다른 사용자의 기본 정보 응답을 엔티티로 변환하는 매퍼
@@ -47,5 +50,6 @@ fun OtherUserInfoResultDto.toEntity() = NuboOtherUserInfoResult(
     signup = Instant.ofEpochMilli(signup).atZone(ZoneOffset.ofHours(9)).toLocalDateTime(),
     signin = Instant.ofEpochMilli(signin).atZone(ZoneOffset.ofHours(9)).toLocalDateTime(),
     admin = admin,
-    blocked = blocked
+    blocked = blocked,
+    badges = badges.map { it.toEntity() }
 )

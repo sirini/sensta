@@ -43,6 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import me.sensta.ui.common.LocalScrollBehavior
+import me.sensta.ui.common.AchievementCelebrationDialog
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.navigation.common.LocalSnackbar
 import me.sensta.ui.navigation.topbar.TopBar
@@ -61,6 +62,7 @@ import me.sensta.ui.screen.home.post.PostCardFullScreen
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 import me.sensta.push.PushEvent
 import me.sensta.viewmodel.AuthViewModel
+import me.sensta.viewmodel.AchievementViewModel
 import me.sensta.viewmodel.CommentViewModel
 import me.sensta.viewmodel.CommonViewModel
 import me.sensta.viewmodel.ExplorerViewModel
@@ -70,6 +72,7 @@ import me.sensta.viewmodel.PostViewViewModel
 import me.sensta.viewmodel.UploadViewModel
 import me.sensta.viewmodel.UserChatViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import me.sensta.viewmodel.local.LocalAchievementViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
 import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.viewmodel.local.LocalExplorerViewModel
@@ -79,6 +82,7 @@ import me.sensta.viewmodel.local.LocalPostViewViewModel
 import me.sensta.viewmodel.local.LocalUploadViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.CommentUiEvent
+import me.sensta.viewmodel.uievent.UploadUiEvent
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     data object Config : Screen("config", "설정", Icons.Default.Settings)
@@ -100,6 +104,7 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val context = LocalContext.current
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = hiltViewModel()
+    val achievementViewModel: AchievementViewModel = hiltViewModel()
     val commonViewModel: CommonViewModel = hiltViewModel()
     val commentViewModel: CommentViewModel = hiltViewModel()
     val explorerViewmodel: ExplorerViewModel = hiltViewModel()
@@ -115,6 +120,15 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val postUid by commonViewModel.postUid
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val user by authViewModel.user
+    val achievementQueue by achievementViewModel.queue
+
+    LaunchedEffect(user.uid, user.token) {
+        if (user.uid > 0 && user.token.isNotBlank()) {
+            achievementViewModel.loadProfileAchievements(user.uid)
+            achievementViewModel.check(user.token)
+        }
+    }
 
     // 댓글 작성 다이얼로그는 모든 화면에서 열릴 수 있으므로 결과도 앱 공통 영역에서 처리한다.
     LaunchedEffect(commentViewModel, snackbarHostState) {
@@ -135,11 +149,10 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                     "댓글이 삭제되었습니다",
                     Toast.LENGTH_SHORT
                 ).show()
-                CommentUiEvent.WroteComment -> Toast.makeText(
-                    context,
-                    "댓글을 작성했습니다",
-                    Toast.LENGTH_SHORT
-                ).show()
+                CommentUiEvent.WroteComment -> {
+                    Toast.makeText(context, "댓글을 작성했습니다", Toast.LENGTH_SHORT).show()
+                    achievementViewModel.check(authViewModel.user.value.token)
+                }
                 CommentUiEvent.CommentEdited -> Toast.makeText(
                     context,
                     "댓글을 수정했습니다",
@@ -169,7 +182,16 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
         }
     }
 
+    LaunchedEffect(uploadViewModel, achievementViewModel) {
+        uploadViewModel.uiEvent.collect { event ->
+            if (event is UploadUiEvent.PostUploaded) {
+                achievementViewModel.check(authViewModel.user.value.token)
+            }
+        }
+    }
+
     CompositionLocalProvider(
+        LocalAchievementViewModel provides achievementViewModel,
         LocalNavController provides navController,
         LocalAuthViewModel provides authViewModel,
         LocalCommonViewModel provides commonViewModel,
@@ -239,6 +261,20 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                 exit = fadeOut() + slideOutVertically(),
             ) {
                 PostCardFullScreen()
+            }
+
+            achievementQueue.firstOrNull()?.let { badge ->
+                AchievementCelebrationDialog(
+                    badge = badge,
+                    remaining = achievementQueue.size - 1,
+                    onConfirm = { achievementViewModel.acknowledgeCurrent(user.token) },
+                    onDismissRequest = { achievementViewModel.acknowledgeCurrent(user.token) },
+                    onViewProfile = {
+                        achievementViewModel.acknowledgeCurrent(user.token) {
+                            navController.navigate(Screen.Profile.route) { launchSingleTop = true }
+                        }
+                    }
+                )
             }
         }
     }

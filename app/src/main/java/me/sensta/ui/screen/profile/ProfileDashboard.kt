@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import me.domain.model.board.NuboStudioSort
+import me.domain.model.common.NuboBadge
+import me.sensta.ui.common.AchievementShelf
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.ProfileStudioUiState
@@ -35,6 +37,7 @@ import java.util.Locale
 @Composable
 fun ProfileView(
     studio: ProfileStudioUiState,
+    achievements: List<NuboBadge>,
     onRefreshStudio: () -> Unit,
     onLoadMoreStudio: () -> Unit,
     onSelectSort: (NuboStudioSort) -> Unit
@@ -78,6 +81,11 @@ fun ProfileView(
         }
 
         StudioSummary(studio)
+
+        AchievementShelf(
+            badges = achievements,
+            modifier = Modifier.padding(vertical = 10.dp)
+        )
 
         PrimaryTabRow(selectedTabIndex = selectedTab.intValue) {
             Tab(
