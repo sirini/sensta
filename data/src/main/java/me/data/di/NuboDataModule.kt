@@ -2,14 +2,17 @@
 
 package me.data.di
 
+import android.content.Context
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
-import me.data.diagnostics.NuboNetworkDiagnosticsInterceptor
 import me.data.auth.UserSessionStore
+import me.data.diagnostics.NuboClientIdentityInterceptor
+import me.data.diagnostics.NuboNetworkDiagnosticsInterceptor
 import me.data.remote.api.NuboAuthApi
 import me.data.remote.api.NuboBoardApi
 import me.data.remote.api.NuboNotificationApi
@@ -38,7 +41,8 @@ object NuboDataModule {
     // 민감한 값은 제외하고 요청 성공 여부와 소요 시간을 Logcat에 남긴다.
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(NuboClientIdentityInterceptor(context))
         .addInterceptor(NuboNetworkDiagnosticsInterceptor())
         .build()
 

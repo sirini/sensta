@@ -5,5 +5,6 @@ data class NuboWriter(
     val uid: Int,
     val name: String,
     val profile: String,
-    val signature: String
+    val signature: String,
+    val badges: List<NuboBadge> = emptyList()
 )

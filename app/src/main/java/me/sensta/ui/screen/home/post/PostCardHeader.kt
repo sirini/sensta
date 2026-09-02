@@ -55,10 +55,7 @@ fun PostCardHeader(writer: NuboWriter) {
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
-                Text(
-                    text = writer.name,
-                    style = MaterialTheme.typography.titleSmall
-                )
+                WriterName(writer = writer, style = MaterialTheme.typography.titleSmall)
                 Text(
                     text = "PHOTOGRAPHER",
                     style = MaterialTheme.typography.labelSmall.copy(

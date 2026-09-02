@@ -56,7 +56,19 @@ class BoardContractDtoTest {
                   "comment": 0,
                   "like": 0,
                   "liked": false,
-                  "writer": {"uid":1,"name":"사진가","profile":"/profile.webp","signature":""}
+                  "writer": {
+                    "uid":1,
+                    "name":"사진가",
+                    "profile":"/profile.webp",
+                    "signature":"",
+                    "badges":[{
+                      "key":"sensta-app",
+                      "name":"SENSTA 앱 포토그래퍼",
+                      "description":"SENSTA 앱으로 사진을 공유한 사용자입니다.",
+                      "iconKey":"aperture",
+                      "earnedAt":1787135276537
+                    }]
+                  }
                 }],
                 "blackList": [],
                 "isAdmin": false
@@ -68,6 +80,7 @@ class BoardContractDtoTest {
         assertTrue(response.success)
         assertEquals(7522, response.result.posts.single().uid)
         assertEquals("/upload/thumbnails/photo.webp", response.result.posts.single().cover)
+        assertEquals("sensta-app", response.result.posts.single().writer.badges.single().key)
     }
 
     @Test

@@ -83,8 +83,8 @@ fun PostCardFooter(
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
-                Text(
-                    text = post.writer.name,
+                WriterName(
+                    writer = post.writer,
                     style = MaterialTheme.typography.titleMedium,
                     color = onMedia
                 )

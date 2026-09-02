@@ -9,7 +9,8 @@ data class WriterDto(
     val uid: Int,
     val name: String,
     val profile: String,
-    val signature: String
+    val signature: String,
+    val badges: List<BadgeDto> = emptyList()
 )
 
 // 게시글 작성자 JSON 응답을 엔티티로 변환하는 매퍼
@@ -17,5 +18,6 @@ fun WriterDto.toEntity() = NuboWriter(
     uid = uid,
     name = name,
     profile = profile,
-    signature = signature
+    signature = signature,
+    badges = badges.map { it.toEntity() }
 )
