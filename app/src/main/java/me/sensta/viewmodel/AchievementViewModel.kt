@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.domain.model.common.NuboBadge
@@ -26,23 +27,19 @@ class AchievementViewModel @Inject constructor(
     private val _profileBadges = mutableStateOf<List<NuboBadge>>(emptyList())
     val profileBadges: State<List<NuboBadge>> get() = _profileBadges
 
-    private var checking = false
-    private var acknowledging = false
+    private var checkJob: Job? = null
+    private var acknowledgeJob: Job? = null
+    private var profileJob: Job? = null
     private var profileUserUid = 0
 
     fun check(token: String) {
-        if (token.isBlank() || checking || acknowledging) return
-        viewModelScope.launch {
-            checking = true
-            try {
-                getUnannouncedAchievementsUseCase(token).handle { badges ->
-                    _queue.value = badges
-                    if (badges.isNotEmpty()) {
-                        _profileBadges.value = (_profileBadges.value + badges).distinctBy { it.key }
-                    }
+        if (token.isBlank() || checkJob?.isActive == true || acknowledgeJob?.isActive == true) return
+        checkJob = viewModelScope.launch {
+            getUnannouncedAchievementsUseCase(token).handle { badges ->
+                _queue.value = badges
+                if (badges.isNotEmpty()) {
+                    _profileBadges.value = (_profileBadges.value + badges).distinctBy { it.key }
                 }
-            } finally {
-                checking = false
             }
         }
     }
@@ -54,7 +51,8 @@ class AchievementViewModel @Inject constructor(
             return
         }
         profileUserUid = userUid
-        viewModelScope.launch {
+        profileJob?.cancel()
+        profileJob = viewModelScope.launch {
             getOtherUserInfoUseCase(userUid).collect { result ->
                 result.handle { user ->
                     if (profileUserUid == userUid) _profileBadges.value = user.badges
@@ -65,19 +63,26 @@ class AchievementViewModel @Inject constructor(
 
     fun acknowledgeCurrent(token: String, onAcknowledged: () -> Unit = {}) {
         val current = _queue.value.firstOrNull() ?: return
-        if (token.isBlank() || acknowledging) return
-        viewModelScope.launch {
-            acknowledging = true
-            try {
-                acknowledgeAchievementsUseCase(token, listOf(current.key)).handle { response ->
-                    if (response.success) {
-                        _queue.value = _queue.value.drop(1)
-                        onAcknowledged()
-                    }
+        if (token.isBlank() || acknowledgeJob?.isActive == true) return
+        acknowledgeJob = viewModelScope.launch {
+            acknowledgeAchievementsUseCase(token, listOf(current.key)).handle { response ->
+                if (response.success) {
+                    _queue.value = _queue.value.drop(1)
+                    onAcknowledged()
                 }
-            } finally {
-                acknowledging = false
             }
         }
+    }
+
+    fun reset() {
+        checkJob?.cancel()
+        acknowledgeJob?.cancel()
+        profileJob?.cancel()
+        checkJob = null
+        acknowledgeJob = null
+        profileJob = null
+        profileUserUid = 0
+        _queue.value = emptyList()
+        _profileBadges.value = emptyList()
     }
 }

@@ -127,6 +127,8 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
         if (user.uid > 0 && user.token.isNotBlank()) {
             achievementViewModel.loadProfileAchievements(user.uid)
             achievementViewModel.check(user.token)
+        } else {
+            achievementViewModel.reset()
         }
     }
 
