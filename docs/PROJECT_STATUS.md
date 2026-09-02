@@ -7,13 +7,13 @@
 
 ## 결정
 
-- 2.0 개발은 `feat/sensta-2.0` 브랜치에서 기능 단위로 검증·커밋·푸시한다.
+- 현재 Android 유지보수의 기준은 Windows checkout의 `main`이며 기능 단위로 검증·커밋·푸시한다.
 - 빌드 기반은 JDK 17, Gradle 9.5, AGP 9.3, Kotlin 2.4.10, compile SDK 37과 target SDK 36으로 고정한다.
 - 최소 지원 버전은 Android 8(API 26)로 낮춘다.
 - PC 장애에 대비해 검증된 기능 단위마다 작게 커밋하고 즉시 GitHub 원격 브랜치에 푸시한다.
 - 실제 기기용 debug 앱은 `me.sensta.debug`로 설치해 Play 앱 `me.sensta`와 데이터·서명을 분리한다.
 - 500px·Unsplash를 참고해 사진 중심 정보 구조와 시각 밀도로 홈 피드와 사진가 프로필을 개편한다.
-- `feat/sensta-2.0`을 `main`에 병합할 때 NUBO·GOAPI README 수준으로 Sensta README의 구조·설치·설정·테스트·배포 문서를 전면 개편한다.
+- NUBO·GOAPI와 함께 계약을 바꾸는 작업은 세 저장소의 상태·API·배포 문서를 같은 세션에서 갱신한다.
 - Kotlin annotation processing은 KAPT 대신 KSP를 사용한다.
 - 최신 Nubo와 GOAPI의 API contract v1을 Android 네트워크 계층의 기준으로 삼는다.
 - 새로 작성하거나 의미를 바로잡는 코드 주석은 한국어로 작성한다.
@@ -112,6 +112,9 @@
   통과했다. 서명된 Release APK는 v2 서명과 versionCode 26·versionName 2.1.3을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
   `34d73c001ae09f8e8043387eb21cd75944fa9f4484e0f6d0a194dbe9e777cf4d`이다.
+- Galaxy S25 Edge의 2.1.3 debug 앱에서 관리자 수여 `유지보수상`의 축하창, HTTP 200 확인 저장,
+  프로필 업적 2개에서 3개로 증가와 재실행 시 미반복을 확인했다. 3탭 프로필 개편 뒤 APK도 설치했지만
+  기기가 잠금·절전 상태여서 최종 시각 확인은 다음 QA로 남겼다.
 - `./scripts/check.sh`(`test`, `lintDebug`, `assembleDebug`, `assembleRelease`, `bundleRelease`) 성공.
 - debug APK의 패키지 `me.sensta.debug`, 버전 `2.0.0-debug`, compile SDK 37과 target SDK 36을 확인했다.
 - `:data:testDebugUnitTest` 인증 계약 테스트 성공.
@@ -166,8 +169,10 @@
 
 ## 다음 작업
 
-- NUBO Web의 `/api/board/my/studio` 프록시 커밋은 아직 운영 웹에 배포되지 않아 404이므로, 웹에서도
-  같은 기능을 사용할 시 NUBO 배포 후 다시 검증한다. Android는 `/goapi` 직접 경로를 사용해 영향이 없다.
+- 최종 AAB `app/build/outputs/bundle/release/app-release.aab`를 Play Console에 2.1.3(26)으로 올리고
+  내부 테스트 또는 단계적 배포를 시작한다.
+- Galaxy 잠금 해제 후 `작품·정보·업적` 탭 전환, 누적 조회·댓글 요약 제거, 2열 업적 진열장과 축하창의
+  업적 탭 이동을 최종 확인한다.
 - Android 앱 안에서 업로드 초안과 대기열을 영속화하고 WorkManager 기반 백그라운드 재시도·진행 상태를
   제공할 수 있는지 현재 multipart 업로드 흐름을 기준으로 설계한다.
 - 시스템 공유 선택 화면, TalkBack 이미지 설명과 GPS 포함 실제 카메라 사진의 운영 업로드 결과를
@@ -176,11 +181,11 @@
   검토한다.
 - Galaxy 원본 HEIF와 EXIF가 풍부한 실제 JPEG, 9장 조합의 메모리 사용량과 100MB 경계를 추가 검증한다.
 - 운영 업로드가 허용된 테스트 계정으로 서버 변환과 상세 화면 EXIF를 확인한 뒤 Play 내부 테스트 배포 여부를 결정한다.
-- 프로덕션 2.0.2의 비정상 종료, ANR, 업로드 실패 지표를 계속 확인한다.
+- 2.1.3 배포 뒤 비정상 종료, ANR, 업로드와 업적 확인 실패 지표를 계속 확인한다.
 - Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play 정책 상태에서 프로덕션 `versionCode 22`의 API 36 반영 상태를 확인한다.
+- Play 심사·정책 상태에서 `versionCode 26`의 API 36 반영과 출시 결과를 확인한다.
 
 ## 백엔드 검토가 필요한 후순위
 
