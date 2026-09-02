@@ -16,8 +16,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import me.domain.model.board.NuboStudioSort
 import me.domain.model.common.NuboBadge
-import me.sensta.ui.common.AchievementShelf
+import me.sensta.ui.common.AchievementShowcase
 import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.viewmodel.ProfileStudioUiState
@@ -38,6 +36,8 @@ import java.util.Locale
 fun ProfileView(
     studio: ProfileStudioUiState,
     achievements: List<NuboBadge>,
+    selectedTab: ProfileTab,
+    onSelectTab: (ProfileTab) -> Unit,
     onRefreshStudio: () -> Unit,
     onLoadMoreStudio: () -> Unit,
     onSelectSort: (NuboStudioSort) -> Unit
@@ -46,7 +46,6 @@ fun ProfileView(
     val commonViewModel = LocalCommonViewModel.current
     val navController = LocalNavController.current
     val user by authViewModel.user
-    val selectedTab = rememberSaveable { mutableIntStateOf(STUDIO_TAB) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -82,27 +81,19 @@ fun ProfileView(
 
         StudioSummary(studio)
 
-        AchievementShelf(
-            badges = achievements,
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
-
-        PrimaryTabRow(selectedTabIndex = selectedTab.intValue) {
-            Tab(
-                selected = selectedTab.intValue == STUDIO_TAB,
-                onClick = { selectedTab.intValue = STUDIO_TAB },
-                text = { Text("내 작품") }
-            )
-            Tab(
-                selected = selectedTab.intValue == INFO_TAB,
-                onClick = { selectedTab.intValue = INFO_TAB },
-                text = { Text("내 정보") }
-            )
+        PrimaryTabRow(selectedTabIndex = selectedTab.ordinal) {
+            ProfileTab.entries.forEach { tab ->
+                Tab(
+                    selected = selectedTab == tab,
+                    onClick = { onSelectTab(tab) },
+                    text = { Text(tab.label) }
+                )
+            }
         }
 
         Box(modifier = Modifier.weight(1f)) {
-            when (selectedTab.intValue) {
-                STUDIO_TAB -> ProfileStudioTab(
+            when (selectedTab) {
+                ProfileTab.Works -> ProfileStudioTab(
                     state = studio,
                     onRefresh = onRefreshStudio,
                     onLoadMore = onLoadMoreStudio,
@@ -119,7 +110,8 @@ fun ProfileView(
                         }
                     }
                 )
-                INFO_TAB -> ProfileInfoTab()
+                ProfileTab.Info -> ProfileInfoTab()
+                ProfileTab.Achievements -> AchievementShowcase(achievements)
             }
         }
     }
@@ -127,31 +119,15 @@ fun ProfileView(
 
 @Composable
 private fun StudioSummary(state: ProfileStudioUiState) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ProfileMetric("작품", state.summary.postCount, state.isLoading)
-            ProfileMetric("사진", state.summary.photoCount, state.isLoading)
-            ProfileMetric("받은 좋아요", state.summary.likeCount, state.isLoading)
-        }
-        Text(
-            text = if (state.isLoading) {
-                "누적 조회 — · 댓글 —"
-            } else {
-                "누적 조회 ${state.summary.viewCount.toCountText()} · 댓글 ${state.summary.commentCount.toCountText()}"
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 6.dp)
-        )
+        ProfileMetric("작품", state.summary.postCount, state.isLoading)
+        ProfileMetric("사진", state.summary.photoCount, state.isLoading)
+        ProfileMetric("받은 좋아요", state.summary.likeCount, state.isLoading)
     }
 }
 
@@ -173,5 +149,8 @@ private fun ProfileMetric(label: String, value: Long, isLoading: Boolean) {
 
 internal fun Long.toCountText(): String = String.format(Locale.KOREAN, "%,d", this)
 
-private const val STUDIO_TAB = 0
-private const val INFO_TAB = 1
+enum class ProfileTab(val label: String) {
+    Works("작품"),
+    Info("정보"),
+    Achievements("업적")
+}

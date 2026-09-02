@@ -27,6 +27,9 @@ class AchievementViewModel @Inject constructor(
     private val _profileBadges = mutableStateOf<List<NuboBadge>>(emptyList())
     val profileBadges: State<List<NuboBadge>> get() = _profileBadges
 
+    private val _profileAchievementTabRequested = mutableStateOf(false)
+    val profileAchievementTabRequested: State<Boolean> get() = _profileAchievementTabRequested
+
     private var checkJob: Job? = null
     private var acknowledgeJob: Job? = null
     private var profileJob: Job? = null
@@ -74,6 +77,14 @@ class AchievementViewModel @Inject constructor(
         }
     }
 
+    fun requestProfileAchievementTab() {
+        _profileAchievementTabRequested.value = true
+    }
+
+    fun consumeProfileAchievementTabRequest() {
+        _profileAchievementTabRequested.value = false
+    }
+
     fun reset() {
         checkJob?.cancel()
         acknowledgeJob?.cancel()
@@ -84,5 +95,6 @@ class AchievementViewModel @Inject constructor(
         profileUserUid = 0
         _queue.value = emptyList()
         _profileBadges.value = emptyList()
+        _profileAchievementTabRequested.value = false
     }
 }

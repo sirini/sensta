@@ -6,10 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.profile.ProfileView
+import me.sensta.ui.screen.profile.ProfileTab
 import me.sensta.viewmodel.ProfileStudioViewModel
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalAchievementViewModel
@@ -29,6 +32,15 @@ fun ProfileScreen() {
     val isLoading by authViewModel.isLoading
     val studio by studioViewModel.uiState.collectAsState()
     val achievements by achievementViewModel.profileBadges
+    val openAchievementTab by achievementViewModel.profileAchievementTabRequested
+    val selectedTabIndex = rememberSaveable { mutableIntStateOf(ProfileTab.Works.ordinal) }
+
+    LaunchedEffect(openAchievementTab) {
+        if (openAchievementTab) {
+            selectedTabIndex.intValue = ProfileTab.Achievements.ordinal
+            achievementViewModel.consumeProfileAchievementTabRequest()
+        }
+    }
 
     LaunchedEffect(user.uid, user.token) {
         if (user.token.isNotBlank()) {
@@ -104,6 +116,8 @@ fun ProfileScreen() {
         else -> ProfileView(
             studio = studio,
             achievements = achievements,
+            selectedTab = ProfileTab.entries[selectedTabIndex.intValue],
+            onSelectTab = { selectedTabIndex.intValue = it.ordinal },
             onRefreshStudio = studioViewModel::refresh,
             onLoadMoreStudio = studioViewModel::loadMore,
             onSelectSort = studioViewModel::selectSort

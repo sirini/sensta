@@ -2,8 +2,8 @@
 
 ## 현재 목표
 
-- 게시글·댓글 수정/삭제와 화면 간 상태 동기화, 탐색 자동 갱신을 반영한 2.1.2(`versionCode 25`)를
-  Google Play에 제출한다.
+- 영구 업적 배지와 새 업적 축하 화면, `작품·정보·업적` 프로필 구조를 반영한
+  2.1.3(`versionCode 26`)을 Google Play에 제출한다.
 
 ## 결정
 
@@ -100,9 +100,18 @@
 - GOAPI의 인증 기반 `GET /board/my/studio` 계약을 Android 데이터·도메인 계층에 연결하고, 내정보의
   기본 화면을 프로필·누적 성과·작품별 조회/좋아요/댓글/업로드일과 네 가지 정렬을 제공하는 스튜디오로
   개편했다. 기존 계정 상세와 수정·세션·탈퇴 기능은 `내 정보` 탭에 유지했다.
+- GOAPI의 영구 업적 계약을 연결해 피드·상세 작성자 인라인 배지, 새 업적 순차 축하 화면과 본인·다른
+  사용자 프로필 진열장을 추가했다. 실기기에서 관리자 수여 `유지보수상`의 1회 축하, 확인 저장과
+  프로필 반영을 검증했다.
+- 내정보를 `작품·정보·업적` 세 탭으로 재구성하고 업적은 전용 2열 진열장으로 옮겼다. 상단 요약에서
+  누적 조회·댓글을 제거해 작품 목록 공간을 넓히고, 축하창의 진열장 버튼은 업적 탭으로 바로 이동한다.
 
 ## 검증
 
+- 2.1.3 전체 `test`, `lintDebug`, `assembleDebug`, `assembleQa`, `assembleRelease`, `bundleRelease`를
+  통과했다. 서명된 Release APK는 v2 서명과 versionCode 26·versionName 2.1.3을 확인했고 AAB는
+  `jar verified.`를 통과했다. AAB SHA-256은
+  `2e4d329d32d8ddb2128f8864b784165e7e9b0fa66574c212388a479169538377`이다.
 - `./scripts/check.sh`(`test`, `lintDebug`, `assembleDebug`, `assembleRelease`, `bundleRelease`) 성공.
 - debug APK의 패키지 `me.sensta.debug`, 버전 `2.0.0-debug`, compile SDK 37과 target SDK 36을 확인했다.
 - `:data:testDebugUnitTest` 인증 계약 테스트 성공.

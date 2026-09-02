@@ -3,15 +3,31 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.1.2` (`versionCode 25`)
+- 버전: `2.1.3` (`versionCode 26`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `58008d2abb6cecfd5563dbd99d7e8665ee12e4119ea4742bce4b02e29e42ea0f`
+- AAB SHA-256: `2e4d329d32d8ddb2128f8864b784165e7e9b0fa66574c212388a479169538377`
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
+
+## 2.1.3 변경사항 노트
+
+권장 출시명은 `2.1.3 (26)`이다. 아래 문안을 Play Console의 한국어 변경사항에 사용한다.
+
+```text
+<ko-KR>
+프로필에서 나만의 업적을 모아보세요.
+
+• 작품·정보·업적 3개 탭으로 프로필 화면 개편
+• 획득한 업적을 한눈에 보는 전용 진열장 추가
+• 새 업적 획득 시 축하 화면 제공
+• SENSTA 앱으로 올린 사진에 앱 사용자 배지 표시
+• 프로필 화면 공간과 전반적인 사용성 개선
+</ko-KR>
+```
 
 ## 2.1.2 변경사항 노트
 

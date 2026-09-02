@@ -273,6 +273,7 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                     onDismissRequest = { achievementViewModel.acknowledgeCurrent(user.token) },
                     onViewProfile = {
                         achievementViewModel.acknowledgeCurrent(user.token) {
+                            achievementViewModel.requestProfileAchievementTab()
                             navController.navigate(Screen.Profile.route) { launchSingleTop = true }
                         }
                     }
