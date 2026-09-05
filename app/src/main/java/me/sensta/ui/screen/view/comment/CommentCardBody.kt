@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Delete
@@ -40,7 +39,7 @@ import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 
 @Composable
-fun CommentCardBody(comment: NuboComment, likeCount: Int) {
+fun CommentCardBody(comment: NuboComment) {
     val authViewModel = LocalAuthViewModel.current
     val commentViewModel = LocalCommentViewModel.current
     val commonViewModel = LocalCommonViewModel.current
@@ -66,21 +65,10 @@ fun CommentCardBody(comment: NuboComment, likeCount: Int) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${likeCount}개 좋아요",
-                    style = MaterialTheme.typography.bodySmall
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "${comment.submitted.format(CustomTime.simpleDate)}에 작성",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            Text(
+                text = comment.submitted.format(CustomTime.commentDate),
+                style = MaterialTheme.typography.bodySmall
+            )
 
             Row {
                 if (

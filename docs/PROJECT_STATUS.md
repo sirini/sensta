@@ -2,8 +2,8 @@
 
 ## 현재 목표
 
-- 영구 업적 배지와 새 업적 축하 화면, `작품·정보·업적` 프로필 구조를 반영한
-  2.1.3(`versionCode 26`)을 Google Play에 제출한다.
+- 댓글 답글, 세션 복원 안정화와 댓글 카드 가독성 개선을 반영한
+  2.1.4(`versionCode 27`)을 Google Play에 제출한다.
 
 ## 결정
 
@@ -107,12 +107,20 @@
   누적 조회·댓글을 제거해 작품 목록 공간을 넓히고, 축하창의 진열장 버튼은 업적 탭으로 바로 이동한다.
 - iOS와 같은 `POST /comment/reply`·`replyTargetUid` 계약을 연결하고, 댓글별 답글 버튼과 대상 작성자·
   원문 미리보기, 답글 들여쓰기 표시를 추가했다. 삭제된 댓글에는 답글 버튼을 노출하지 않는다.
+- 댓글과 답글 작성 시각을 `yy/MM/dd HH:mm`으로 줄이고, 좋아요 수를 본문 하단 대신 우측 상단 하트
+  옆에 표시했다. 답글 카드의 시작 여백은 48dp로 늘려 일반 댓글과 계층을 명확히 구분했다.
 - 저장된 로그인 정보를 앱 시작 시 refresh token으로 검증·회전하고, 한 시간 이상 지난 세션은 앱 복귀
   시 다시 갱신한다. 불완전하거나 서버에서 거부된 세션은 사용자와 로그인 단계 상태를 함께 비워
   이름 없는 `WELCOME BACK` 화면 대신 이메일 로그인 화면을 표시한다.
 
 ## 검증
 
+- 2.1.4 전체 `test`, `lintDebug`, `assembleDebug`, `assembleQa`, `assembleRelease`, `bundleRelease`를
+  통과했다. Release APK는 `me.sensta`, versionCode 27·versionName 2.1.4와 v2 서명을 확인했고 AAB는
+  `jar verified.`를 통과했다. AAB SHA-256은
+  `c5b65aa69b96e45f19c912b21deaddbff316456a294db3620ec99e47fa6b8046`이다.
+- Galaxy S25 Edge에 2.1.4 debug APK를 덮어 설치해 댓글의 짧은 작성 시각, 하트 옆 좋아요 수와
+  48dp 답글 들여쓰기를 확인했다. Android 로그에 비정상 종료는 없었다.
 - 2.1.3 전체 `test`, `lintDebug`, `assembleDebug`, `assembleQa`, `assembleRelease`, `bundleRelease`를
   통과했다. 서명된 Release APK는 v2 서명과 versionCode 26·versionName 2.1.3을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
@@ -181,12 +189,11 @@
 
 ## 다음 작업
 
-- 최종 AAB `app/build/outputs/bundle/release/app-release.aab`를 Play Console에 2.1.3(26)으로 올리고
+- 최종 AAB `app/build/outputs/bundle/release/app-release.aab`를 Play Console에 2.1.4(27)로 올리고
   내부 테스트 또는 단계적 배포를 시작한다.
 - Galaxy 잠금 해제 후 `작품·정보·업적` 탭 전환, 누적 조회·댓글 요약 제거, 2열 업적 진열장과 축하창의
   업적 탭 이동을 최종 확인한다.
-- Galaxy에서 일반 댓글과 답글 등록·들여쓰기·삭제된 원댓글 자리 보존, 로그아웃 및 만료 세션의 이메일
-  로그인 화면 전환을 확인한다.
+- Galaxy에서 삭제된 원댓글의 자리 보존과 만료된 실제 세션의 이메일 로그인 화면 전환을 추가 확인한다.
 - Android 앱 안에서 업로드 초안과 대기열을 영속화하고 WorkManager 기반 백그라운드 재시도·진행 상태를
   제공할 수 있는지 현재 multipart 업로드 흐름을 기준으로 설계한다.
 - 시스템 공유 선택 화면, TalkBack 이미지 설명과 GPS 포함 실제 카메라 사진의 운영 업로드 결과를
@@ -195,11 +202,11 @@
   검토한다.
 - Galaxy 원본 HEIF와 EXIF가 풍부한 실제 JPEG, 9장 조합의 메모리 사용량과 100MB 경계를 추가 검증한다.
 - 운영 업로드가 허용된 테스트 계정으로 서버 변환과 상세 화면 EXIF를 확인한 뒤 Play 내부 테스트 배포 여부를 결정한다.
-- 2.1.3 배포 뒤 비정상 종료, ANR, 업로드와 업적 확인 실패 지표를 계속 확인한다.
+- 2.1.4 배포 뒤 비정상 종료, ANR, 업로드와 업적 확인 실패 지표를 계속 확인한다.
 - Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play 심사·정책 상태에서 `versionCode 26`의 API 36 반영과 출시 결과를 확인한다.
+- Play 심사·정책 상태에서 `versionCode 27`의 API 36 반영과 출시 결과를 확인한다.
 
 ## 백엔드 검토가 필요한 후순위
 

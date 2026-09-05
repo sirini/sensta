@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter
 object CustomTime {
     val fullDate = DateTimeFormatter.ofPattern("yy년 MM월 dd일 HH시 mm분")
     val simpleDate = DateTimeFormatter.ofPattern("yy년 MM월 dd일")
+    val commentDate = DateTimeFormatter.ofPattern("yy/MM/dd HH:mm")
 }
 
 fun CustomTime.now(): LocalDateTime {

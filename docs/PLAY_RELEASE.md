@@ -3,15 +3,31 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.1.3` (`versionCode 26`)
+- 버전: `2.1.4` (`versionCode 27`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `34d73c001ae09f8e8043387eb21cd75944fa9f4484e0f6d0a194dbe9e777cf4d`
+- AAB SHA-256: `c5b65aa69b96e45f19c912b21deaddbff316456a294db3620ec99e47fa6b8046`
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
+
+## 2.1.4 변경사항 노트
+
+권장 출시명은 `2.1.4 (27)`이다. 아래 문안을 Play Console의 한국어 변경사항에 사용한다.
+
+```text
+<ko-KR>
+댓글과 답글을 더 편리하게 이용해 보세요.
+
+• 댓글에 답글 작성 기능 추가
+• 답글 대상과 원문 미리보기 제공
+• 작성 시각과 답글 구분 표시 개선
+• 댓글 좋아요 수를 하트 옆에 표시
+• 로그인 세션과 Google 로그인 안정성 개선
+</ko-KR>
+```
 
 ## 2.1.3 변경사항 노트
 
@@ -137,7 +153,7 @@ Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용�
 
 ## 현재 Play 배포 상태
 
-2.1.3(`versionCode 26`)은 2026-09-03에 서명·축소 빌드와 AAB 검증을 마친 Play 제출 후보이며, 이 세션에서는
+2.1.4(`versionCode 27`)은 2026-09-05에 서명·축소 빌드와 AAB 검증을 마친 Play 제출 후보이며, 이 세션에서는
 아직 Play Console 업로드·심사 제출을 하지 않았다. 제출 결과와 배포 비율은 Console 작업 뒤 이 절에
 추가한다.
 
@@ -188,7 +204,7 @@ Data safety에는 실제 운영 서버 동작을 다시 확인한 뒤 적어도 
 
 1. [운영 서버 배포](SERVER_DEPLOYMENT.md)에 따라 Sensta 2.0 계약을 포함한 NUBO·GOAPI 릴리스를
    `sensta.me`에 먼저 반영한다.
-2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.3의 `versionCode 26`이 더 큰지 확인한다.
+2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.4의 `versionCode 27`이 더 큰지 확인한다.
 3. Firebase 운영 설정, 업로드 인증서와 위 SHA-256이 일치하는 서명된 AAB를 사용한다.
 4. [Galaxy 실제 기기 테스트](DEVICE_TESTING.md)와 Play 내부 테스트에서 핵심 시나리오와 비정상 종료·ANR을 확인한다.
 5. 회사 사진 사용자 그룹으로 비공개 테스트와 피드백 수집을 진행한다.

@@ -31,6 +31,7 @@ import me.domain.model.board.NuboComment
 fun CommentCardHeader(
     comment: NuboComment,
     likeState: Boolean,
+    likeCount: Int,
     isReply: Boolean,
     onLikeClick: () -> Unit
 ) {
@@ -91,6 +92,11 @@ fun CommentCardHeader(
                     )
                 }
             }
+            Text(
+                text = likeCount.toString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

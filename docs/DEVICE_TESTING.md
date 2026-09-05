@@ -182,6 +182,14 @@ adb -d logcat | rg 'Sensta-Nubo|Sensta-App|Sensta-GoogleAuth|AndroidRuntime|FATA
   `UNREGISTERED_ON_API_CONSOLE`로 실패했다. Firebase에 `me.sensta.debug`와 해당 SHA-1을 추가한 뒤
   ID token 발급, Google 로그인, FCM 기기 등록과 프로필 후속 조회가 모두 HTTP 200으로 완료됐다.
 
+### 2026-09-05 2.1.4 댓글 카드 확인
+
+- `2.1.4-debug`를 로그인 세션을 유지한 채 덮어 설치하고 versionCode 27을 확인했다.
+- 일반 댓글과 답글의 작성 시각이 `yy/MM/dd HH:mm` 형식으로 표시되고 기존 `0개 좋아요` 문구가
+  사라진 것을 확인했다.
+- 좋아요 수가 우측 상단 하트 옆에 숫자로 표시되고, 답글 카드가 일반 댓글보다 36dp 더 들어간 총 48dp
+  시작 여백을 사용하는 것을 화면에서 확인했다.
+
 테스트가 끝나면 debug 앱만 제거할 수 있습니다.
 
 ```bash

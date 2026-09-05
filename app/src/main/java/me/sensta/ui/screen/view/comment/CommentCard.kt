@@ -20,7 +20,7 @@ fun CommentCard(comment: NuboComment) {
 
     Card(
         modifier = Modifier
-            .padding(start = if (isReply) 28.dp else 12.dp, end = 12.dp)
+            .padding(start = if (isReply) 48.dp else 12.dp, end = 12.dp)
             .fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
@@ -34,10 +34,10 @@ fun CommentCard(comment: NuboComment) {
             defaultElevation = 0.dp
         )
     ) {
-        CommentCardHeader(comment, comment.liked, isReply) {
+        CommentCardHeader(comment, comment.liked, comment.like, isReply) {
             commentViewModel.like(comment.uid, !comment.liked, comment.like)
         }
-        CommentCardBody(comment, comment.like)
+        CommentCardBody(comment)
     }
     Spacer(modifier = Modifier.height(12.dp))
 }
