@@ -13,8 +13,19 @@ class WriteCommentUseCase @Inject constructor(
         boardUid: Int,
         postUid: Int,
         content: String,
-        token: String
+        token: String,
+        replyTargetUid: Int? = null
     ) = flow {
-        emit(repository.writeComment(NuboWriteCommentParam(boardUid, postUid, content, token)))
+        emit(
+            repository.writeComment(
+                NuboWriteCommentParam(
+                    boardUid = boardUid,
+                    postUid = postUid,
+                    content = content,
+                    token = token,
+                    replyTargetUid = replyTargetUid
+                )
+            )
+        )
     }
 }

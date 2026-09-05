@@ -5,5 +5,6 @@ data class NuboWriteCommentParam(
     val boardUid: Int,
     val postUid: Int,
     val content: String,
-    val token: String
+    val token: String,
+    val replyTargetUid: Int? = null
 )

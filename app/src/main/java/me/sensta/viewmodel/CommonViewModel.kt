@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import me.domain.model.board.NuboComment
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +29,9 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     private var _showCommentDialog = mutableStateOf(false)
     val showCommentDialog: State<Boolean> get() = _showCommentDialog
 
+    private val _commentReplyTarget = mutableStateOf<NuboComment?>(null)
+    val commentReplyTarget: State<NuboComment?> get() = _commentReplyTarget
+
     // 이미 목록에서 가져왔던 사진 정보들 저장하기
     fun updatePostUid(postUid: Int) {
         _pagerIndex.intValue = 0
@@ -42,12 +46,21 @@ class CommonViewModel @Inject constructor() : ViewModel() {
     // 댓글 달기용 다이얼로그 띄우기
     fun openWriteCommentDialog(postUid: Int) {
         _postUid.intValue = postUid
+        _commentReplyTarget.value = null
+        _showCommentDialog.value = true
+    }
+
+    // 선택한 댓글을 답글 대상으로 지정하고 작성 다이얼로그를 연다.
+    fun openReplyCommentDialog(comment: NuboComment) {
+        _postUid.intValue = comment.postUid
+        _commentReplyTarget.value = comment
         _showCommentDialog.value = true
     }
 
     // 댓글 달기용 다이얼로그 닫기
     fun closeWriteCommentDialog() {
         _showCommentDialog.value = false
+        _commentReplyTarget.value = null
     }
 
     // 이미지 전체 화면으로 보기

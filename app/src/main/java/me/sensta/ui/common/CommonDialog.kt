@@ -28,6 +28,7 @@ fun CommonDialog(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
     icon: ImageVector,
+    confirmText: String = "확인",
     content: @Composable () -> Unit
 ) {
     BasicAlertDialog(
@@ -75,7 +76,7 @@ fun CommonDialog(
                         Text(text = "취소")
                     }
                     Button(onClick = onConfirm) {
-                        Text(text = "확인")
+                        Text(text = confirmText)
                     }
                 }
             }

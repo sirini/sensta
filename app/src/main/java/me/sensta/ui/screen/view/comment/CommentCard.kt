@@ -16,10 +16,11 @@ import me.sensta.viewmodel.local.LocalCommentViewModel
 @Composable
 fun CommentCard(comment: NuboComment) {
     val commentViewModel = LocalCommentViewModel.current
+    val isReply = comment.replyUid > 0 && comment.replyUid != comment.uid
 
     Card(
         modifier = Modifier
-            .padding(horizontal = 12.dp)
+            .padding(start = if (isReply) 28.dp else 12.dp, end = 12.dp)
             .fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
@@ -33,7 +34,7 @@ fun CommentCard(comment: NuboComment) {
             defaultElevation = 0.dp
         )
     ) {
-        CommentCardHeader(comment, comment.liked) {
+        CommentCardHeader(comment, comment.liked, isReply) {
             commentViewModel.like(comment.uid, !comment.liked, comment.like)
         }
         CommentCardBody(comment, comment.like)

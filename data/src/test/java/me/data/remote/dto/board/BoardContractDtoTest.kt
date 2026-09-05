@@ -6,12 +6,16 @@ import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import me.data.remote.api.NuboBoardApi
 import me.data.remote.dto.photo.ImageDto
 import me.data.remote.dto.photo.toEntity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.POST
 
 class BoardContractDtoTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -119,6 +123,20 @@ class BoardContractDtoTest {
         assertEquals(2, body.getValue("boardUid").jsonPrimitive.int)
         assertEquals(7522, body.getValue("postUid").jsonPrimitive.int)
         assertEquals(231, body.getValue("modifyTargetUid").jsonPrimitive.int)
+    }
+
+    @Test
+    fun `답글 요청은 전용 경로와 대상 댓글 필드를 사용한다`() {
+        val method = NuboBoardApi::class.java.declaredMethods.single { it.name == "replyComment" }
+        val fields = method.parameterAnnotations
+            .flatten()
+            .filterIsInstance<Field>()
+            .map(Field::value)
+        val post = requireNotNull(method.getAnnotation(POST::class.java))
+
+        assertEquals("comment/reply", post.value)
+        assertTrue(method.isAnnotationPresent(FormUrlEncoded::class.java))
+        assertTrue(fields.containsAll(listOf("boardUid", "postUid", "replyTargetUid", "content")))
     }
 
     @Test

@@ -42,6 +42,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.common.AchievementCelebrationDialog
 import me.sensta.ui.navigation.common.LocalNavController
@@ -117,11 +119,16 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val snackbarHostState = remember { SnackbarHostState() }
     val showFullScreen by commonViewModel.showFullScreen
     val showCommentDialog by commonViewModel.showCommentDialog
+    val commentReplyTarget by commonViewModel.commentReplyTarget
     val postUid by commonViewModel.postUid
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val user by authViewModel.user
     val achievementQueue by achievementViewModel.queue
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        authViewModel.refreshIfNeeded()
+    }
 
     LaunchedEffect(user.uid, user.token) {
         if (user.uid > 0 && user.token.isNotBlank()) {
@@ -248,9 +255,14 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                 // 댓글 작성하기 다이얼로그
                 if (showCommentDialog) {
                     ViewPostCommentDialog(
-                        onDismissRequest = { commonViewModel.closeWriteCommentDialog() }
+                        onDismissRequest = { commonViewModel.closeWriteCommentDialog() },
+                        replyTarget = commentReplyTarget
                     ) { content ->
-                        commentViewModel.write(postUid = postUid, content.trim())
+                        commentViewModel.write(
+                            postUid = postUid,
+                            content = content.trim(),
+                            replyTargetUid = commentReplyTarget?.uid
+                        )
                         commonViewModel.closeWriteCommentDialog()
                     }
                 }

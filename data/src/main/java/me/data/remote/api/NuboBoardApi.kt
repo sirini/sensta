@@ -125,6 +125,17 @@ interface NuboBoardApi {
         @Field("content") content: String
     ): WriteResponseDto
 
+    // 기존 댓글에 답글 작성하기
+    @FormUrlEncoded
+    @POST("comment/reply")
+    suspend fun replyComment(
+        @Header("Authorization") authorization: String,
+        @Field("boardUid") boardUid: Int,
+        @Field("postUid") postUid: Int,
+        @Field("replyTargetUid") replyTargetUid: Int,
+        @Field("content") content: String
+    ): WriteResponseDto
+
     // 댓글 목록 가져오기
     @GET("comment/list")
     suspend fun getComments(

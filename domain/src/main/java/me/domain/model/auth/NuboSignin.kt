@@ -27,6 +27,10 @@ data class NuboSigninResult(
     val refresh: String
 )
 
+/** 화면에서 로그인 상태로 취급할 수 있는 완전한 세션인지 확인한다. */
+val NuboSigninResult.hasCompleteSession: Boolean
+    get() = uid > 0 && name.isNotBlank() && token.isNotBlank() && refresh.isNotBlank()
+
 // 사용자 정보 빈 엔티티
 val emptyUser = NuboSigninResult(
     uid = -1,

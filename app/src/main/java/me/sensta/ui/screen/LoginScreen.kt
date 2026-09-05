@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import me.domain.model.auth.NuboSigninResult
+import me.domain.model.auth.hasCompleteSession
 import me.sensta.ui.screen.login.LoginCompleted
 import me.sensta.ui.screen.login.LoginInputEmail
 import me.sensta.ui.screen.login.LoginInputPassword
@@ -41,6 +43,7 @@ fun LoginScreen() {
     val snackbarHostState = LocalSnackbar.current
     val isLoading by authViewModel.isLoading
     val loginState by authViewModel.loginState
+    val user by authViewModel.user
 
     LaunchedEffect(Unit) {
         // AuthViewModel에서 전달된 이벤트들 중 로그인과 연관된 내용들 출력하기
@@ -104,7 +107,7 @@ fun LoginScreen() {
                 }
 
                 AnimatedContent(
-                    targetState = loginState,
+                    targetState = loginState.visibleFor(user),
                     transitionSpec = {
                         slideInHorizontally(
                             animationSpec = tween(300),
@@ -126,3 +129,10 @@ fun LoginScreen() {
         }
     }
 }
+
+internal fun LoginState.visibleFor(user: NuboSigninResult): LoginState =
+    if (this == LoginState.LoginCompleted && !user.hasCompleteSession) {
+        LoginState.InputEmail
+    } else {
+        this
+    }

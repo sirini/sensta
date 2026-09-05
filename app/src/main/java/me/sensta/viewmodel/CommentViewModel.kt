@@ -177,11 +177,15 @@ class CommentViewModel @Inject constructor(
     }
 
     // 댓글 작성하기
-    fun write(postUid: Int, content: String) {
+    fun write(postUid: Int, content: String, replyTargetUid: Int? = null) {
         viewModelScope.launch {
             val trimmedContent = content.trim()
             if (trimmedContent.length < 10) {
                 _uiEvent.emit(CommentUiEvent.FailedToWriteComment("댓글은 10자 이상 입력해 주세요"))
+                return@launch
+            }
+            if (replyTargetUid != null && replyTargetUid < 1) {
+                _uiEvent.emit(CommentUiEvent.FailedToWriteComment("답글 대상을 확인할 수 없습니다"))
                 return@launch
             }
             val user = getUserInfoUseCase().first()
@@ -195,7 +199,8 @@ class CommentViewModel @Inject constructor(
                 boardUid = Env.BOARD_UID,
                 postUid = postUid,
                 content = trimmedContent,
-                token = token
+                token = token,
+                replyTargetUid = replyTargetUid
             ).collect { result ->
                 result.handle(
                     onError = { error ->
@@ -206,7 +211,7 @@ class CommentViewModel @Inject constructor(
                         boardStateSync.addComment(
                             NuboComment(
                                 uid = resp.result,
-                                replyUid = resp.result,
+                                replyUid = replyTargetUid ?: resp.result,
                                 postUid = postUid,
                                 writer = NuboWriter(
                                     uid = user.uid,

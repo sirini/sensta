@@ -13,6 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.data.util.Upload
@@ -20,6 +22,7 @@ import me.domain.model.auth.NuboSigninResult
 import me.domain.model.auth.NuboUpdateUserInfoParam
 import me.domain.model.auth.NuboVerifyCodeParam
 import me.domain.model.auth.emptyUser
+import me.domain.model.auth.hasCompleteSession
 import me.domain.model.common.NuboResponseNothing
 import me.domain.repository.NuboResponse
 import me.domain.repository.handle
@@ -47,7 +50,11 @@ import me.sensta.viewmodel.state.SignupState
 import me.sensta.viewmodel.uievent.AuthUiEvent
 import me.sensta.viewmodel.uievent.LoginUiEvent
 import me.sensta.viewmodel.uievent.ProfileUiEvent
+import java.time.Duration
+import java.time.LocalDateTime
 import javax.inject.Inject
+
+private val SESSION_REFRESH_INTERVAL: Duration = Duration.ofHours(1)
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
@@ -109,16 +116,24 @@ class AuthViewModel @Inject constructor(
     private val _uiProfileEvent = MutableSharedFlow<ProfileUiEvent>()
     val uiProfileEvent = _uiProfileEvent.asSharedFlow()
 
-    // 생성 시점에 기존에 로그인했던 정보가 있다면 가져오기
+    private val sessionRefreshMutex = Mutex()
+    private var sessionRevision = 0L
+
+    // 저장된 세션을 복원한 뒤 서버에서 토큰 갱신을 시도하고, 거부된 세션은 즉시 비운다.
     init {
         _isLoading.value = true
         viewModelScope.launch {
-            _user.value = getUserInfoUseCase().first()
-            if (_user.value.token.isNotBlank()) {
-                pushTokenManager.synchronize()
+            try {
+                val restoredUser = getUserInfoUseCase().first()
+                if (restoredUser.hasCompleteSession) {
+                    replaceUser(restoredUser)
+                    updateAccessToken()
+                } else {
+                    discardSession()
+                }
+            } finally {
+                _isLoading.value = false
             }
-            _loginState.value = LoginState.InputEmail
-            _isLoading.value = false
         }
     }
 
@@ -257,12 +272,11 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             signInUseCase(_id.value, _pw.value).collect {
                 it.handle { resp ->
-                    if (null == resp.result) {
+                    val signedInUser = resp.result
+                    if (signedInUser == null) {
                         _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(resp.error))
                     } else {
-                        _user.value = resp.result!!
-                        pushTokenManager.synchronize()
-                        _loginState.value = LoginState.LoginCompleted
+                        completeLogin(signedInUser, resp.error)
                     }
                 }
             }
@@ -272,14 +286,15 @@ class AuthViewModel @Inject constructor(
 
     // 로그아웃하기
     fun logout() {
+        val signedOutUser = _user.value
         _loginState.value = LoginState.InputEmail
+        replaceUser(emptyUser)
         viewModelScope.launch {
-            val accessToken = _user.value.token
+            val accessToken = signedOutUser.token
             if (accessToken.isNotBlank()) {
                 pushTokenManager.unregister(accessToken)
             }
             googleCredentialClient.clearCredentialState()
-            _user.value = emptyUser
             clearUserInfoUseCase()
         }
     }
@@ -296,9 +311,7 @@ class AuthViewModel @Inject constructor(
                     if (result.success) {
                         // 서버에서 기기 등록도 함께 삭제하므로 별도의 해제 호출은 하지 않는다.
                         googleCredentialClient.clearCredentialState()
-                        _user.value = emptyUser
-                        clearUserInfoUseCase()
-                        _loginState.value = LoginState.InputEmail
+                        discardSession()
                         _uiProfileEvent.emit(ProfileUiEvent.AccountDeleted)
                     } else {
                         _uiProfileEvent.emit(ProfileUiEvent.FailedToDeleteAccount(result.error))
@@ -315,10 +328,15 @@ class AuthViewModel @Inject constructor(
     // 로그인 세션 갱신
     fun refresh() {
         viewModelScope.launch {
-            if (_user.value.token.isNotEmpty()) {
-                updateAccessToken()
-            }
+            updateAccessToken()
         }
+    }
+
+    // 프로세스가 유지된 채 앱으로 돌아와도 만료 전에 세션을 갱신한다.
+    fun refreshIfNeeded() {
+        val currentUser = _user.value
+        if (!currentUser.needsSessionRefresh(CustomTime.now())) return
+        viewModelScope.launch { updateAccessToken() }
     }
 
     // 아이디(이메일 주소) 입력 받기
@@ -385,14 +403,13 @@ class AuthViewModel @Inject constructor(
 
     private suspend fun completeGoogleLogin(response: me.domain.model.auth.NuboSignin) {
         val signedInUser = response.result
-        if (signedInUser == null) {
+        if (signedInUser == null || !signedInUser.hasCompleteSession) {
             AppDiagnostics.report("NUBO Google 로그인", response.error)
+            discardSession()
             _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(response.error))
             return
         }
-        _user.value = signedInUser
-        pushTokenManager.synchronize()
-        _loginState.value = LoginState.LoginCompleted
+        completeLogin(signedInUser, response.error)
     }
 
     // 회원정보 등록 및 필요시 이메일로 전달된 인증 코드 받기
@@ -431,7 +448,11 @@ class AuthViewModel @Inject constructor(
             }
             _isLoading.value = true
 
-            updateAccessToken()
+            if (!updateAccessToken()) {
+                _uiProfileEvent.emit(ProfileUiEvent.FailedToChangeName("로그인 상태를 확인해 주세요"))
+                _isLoading.value = false
+                return@launch
+            }
             val param = NuboUpdateUserInfoParam(
                 authorization = _user.value.token,
                 name = name,
@@ -484,28 +505,81 @@ class AuthViewModel @Inject constructor(
     }
 
     // 사용자의 리프레시 토큰으로 새 액세스 토큰 발급받기
-    private suspend fun updateAccessToken() {
-        if (_user.value.uid < 1) return
+    private suspend fun updateAccessToken(): Boolean {
+        val refreshUser = _user.value
+        if (!refreshUser.hasCompleteSession) return false
 
-        updateAccessTokenUseCase(_user.value.refresh).collect {
-            it.handle { resp ->
-                val tokens = resp.result
-                if (resp.success && tokens != null) {
-                    _user.value = _user.value.copy(
-                        token = tokens.token,
-                        refresh = tokens.refresh,
-                        signin = CustomTime.now()
-                    )
-                    saveUserInfoUseCase(_user.value)
-                    pushTokenManager.synchronize()
-                    _uiAuthEvent.emit(AuthUiEvent.AccessTokenUpdated)
-                } else {
-                    _user.value = emptyUser
-                    clearUserInfoUseCase()
-                    _uiAuthEvent.emit(AuthUiEvent.ExpiredAccessToken)
+        return sessionRefreshMutex.withLock {
+            // 기다리는 사이 다른 요청이 이미 토큰을 회전했으면 같은 refresh token을 재사용하지 않는다.
+            if (
+                _user.value.uid != refreshUser.uid ||
+                _user.value.refresh != refreshUser.refresh
+            ) {
+                return@withLock _user.value.hasCompleteSession
+            }
+
+            val requestRevision = sessionRevision
+            var refreshed = false
+            updateAccessTokenUseCase(refreshUser.refresh).collect { response ->
+                response.handle(
+                    onError = { error -> AppDiagnostics.report("로그인 세션 갱신", error) }
+                ) { resp ->
+                    // 로그아웃이나 다른 로그인 뒤 늦게 도착한 응답은 이전 세션을 되살리면 안 된다.
+                    if (
+                        requestRevision != sessionRevision ||
+                        _user.value.uid != refreshUser.uid ||
+                        _user.value.refresh != refreshUser.refresh
+                    ) {
+                        return@handle
+                    }
+
+                    val tokens = resp.result
+                    if (
+                        resp.success &&
+                        tokens != null &&
+                        tokens.token.isNotBlank() &&
+                        tokens.refresh.isNotBlank()
+                    ) {
+                        val refreshedUser = refreshUser.copy(
+                            token = tokens.token,
+                            refresh = tokens.refresh,
+                            signin = CustomTime.now()
+                        )
+                        replaceUser(refreshedUser)
+                        saveUserInfoUseCase(refreshedUser)
+                        pushTokenManager.synchronize()
+                        _uiAuthEvent.emit(AuthUiEvent.AccessTokenUpdated)
+                        refreshed = true
+                    } else {
+                        discardSession()
+                        _uiAuthEvent.emit(AuthUiEvent.ExpiredAccessToken)
+                    }
                 }
             }
+            refreshed
         }
+    }
+
+    private suspend fun completeLogin(user: NuboSigninResult, error: String) {
+        if (!user.hasCompleteSession) {
+            discardSession()
+            _uiLoginEvent.emit(LoginUiEvent.FailedToLogin(error.ifBlank { "로그인 응답이 올바르지 않습니다" }))
+            return
+        }
+        replaceUser(user)
+        pushTokenManager.synchronize()
+        _loginState.value = LoginState.LoginCompleted
+    }
+
+    private fun replaceUser(user: NuboSigninResult) {
+        sessionRevision += 1
+        _user.value = user
+    }
+
+    private suspend fun discardSession() {
+        replaceUser(emptyUser)
+        _loginState.value = LoginState.InputEmail
+        clearUserInfoUseCase()
     }
 
     // 사용자의 프로필 업데이트하기
@@ -513,7 +587,13 @@ class AuthViewModel @Inject constructor(
         _isLoading.value = true
 
         viewModelScope.launch {
-            updateAccessToken()
+            if (!updateAccessToken()) {
+                _uiProfileEvent.emit(
+                    ProfileUiEvent.FailedToUpdateProfileImage("로그인 상태를 확인해 주세요")
+                )
+                _isLoading.value = false
+                return@launch
+            }
             val preparedProfile = withContext(Dispatchers.IO) {
                 Upload.prepareImage(context, uri, "profile")
             }
@@ -552,3 +632,8 @@ class AuthViewModel @Inject constructor(
         }
     }
 }
+
+internal fun NuboSigninResult.needsSessionRefresh(now: LocalDateTime): Boolean =
+    hasCompleteSession &&
+        !signin.isAfter(now) &&
+        Duration.between(signin, now) >= SESSION_REFRESH_INTERVAL

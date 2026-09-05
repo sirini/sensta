@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +28,12 @@ import me.data.env.Env
 import me.domain.model.board.NuboComment
 
 @Composable
-fun CommentCardHeader(comment: NuboComment, likeState: Boolean, onLikeClick: () -> Unit) {
+fun CommentCardHeader(
+    comment: NuboComment,
+    likeState: Boolean,
+    isReply: Boolean,
+    onLikeClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,6 +42,15 @@ fun CommentCardHeader(comment: NuboComment, likeState: Boolean, onLikeClick: () 
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isReply) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.Reply,
+                    contentDescription = "답글",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+            }
             if (comment.writer.profile.isNotEmpty()) {
                 AsyncImage(
                     model = Env.DOMAIN + comment.writer.profile,

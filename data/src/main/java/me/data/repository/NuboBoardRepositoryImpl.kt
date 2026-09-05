@@ -259,12 +259,20 @@ class NuboBoardRepositoryImpl @Inject constructor(
     // 댓글 작성하기
     override suspend fun writeComment(param: NuboWriteCommentParam): NuboResponse<NuboWriteResponse> {
         return try {
-            val response = api.writeComment(
-                authorization = "Bearer ${param.token}",
-                boardUid = param.boardUid,
-                postUid = param.postUid,
-                content = param.content
-            )
+            val response = param.replyTargetUid?.let { replyTargetUid ->
+                api.replyComment(
+                    authorization = "Bearer ${param.token}",
+                    boardUid = param.boardUid,
+                    postUid = param.postUid,
+                    replyTargetUid = replyTargetUid,
+                    content = param.content
+                )
+            } ?: api.writeComment(
+                    authorization = "Bearer ${param.token}",
+                    boardUid = param.boardUid,
+                    postUid = param.postUid,
+                    content = param.content
+                )
             NuboResponse.Success(response.toEntity())
         } catch (e: Exception) {
             NuboResponse.Error(message = e.localizedMessage ?: "An unexpected error occurred", cause = e)

@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import me.domain.model.auth.hasCompleteSession
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.profile.ProfileView
 import me.sensta.ui.screen.profile.ProfileTab
@@ -43,7 +44,7 @@ fun ProfileScreen() {
     }
 
     LaunchedEffect(user.uid, user.token) {
-        if (user.token.isNotBlank()) {
+        if (user.hasCompleteSession) {
             studioViewModel.refresh()
             achievementViewModel.loadProfileAchievements(user.uid)
         }
@@ -112,7 +113,7 @@ fun ProfileScreen() {
 
     when {
         isLoading -> LoadingScreen()
-        user.token.isEmpty() -> LoginScreen()
+        !user.hasCompleteSession -> LoginScreen()
         else -> ProfileView(
             studio = studio,
             achievements = achievements,

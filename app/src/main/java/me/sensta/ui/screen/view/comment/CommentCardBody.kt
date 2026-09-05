@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
@@ -26,18 +27,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.text.HtmlCompat
 import androidx.core.text.parseAsHtml
+import me.domain.model.auth.hasCompleteSession
 import me.domain.model.board.NuboComment
 import me.sensta.util.CustomTime
 import me.sensta.util.NewlineTagHandler
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalCommentViewModel
+import me.sensta.viewmodel.local.LocalCommonViewModel
 import me.sensta.ui.common.CommonDialog
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.screen.view.ViewPostCommentDialog
 
 @Composable
 fun CommentCardBody(comment: NuboComment, likeCount: Int) {
     val authViewModel = LocalAuthViewModel.current
     val commentViewModel = LocalCommentViewModel.current
+    val commonViewModel = LocalCommonViewModel.current
+    val navController = LocalNavController.current
     val user by authViewModel.user
     var showEditDialog by remember(comment.uid) { mutableStateOf(false) }
     var showDeleteDialog by remember(comment.uid) { mutableStateOf(false) }
@@ -76,6 +83,25 @@ fun CommentCardBody(comment: NuboComment, likeCount: Int) {
             }
 
             Row {
+                if (
+                    comment.uid > 0 &&
+                    comment.status == 0 &&
+                    comment.content != "(deleted)"
+                ) {
+                    IconButton(onClick = {
+                        if (!user.hasCompleteSession) {
+                            navController.navigate(Screen.Login.route) { launchSingleTop = true }
+                        } else {
+                            commonViewModel.openReplyCommentDialog(comment)
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Default.Reply,
+                            contentDescription = "${comment.writer.name}님에게 답글",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
                 if (
                     comment.writer.uid == user.uid &&
                     comment.status == 0 &&

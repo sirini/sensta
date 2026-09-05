@@ -25,9 +25,6 @@ fun HomeScreen() {
     val posts by homeViewModel.posts
 
     LaunchedEffect(Unit) {
-        // 사용자 정보 업데이트하기
-        authViewModel.refresh()
-
         // HomeViewModel에서 전달된 이벤트들에 따라 메시지 출력하기
         homeViewModel.uiEvent.collect { event ->
             when (event) {
