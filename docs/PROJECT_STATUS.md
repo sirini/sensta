@@ -116,13 +116,17 @@
 - 2.1.3 전체 `test`, `lintDebug`, `assembleDebug`, `assembleQa`, `assembleRelease`, `bundleRelease`를
   통과했다. 서명된 Release APK는 v2 서명과 versionCode 26·versionName 2.1.3을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
-  `34d73c001ae09f8e8043387eb21cd75944fa9f4484e0f6d0a194dbe9e777cf4d`이다.
+  `5bf5ee97dcd60970d58e75e1788c9291cd2d89f6aaaface80876d2003fd9e1f1`이다.
 - Galaxy S25 Edge의 2.1.3 debug 앱에서 관리자 수여 `유지보수상`의 축하창, HTTP 200 확인 저장,
   프로필 업적 2개에서 3개로 증가와 재실행 시 미반복을 확인했다. 3탭 프로필 개편 뒤 APK도 설치했지만
   기기가 잠금·절전 상태여서 최종 시각 확인은 다음 QA로 남겼다.
 - Android 답글·세션 복원 회귀 테스트를 포함한 단위 테스트 56개, Debug Lint와 Debug·QA·Release APK,
-  Release App Bundle 빌드를 macOS에서 통과했다. 연결된 Galaxy의 USB 디버깅 승인이 필요해 답글 등록과
-  만료 세션 화면 전환의 실기기 확인은 다음 QA로 남겼다.
+  Release App Bundle 빌드를 macOS에서 통과했다. Galaxy S25 Edge에 새 debug APK를 설치해 로그아웃
+  내정보가 이메일 로그인 화면을 표시하고, 댓글의 답글 버튼과 대상 작성자·원문 미리보기·답글 등록
+  대화상자가 표시되는 것을 확인했다. 운영 데이터에 실제 답글을 등록하는 동작은 실행하지 않았다.
+- Firebase Android 설정에 Mac debug SHA-1을 추가하고 두 패키지가 든 `app/google-services.json`을
+  적용했다. Galaxy S25 Edge에서 Google ID token 발급, `/auth/android/google`, `/push/device`, 사용자
+  정보·업적·내 작품 조회가 모두 HTTP 200으로 완료됐다.
 - `./scripts/check.sh`(`test`, `lintDebug`, `assembleDebug`, `assembleRelease`, `bundleRelease`) 성공.
 - debug APK의 패키지 `me.sensta.debug`, 버전 `2.0.0-debug`, compile SDK 37과 target SDK 36을 확인했다.
 - `:data:testDebugUnitTest` 인증 계약 테스트 성공.

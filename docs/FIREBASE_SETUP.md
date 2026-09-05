@@ -8,9 +8,16 @@ Sensta는 Firebase 설정이 있는 배포 빌드에서는 FID 기반 실시간 
    각각 등록합니다.
 2. 두 패키지의 Android client가 포함된 `google-services.json`을 `app/google-services.json`에 둡니다.
    파일 안의 `package_name`에 두 값이 모두 있는지 확인합니다. 이 파일은 Git에서 제외됩니다.
+   Firebase Console에서 각 앱별로 내려받은 파일이 서로 동일하고 두 패키지를 모두 포함한다면 한 파일만
+   보관합니다. `rg '"package_name"' app/google-services.json`으로 `me.sensta`와
+   `me.sensta.debug`가 모두 나오는지 확인할 수 있습니다.
 3. Firebase Cloud Messaging API가 활성화되었는지 확인합니다.
 4. `source scripts/android-env.sh && ./gradlew assembleDebug assembleRelease`로 두 variant의 Google Services
    리소스 생성을 확인합니다.
+
+Google 로그인용 Android OAuth client는 패키지와 실제 설치본의 SHA-1 조합마다 필요합니다. 개발 PC의
+기본 debug 키가 달라지면 `me.sensta.debug`에 새 SHA-1을 추가하고, Play 배포본 `me.sensta`에는 업로드
+키가 아니라 Play Console의 앱 서명 키 SHA-1이 등록되어 있어야 합니다.
 
 앱은 2026년 권장 계약인 Firebase Installation ID(FID)를 `/push/device`의 `token` 필드로 등록합니다. 로그인·토큰 갱신·FID 회전 시 등록하고, 로그아웃 시 서버와 FCM에서 모두 해제합니다.
 

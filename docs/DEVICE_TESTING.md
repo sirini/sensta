@@ -172,6 +172,16 @@ adb -d logcat | rg 'Sensta-Nubo|Sensta-App|Sensta-GoogleAuth|AndroidRuntime|FATA
 `Sensta-Nubo`는 본문·인증값 없이 API 경로, HTTP 상태와 소요 시간만 기록합니다. `Sensta-App`은 화면
 작업과 이미지 로딩 실패를 기록하므로 목록 요청, 응답 변환, 이미지 다운로드 문제를 구분할 수 있습니다.
 
+### 2026-09-05 답글·세션·Mac Google 로그인 확인
+
+- Mac 기본 debug 키로 서명한 `2.1.3-debug`를 Galaxy S25 Edge에 설치했다.
+- 로그아웃 내정보는 이름 없는 환영 화면 대신 이메일·Google 로그인 화면을 표시했다.
+- 댓글의 답글 버튼, 대상 작성자와 원문 미리보기, 답글 입력과 `답글 등록` 대화상자를 확인했다. 실제
+  운영 답글 등록은 실행하지 않았다.
+- 최초 Google 로그인은 OAuth Android client에 Mac debug SHA-1이 없어
+  `UNREGISTERED_ON_API_CONSOLE`로 실패했다. Firebase에 `me.sensta.debug`와 해당 SHA-1을 추가한 뒤
+  ID token 발급, Google 로그인, FCM 기기 등록과 프로필 후속 조회가 모두 HTTP 200으로 완료됐다.
+
 테스트가 끝나면 debug 앱만 제거할 수 있습니다.
 
 ```bash
