@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
@@ -241,9 +240,7 @@ private fun UserMessageTab() {
     Scaffold(
         bottomBar = { if (!isBlockedByMe) ChatInputBar() },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
+        modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         val bottomPadding = innerPadding.calculateBottomPadding()
         LaunchedEffect(otherUser.uid, chatHistory.lastOrNull()?.uid, bottomPadding) {
