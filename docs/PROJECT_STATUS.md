@@ -3,7 +3,7 @@
 ## 현재 목표
 
 - 댓글 답글·세션 복원과 피드 상단 계정/알림, 중앙 업로드·탐색, 롱터치 배경화면 동작을 반영한
-  2.1.5(`versionCode 28`)을 실기기에서 최종 확인한 뒤 Google Play에 제출한다.
+  2.1.5(`versionCode 28`)의 Google Play 업데이트를 완료했다. 배포판 통합 QA와 안정성 지표를 확인한다.
 
 ## 결정
 
@@ -195,11 +195,17 @@
   `assembleRelease`, `bundleRelease` 전체 게이트를 Windows PowerShell에서 다시 통과했다. 최종 QA APK는
   기존 데이터 삭제 없이 Galaxy S25 Edge에 덮어쓰고 운영 스튜디오 요청 HTTP 200을 재확인했다.
 
+## Google Play 2.1.5 반영 (2026-09-06)
+
+- 제품 소유자가 2.1.5(`versionCode 28`)의 Google Play 업데이트 반영을 완료했다. 사전 검증을 통과한
+  Release AAB의 SHA-256은 `57d691e19b316ff91faa2f4d76e0e9adb0672398f5a2fb893ab5ed33ada7dc76`이다.
+- 후속 작업은 새 업로드가 아니라 Play 배포판의 피드 핵심 동작·알림·업로드·딥 링크·안전 기능·접근성과
+  비정상 종료·ANR 지표 확인이다.
+
 ## 다음 작업
 
-- Galaxy에서 2.1.5 피드의 계정·알림·업로드·탐색 배치와 홈/잠금/양쪽 배경화면 적용을 최종 확인한다.
-- 최종 AAB `app/build/outputs/bundle/release/app-release.aab`를 Play Console에 2.1.5(28)로 올리고
-  내부 테스트 또는 단계적 배포를 시작한다.
+- Google Play 2.1.5 배포판에서 피드의 계정·알림·업로드·탐색 배치와 홈/잠금/양쪽 배경화면 적용을
+  최종 확인한다.
 - Galaxy 잠금 해제 후 `작품·정보·업적` 탭 전환, 누적 조회·댓글 요약 제거, 2열 업적 진열장과 축하창의
   업적 탭 이동을 최종 확인한다.
 - Galaxy에서 삭제된 원댓글의 자리 보존과 만료된 실제 세션의 이메일 로그인 화면 전환을 추가 확인한다.
@@ -215,7 +221,7 @@
 - Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play 심사·정책 상태에서 `versionCode 28`의 API 36 반영과 출시 결과를 확인한다.
+- Play Console에서 `versionCode 28`의 비정상 종료·ANR과 API 36 정책 상태를 계속 확인한다.
 
 ## 백엔드 검토가 필요한 후순위
 
