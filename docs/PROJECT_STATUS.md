@@ -2,8 +2,8 @@
 
 ## 현재 목표
 
-- 댓글 답글, 세션 복원 안정화와 댓글 카드 가독성 개선을 반영한
-  2.1.4(`versionCode 27`)을 Google Play에 제출한다.
+- 댓글 답글·세션 복원과 피드 상단 계정/알림, 중앙 업로드·탐색, 롱터치 배경화면 동작을 반영한
+  2.1.5(`versionCode 28`)을 실기기에서 최종 확인한 뒤 Google Play에 제출한다.
 
 ## 결정
 
@@ -112,9 +112,17 @@
 - 저장된 로그인 정보를 앱 시작 시 refresh token으로 검증·회전하고, 한 시간 이상 지난 세션은 앱 복귀
   시 다시 갱신한다. 불완전하거나 서버에서 거부된 세션은 사용자와 로그인 단계 상태를 함께 비워
   이름 없는 `WELCOME BACK` 화면 대신 이메일 로그인 화면을 표시한다.
+- 전체 화면 피드의 우상단에 계정·알림을 모으고, 하단 중앙 업로드와 우측 탐색으로 핵심 동작을 정리했다.
+  프로필 사진 없는 작성자는 빈 avatar 자리를 만들지 않으며 상태·내비게이션 bar 영역의 가독성을 보강했다.
+- 피드 사진을 길게 누르면 Android 공개 `WallpaperManager`로 홈·잠금·양쪽 배경화면을 선택해 적용한다.
+  이미지 로드·미지원·정책 거부·실패를 구분해 안내하고 적용 중 중복 요청을 막는다.
 
 ## 검증
 
+- 2.1.5 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
+  통과했다. Release APK는 `me.sensta`, versionCode 28·versionName 2.1.5와 v2 서명을 확인했고 AAB는
+  `jar verified.`를 통과했다. AAB SHA-256은
+  `57d691e19b316ff91faa2f4d76e0e9adb0672398f5a2fb893ab5ed33ada7dc76`이다.
 - 2.1.4 전체 `test`, `lintDebug`, `assembleDebug`, `assembleQa`, `assembleRelease`, `bundleRelease`를
   통과했다. Release APK는 `me.sensta`, versionCode 27·versionName 2.1.4와 v2 서명을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
@@ -189,7 +197,8 @@
 
 ## 다음 작업
 
-- 최종 AAB `app/build/outputs/bundle/release/app-release.aab`를 Play Console에 2.1.4(27)로 올리고
+- Galaxy에서 2.1.5 피드의 계정·알림·업로드·탐색 배치와 홈/잠금/양쪽 배경화면 적용을 최종 확인한다.
+- 최종 AAB `app/build/outputs/bundle/release/app-release.aab`를 Play Console에 2.1.5(28)로 올리고
   내부 테스트 또는 단계적 배포를 시작한다.
 - Galaxy 잠금 해제 후 `작품·정보·업적` 탭 전환, 누적 조회·댓글 요약 제거, 2열 업적 진열장과 축하창의
   업적 탭 이동을 최종 확인한다.
@@ -202,11 +211,11 @@
   검토한다.
 - Galaxy 원본 HEIF와 EXIF가 풍부한 실제 JPEG, 9장 조합의 메모리 사용량과 100MB 경계를 추가 검증한다.
 - 운영 업로드가 허용된 테스트 계정으로 서버 변환과 상세 화면 EXIF를 확인한 뒤 Play 내부 테스트 배포 여부를 결정한다.
-- 2.1.4 배포 뒤 비정상 종료, ANR, 업로드와 업적 확인 실패 지표를 계속 확인한다.
+- 2.1.5 배포 뒤 비정상 종료, ANR, 업로드와 업적 확인 실패 지표를 계속 확인한다.
 - Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play 심사·정책 상태에서 `versionCode 27`의 API 36 반영과 출시 결과를 확인한다.
+- Play 심사·정책 상태에서 `versionCode 28`의 API 36 반영과 출시 결과를 확인한다.
 
 ## 백엔드 검토가 필요한 후순위
 
