@@ -3,15 +3,31 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.1.4` (`versionCode 27`)
+- 버전: `2.1.6` (`versionCode 29`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `c5b65aa69b96e45f19c912b21deaddbff316456a294db3620ec99e47fa6b8046`
+- AAB SHA-256: `c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
+
+## 2.1.6 변경사항 노트
+
+권장 출시명은 `2.1.6 (29)`이다. 아래 문안을 Play Console의 한국어 변경사항에 사용한다.
+
+```text
+<ko-KR>
+더 편안하고 정확한 1:1 대화를 만나보세요.
+
+• 대화 중 새 메시지 자동 갱신 및 읽음 상태 표시
+• 프로필 사진, 전송 시각과 전송됨·읽음 표시 개선
+• 메시지의 해시태그를 눌러 관련 사진 탐색
+• 2,000자 입력 제한과 개인정보 공유 주의 안내 추가
+• 키보드가 입력창을 가리거나 빈 공간이 생기는 문제 수정
+</ko-KR>
+```
 
 ## 2.1.4 변경사항 노트
 
@@ -153,9 +169,10 @@ Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용�
 
 ## 현재 Play 배포 상태
 
-2.1.4(`versionCode 27`)은 2026-09-05에 서명·축소 빌드와 AAB 검증을 마친 Play 제출 후보이며, 이 세션에서는
-아직 Play Console 업로드·심사 제출을 하지 않았다. 제출 결과와 배포 비율은 Console 작업 뒤 이 절에
-추가한다.
+2.1.5(`versionCode 28`)는 2026-09-06에 Google Play 업데이트 반영을 완료했다. 이후 1:1 메시지 개선을
+담은 2.1.6(`versionCode 29`)의 서명·축소 Release AAB를 빌드·검증하고 Play Console에 업로드했다.
+심사 제출과 프로덕션 배포 완료 여부는 별도로 확인한다. AAB SHA-256은
+`c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`이다.
 
 `versionCode 21`은 2026-08-22 16:10(KST)에 대한민국 대상 프로덕션 트랙으로 100% 게시되었다. Play
 Console에서 트랙 `활성`, `Google Play에 제공됨`, 대상 국가/지역 대한민국, 지원 Android 기기 17,678대를
@@ -204,7 +221,7 @@ Data safety에는 실제 운영 서버 동작을 다시 확인한 뒤 적어도 
 
 1. [운영 서버 배포](SERVER_DEPLOYMENT.md)에 따라 Sensta 2.0 계약을 포함한 NUBO·GOAPI 릴리스를
    `sensta.me`에 먼저 반영한다.
-2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.4의 `versionCode 27`이 더 큰지 확인한다.
+2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.6의 `versionCode 29`가 더 큰지 확인한다.
 3. Firebase 운영 설정, 업로드 인증서와 위 SHA-256이 일치하는 서명된 AAB를 사용한다.
 4. [Galaxy 실제 기기 테스트](DEVICE_TESTING.md)와 Play 내부 테스트에서 핵심 시나리오와 비정상 종료·ANR을 확인한다.
 5. 회사 사진 사용자 그룹으로 비공개 테스트와 피드백 수집을 진행한다.

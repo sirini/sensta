@@ -3,7 +3,9 @@
 ## 현재 목표
 
 - 댓글 답글·세션 복원과 피드 상단 계정/알림, 중앙 업로드·탐색, 롱터치 배경화면 동작을 반영한
-  2.1.5(`versionCode 28`)의 Google Play 업데이트를 완료했다. 배포판 통합 QA와 안정성 지표를 확인한다.
+  2.1.5(`versionCode 28`)의 Google Play 업데이트를 완료했다. 이후 1:1 메시지 개선을 담은
+  2.1.6(`versionCode 29`)의 서명된 AAB를 Play Console에 업로드했으며 심사·배포 상태와 안정성 지표를
+  확인한다.
 
 ## 결정
 
@@ -119,6 +121,10 @@
 
 ## 검증
 
+- 2.1.6 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
+  통과했다. Release APK는 `me.sensta`, versionCode 29·versionName 2.1.6과 v2 서명을 확인했고 AAB는
+  `jar verified.`를 통과했다. AAB SHA-256은
+  `c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`이다.
 - 2.1.5 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
   통과했다. Release APK는 `me.sensta`, versionCode 28·versionName 2.1.5와 v2 서명을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
@@ -228,9 +234,19 @@
 - 후속 작업은 새 업로드가 아니라 Play 배포판의 피드 핵심 동작·알림·업로드·딥 링크·안전 기능·접근성과
   비정상 종료·ANR 지표 확인이다.
 
+## Google Play 2.1.6 업로드 (2026-09-06)
+
+- 제품 소유자가 1:1 메시지 개선을 담은 2.1.6(`versionCode 29`) Release AAB를 Play Console에
+  업로드했다. 업로드한 AAB의 SHA-256은
+  `c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`이다.
+- 읽음 처리 등 새 메시지 계약을 제공하는 운영 백엔드는 앞선 iOS 앱 테스트에서 확인했다. 심사 제출과
+  프로덕션 배포 완료 여부는 이번 기록에 포함하지 않는다.
+
 ## 다음 작업
 
 - Google Play 2.1.5 배포판에서 피드의 계정·알림·업로드·탐색 배치와 홈/잠금/양쪽 배경화면 적용을
+  최종 확인한다.
+- Google Play에서 2.1.6을 설치할 수 있게 되면 대화 자동 갱신·읽음 상태·해시태그 이동과 키보드 레이아웃을
   최종 확인한다.
 - Galaxy 잠금 해제 후 `작품·정보·업적` 탭 전환, 누적 조회·댓글 요약 제거, 2열 업적 진열장과 축하창의
   업적 탭 이동을 최종 확인한다.
@@ -243,11 +259,11 @@
   검토한다.
 - Galaxy 원본 HEIF와 EXIF가 풍부한 실제 JPEG, 9장 조합의 메모리 사용량과 100MB 경계를 추가 검증한다.
 - 운영 업로드가 허용된 테스트 계정으로 서버 변환과 상세 화면 EXIF를 확인한 뒤 Play 내부 테스트 배포 여부를 결정한다.
-- 2.1.5 배포 뒤 비정상 종료, ANR, 업로드와 업적 확인 실패 지표를 계속 확인한다.
+- 2.1.6 배포 뒤 비정상 종료, ANR과 메시지 갱신·읽음 처리 실패 지표를 계속 확인한다.
 - Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play Console에서 `versionCode 28`의 비정상 종료·ANR과 API 36 정책 상태를 계속 확인한다.
+- Play Console에서 `versionCode 29`의 심사·배포 상태, 비정상 종료·ANR과 API 36 정책 상태를 확인한다.
 
 ## 백엔드 검토가 필요한 후순위
 
