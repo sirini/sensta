@@ -224,7 +224,9 @@ class UserChatViewModel @Inject constructor(
             val userInfo = getUserInfoUseCase().first()
             if (userInfo.token.isEmpty()) return@launch
             val outgoingMessage = _chatMessage.value.trim()
-            if (outgoingMessage.isEmpty()) return@launch
+            if (outgoingMessage.isEmpty() ||
+                outgoingMessage.codePointCount(0, outgoingMessage.length) > MAX_CHAT_MESSAGE_LENGTH
+            ) return@launch
 
             sendChatUseCase(
                 targetUserUid = _otherUser.value.uid,
@@ -397,9 +399,10 @@ class UserChatViewModel @Inject constructor(
         }
     }
 
-    private companion object {
-        const val CHAT_NOTIFICATION_TYPE = 4
-        const val WRITER_SEARCH_OPTION = 2
+    companion object {
+        const val MAX_CHAT_MESSAGE_LENGTH = 2_000
+        private const val CHAT_NOTIFICATION_TYPE = 4
+        private const val WRITER_SEARCH_OPTION = 2
     }
 }
 

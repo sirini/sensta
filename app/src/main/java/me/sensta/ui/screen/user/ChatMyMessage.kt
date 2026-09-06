@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.sensta.viewmodel.local.LocalAuthViewModel
+import java.time.LocalDateTime
 
 @Composable
 fun ChatMyMessage(
     message: String,
+    timestamp: LocalDateTime,
     showReadState: Boolean,
     isRead: Boolean,
     onHashtagClick: (String) -> Unit
@@ -44,13 +46,26 @@ fun ChatMyMessage(
         ) {
             Column(modifier = Modifier.padding(8.dp)) {
                 ChatMessageText(message = message, onHashtagClick = onHashtagClick)
-                if (showReadState) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = if (isRead) "읽음" else "전송됨",
+                        text = formatChatTimestamp(timestamp),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.End)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if (showReadState) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isRead) "읽음" else "전송됨",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }

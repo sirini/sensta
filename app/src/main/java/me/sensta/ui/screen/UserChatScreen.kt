@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -34,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Modifier
@@ -226,11 +229,15 @@ private fun UserMessageTab() {
         }
     }
 
-    LaunchedEffect(chatHistory.size) {
-        if (chatHistory.isNotEmpty()) listState.animateScrollToItem(chatHistory.lastIndex + 1)
-    }
-
     Scaffold(bottomBar = { if (!isBlockedByMe) ChatInputBar() }) { innerPadding ->
+        val bottomPadding = innerPadding.calculateBottomPadding()
+        LaunchedEffect(otherUser.uid, chatHistory.lastOrNull()?.uid, bottomPadding) {
+            if (chatHistory.isNotEmpty()) {
+                withFrameNanos { }
+                listState.scrollToItem(chatHistory.size + 1)
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -265,6 +272,7 @@ private fun UserMessageTab() {
                     if (chat.userUid == my.uid) {
                         ChatMyMessage(
                             message = message,
+                            timestamp = chat.timestamp,
                             showReadState = chat.uid == latestOutgoingUid,
                             isRead = chat.readAt > 0,
                             onHashtagClick = openHashtag
@@ -272,11 +280,16 @@ private fun UserMessageTab() {
                     } else {
                         ChatOtherUserMessage(
                             message = message,
+                            timestamp = chat.timestamp,
                             onHashtagClick = openHashtag
                         )
                     }
                 }
-                item { Box(modifier = Modifier.padding(innerPadding)) }
+                item {
+                    Spacer(
+                        modifier = Modifier.height(bottomPadding + 16.dp)
+                    )
+                }
             }
 
             if (isLoadingChat) {

@@ -1,7 +1,7 @@
 package me.sensta.ui.screen.user
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import me.sensta.viewmodel.local.LocalUserChatViewModel
+import java.time.LocalDateTime
 
 @Composable
 fun ChatOtherUserMessage(
     message: String,
+    timestamp: LocalDateTime,
     onHashtagClick: (String) -> Unit
 ) {
     val userViewModel = LocalUserChatViewModel.current
@@ -46,8 +48,14 @@ fun ChatOtherUserMessage(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
             )
         ) {
-            Box(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.padding(8.dp)) {
                 ChatMessageText(message = message, onHashtagClick = onHashtagClick)
+                Text(
+                    text = formatChatTimestamp(timestamp),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
         }
     }
