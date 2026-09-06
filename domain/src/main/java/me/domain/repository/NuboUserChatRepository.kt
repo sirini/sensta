@@ -1,6 +1,7 @@
 package me.domain.repository
 
 import me.domain.model.user.NuboChatHistoryResponse
+import me.domain.model.user.NuboChatReadResult
 import me.domain.model.user.NuboOtherUserInfoResult
 import me.domain.model.user.NuboSendChatResponse
 import me.domain.model.user.NuboUserSafetyStatus
@@ -14,6 +15,12 @@ interface NuboUserChatRepository {
         limit: Int,
         token: String
     ): NuboResponse<NuboChatHistoryResponse>
+
+    suspend fun markChatRead(
+        targetUserUid: Int,
+        throughUid: Int,
+        token: String
+    ): NuboResponse<NuboChatReadResult>
 
     suspend fun sendChatMessage(
         targetUserUid: Int,

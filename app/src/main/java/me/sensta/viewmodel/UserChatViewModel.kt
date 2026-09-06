@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domain.model.board.NuboPost
 import me.domain.model.common.NuboWriter
@@ -21,6 +22,7 @@ import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
 import me.domain.usecase.user.GetChatHistoryUseCase
 import me.domain.usecase.user.GetOtherUserInfoUseCase
+import me.domain.usecase.user.MarkChatReadUseCase
 import me.domain.usecase.user.GetUserSafetyStatusUseCase
 import me.domain.usecase.user.ReportUserUseCase
 import me.domain.usecase.user.ChangeUserBlockUseCase
@@ -36,6 +38,7 @@ class UserChatViewModel @Inject constructor(
     private val getPostListUseCase: GetPostListUseCase,
     private val getOtherUserInfoUseCase: GetOtherUserInfoUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
+    private val markChatReadUseCase: MarkChatReadUseCase,
     private val sendChatUseCase: SendChatUseCase,
     private val getUserSafetyStatusUseCase: GetUserSafetyStatusUseCase,
     private val reportUserUseCase: ReportUserUseCase,
@@ -74,6 +77,10 @@ class UserChatViewModel @Inject constructor(
 
     private val _chatHistory = MutableStateFlow<List<NuboChatHistory>>(emptyList())
     val chatHistory: MutableStateFlow<List<NuboChatHistory>> get() = _chatHistory
+    private var chatHistoryJob: Job? = null
+    private var chatMutationRevision = 0
+    private var markedIncomingThroughUid = 0
+    private var isConversationVisible = false
 
     private val _isLoadingInfo = mutableStateOf(false)
     val isLoadingInfo: State<Boolean> get() = _isLoadingInfo
@@ -96,40 +103,70 @@ class UserChatViewModel @Inject constructor(
                 if (event.notificationType == CHAT_NOTIFICATION_TYPE &&
                     event.fromUserUid == _otherUser.value.uid
                 ) {
-                    loadChatHistory()
+                    loadChatHistory(showLoading = false)
                 }
             }
         }
     }
 
     // 상대방과의 대화 목록 가져오기
-    fun loadChatHistory() {
-        _isLoadingChat.value = true
+    fun loadChatHistory(showLoading: Boolean = true) {
+        if (chatHistoryJob?.isActive == true) return
+        if (showLoading) _isLoadingChat.value = true
 
-        viewModelScope.launch {
+        chatHistoryJob = viewModelScope.launch {
+            val targetUserUid = _otherUser.value.uid
+            val requestRevision = chatMutationRevision
             val token = getUserInfoUseCase().first().token
-            if (token.isEmpty()) {
-                _isLoadingChat.value = false
-                return@launch
-            }
+            if (token.isEmpty() || targetUserUid < 1) return@launch
 
             if (_isBlockedByMe.value) {
                 _chatHistory.value = emptyList()
-                _isLoadingChat.value = false
                 return@launch
             }
 
             getChatHistoryUseCase(
-                targetUserUid = _otherUser.value.uid,
+                targetUserUid = targetUserUid,
                 limit = 100,
                 token = token
-            ).collect {
-                it.handle { resp ->
-                    // 서버가 과거에서 최신 순으로 정렬한 결과를 그대로 표시한다.
-                    _chatHistory.value = resp.result
+            ).collect { response ->
+                response.handle { resp ->
+                    if (_otherUser.value.uid == targetUserUid) {
+                        // 전송 중 발생한 폴링 응답이 방금 추가한 메시지를 덮어쓰지 않게 한다.
+                        if (requestRevision == chatMutationRevision) {
+                            _chatHistory.value = resp.result
+                        }
+                        markLatestIncomingRead(resp.result, targetUserUid, token)
+                    }
                 }
             }
-            _isLoadingChat.value = false
+        }.also { job ->
+            job.invokeOnCompletion {
+                if (showLoading) _isLoadingChat.value = false
+                if (chatHistoryJob === job) chatHistoryJob = null
+            }
+        }
+    }
+
+    fun setConversationVisible(visible: Boolean) {
+        isConversationVisible = visible
+    }
+
+    private suspend fun markLatestIncomingRead(
+        history: List<NuboChatHistory>,
+        targetUserUid: Int,
+        token: String
+    ) {
+        if (!isConversationVisible) return
+        val throughUid = latestIncomingMessageUid(history, targetUserUid) ?: return
+        if (throughUid <= markedIncomingThroughUid) return
+
+        markChatReadUseCase(targetUserUid, throughUid, token).collect { response ->
+            response.handle { result ->
+                if (_otherUser.value.uid == targetUserUid) {
+                    markedIncomingThroughUid = maxOf(markedIncomingThroughUid, result.throughUid)
+                }
+            }
         }
     }
 
@@ -202,9 +239,11 @@ class UserChatViewModel @Inject constructor(
                                 uid = resp.result,
                                 userUid = userInfo.uid,
                                 message = outgoingMessage,
-                                timestamp = LocalDateTime.now()
+                                timestamp = LocalDateTime.now(),
+                                readAt = 0
                             )
                         )
+                        chatMutationRevision++
                         _chatHistory.value = updated
                         _chatMessage.value = ""
                     } else {
@@ -233,6 +272,10 @@ class UserChatViewModel @Inject constructor(
     }
 
     private fun resetUserSafetyStatus() {
+        chatHistoryJob?.cancel()
+        chatHistoryJob = null
+        chatMutationRevision++
+        markedIncomingThroughUid = 0
         _isReported.value = false
         _isBlockedByMe.value = false
         _chatHistory.value = emptyList()
@@ -359,3 +402,8 @@ class UserChatViewModel @Inject constructor(
         const val WRITER_SEARCH_OPTION = 2
     }
 }
+
+internal fun latestIncomingMessageUid(
+    history: List<NuboChatHistory>,
+    targetUserUid: Int
+): Int? = history.lastOrNull { it.userUid == targetUserUid }?.uid

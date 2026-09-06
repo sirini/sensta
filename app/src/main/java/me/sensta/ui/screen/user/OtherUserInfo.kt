@@ -91,17 +91,15 @@ fun OtherUserInfo(latestPhoto: String?) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            AsyncImage(
-                model = Env.DOMAIN + otherUser.profile,
-                contentDescription = otherUser.name,
-                contentScale = ContentScale.Crop,
+            ChatAvatar(
+                profile = otherUser.profile,
+                name = otherUser.name,
+                size = 88.dp,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(y = 44.dp)
-                    .size(88.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .border(3.dp, MaterialTheme.colorScheme.background, CircleShape)
+                    .border(3.dp, MaterialTheme.colorScheme.background, CircleShape),
+                backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
             )
 
             if (!latestPhoto.isNullOrBlank()) {

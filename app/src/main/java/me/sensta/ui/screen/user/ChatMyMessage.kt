@@ -1,14 +1,12 @@
 package me.sensta.ui.screen.user
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -17,14 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import me.data.env.Env
 import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
-fun ChatMyMessage(message: String) {
+fun ChatMyMessage(
+    message: String,
+    showReadState: Boolean,
+    isRead: Boolean,
+    onHashtagClick: (String) -> Unit
+) {
     val authViewModel = LocalAuthViewModel.current
     val my by authViewModel.user
 
@@ -42,19 +42,23 @@ fun ChatMyMessage(message: String) {
                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
             )
         ) {
-            Text(
-                text = message,
-                modifier = Modifier.padding(8.dp)
-            )
+            Column(modifier = Modifier.padding(8.dp)) {
+                ChatMessageText(message = message, onHashtagClick = onHashtagClick)
+                if (showReadState) {
+                    Text(
+                        text = if (isRead) "읽음" else "전송됨",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.End)
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.width(8.dp))
-        AsyncImage(
-            model = Env.DOMAIN + my.profile,
-            contentDescription = my.name,
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+        ChatAvatar(
+            profile = my.profile,
+            name = my.name,
+            backgroundColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         )
     }
 }

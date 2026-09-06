@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +42,11 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import me.domain.repository.NuboResponse
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.screen.user.ChatInputBar
@@ -54,6 +60,9 @@ import me.sensta.util.toPreviewImagePath
 import me.sensta.viewmodel.local.LocalAuthViewModel
 import me.sensta.viewmodel.local.LocalUserChatViewModel
 import me.sensta.viewmodel.uievent.ChatUiEvent
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
+import me.sensta.viewmodel.local.LocalExplorerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,12 +136,6 @@ fun UserChatScreen(
         }
     }
 
-    LaunchedEffect(selectedTab.intValue, otherUser.uid) {
-        if (selectedTab.intValue == MESSAGE_TAB && otherUser.uid > 0) {
-            userViewModel.loadChatHistory()
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -187,12 +190,41 @@ private fun UserMessageTab() {
     val context = LocalContext.current
     val userViewModel = LocalUserChatViewModel.current
     val authViewModel = LocalAuthViewModel.current
+    val explorerViewModel = LocalExplorerViewModel.current
+    val navController = LocalNavController.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val listState = rememberLazyListState()
     val chatHistory by userViewModel.chatHistory.collectAsState()
     val my by authViewModel.user
+    val otherUser by userViewModel.otherUser
     val isLoadingChat by userViewModel.isLoadingChat
     val isBlockedByMe by userViewModel.isBlockedByMe
     val pullToRefreshState = rememberPullToRefreshState()
+    val latestOutgoingUid = latestOutgoingMessageUid(chatHistory, my.uid)
+
+    DisposableEffect(userViewModel) {
+        userViewModel.setConversationVisible(true)
+        onDispose { userViewModel.setConversationVisible(false) }
+    }
+
+    LaunchedEffect(lifecycleOwner, userViewModel, my.uid, otherUser.uid) {
+        if (otherUser.uid < 1) return@LaunchedEffect
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            userViewModel.loadChatHistory()
+            while (isActive) {
+                delay(CHAT_POLL_INTERVAL_MILLIS)
+                userViewModel.loadChatHistory(showLoading = false)
+            }
+        }
+    }
+
+    val openHashtag: (String) -> Unit = { hashtag ->
+        explorerViewModel.search(explorerViewModel.hashtagOption, hashtag)
+        navController.navigate(Screen.Explorer.route) {
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
 
     LaunchedEffect(chatHistory.size) {
         if (chatHistory.isNotEmpty()) listState.animateScrollToItem(chatHistory.lastIndex + 1)
@@ -231,9 +263,17 @@ private fun UserMessageTab() {
                 items(if (isBlockedByMe) emptyList() else chatHistory) { chat ->
                     val message = convertHtmlToText(chat.message)
                     if (chat.userUid == my.uid) {
-                        ChatMyMessage(message = message)
+                        ChatMyMessage(
+                            message = message,
+                            showReadState = chat.uid == latestOutgoingUid,
+                            isRead = chat.readAt > 0,
+                            onHashtagClick = openHashtag
+                        )
                     } else {
-                        ChatOtherUserMessage(message = message)
+                        ChatOtherUserMessage(
+                            message = message,
+                            onHashtagClick = openHashtag
+                        )
                     }
                 }
                 item { Box(modifier = Modifier.padding(innerPadding)) }
@@ -249,8 +289,14 @@ private fun UserMessageTab() {
 private const val PHOTO_TAB = 0
 private const val MESSAGE_TAB = 1
 private const val PROFILE_HEADER_SCROLL_THRESHOLD = 42f
+private const val CHAT_POLL_INTERVAL_MILLIS = 12_000L
 
 internal fun shouldOpenMessageInitially(
     initialUserUid: Int,
     openMessageInitially: Boolean
 ): Boolean = initialUserUid > 0 || openMessageInitially
+
+internal fun latestOutgoingMessageUid(
+    history: List<me.domain.model.user.NuboChatHistory>,
+    currentUserUid: Int
+): Int? = history.lastOrNull { it.userUid == currentUserUid }?.uid

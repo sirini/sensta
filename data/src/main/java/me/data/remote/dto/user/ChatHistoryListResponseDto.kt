@@ -21,7 +21,8 @@ data class ChatHistoryResultDto(
     val uid: Int,
     val userUid: Int,
     val message: String,
-    val timestamp: Long
+    val timestamp: Long,
+    val readAt: Long = 0
 )
 
 // 상대방과의 최근 대화 기록 응답을 엔티티로 변환하는 매퍼
@@ -37,5 +38,6 @@ fun ChatHistoryResultDto.toEntity() = NuboChatHistory(
     uid = uid,
     userUid = userUid,
     message = message,
-    timestamp = Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.ofHours(9)).toLocalDateTime()
+    timestamp = Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.ofHours(9)).toLocalDateTime(),
+    readAt = readAt
 )

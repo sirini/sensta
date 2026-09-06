@@ -2,12 +2,14 @@ package me.data.repository
 
 import me.data.remote.api.NuboUserApi
 import me.data.remote.dto.user.toEntity
+import me.data.remote.dto.user.ChatReadRequestDto
 import me.data.remote.dto.user.SendChatRequestDto
 import me.data.remote.dto.user.UserReportRequestDto
 import me.data.remote.dto.user.UserTargetRequestDto
 import me.data.remote.dto.common.toEntity
 import me.domain.model.common.NuboResponseNothing
 import me.domain.model.user.NuboChatHistoryResponse
+import me.domain.model.user.NuboChatReadResult
 import me.domain.model.user.NuboOtherUserInfoResult
 import me.domain.model.user.NuboSendChatResponse
 import me.domain.model.user.NuboUserSafetyStatus
@@ -51,6 +53,30 @@ class NuboUserChatRepositoryImpl @Inject constructor(
             NuboResponse.Success(response.toEntity())
         } catch (e: Exception) {
             NuboResponse.Error(message = e.localizedMessage ?: "An unexpected error occurred", cause = e)
+        }
+    }
+
+    override suspend fun markChatRead(
+        targetUserUid: Int,
+        throughUid: Int,
+        token: String
+    ): NuboResponse<NuboChatReadResult> {
+        return try {
+            val response = api.markChatRead(
+                authorization = "Bearer $token",
+                request = ChatReadRequestDto(
+                    targetUserUid = targetUserUid,
+                    throughUid = throughUid
+                )
+            )
+            val result = response.result
+            if (!response.success || result == null) {
+                NuboResponse.Error(response.error.ifBlank { "읽음 상태를 반영하지 못했습니다" })
+            } else {
+                NuboResponse.Success(result.toEntity())
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "읽음 상태를 반영하지 못했습니다", cause = e)
         }
     }
 

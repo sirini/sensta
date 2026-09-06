@@ -2,6 +2,8 @@ package me.data.remote.api
 
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.user.ChatHistoryListResponseDto
+import me.data.remote.dto.user.ChatReadRequestDto
+import me.data.remote.dto.user.ChatReadResponseDto
 import me.data.remote.dto.user.OtherUserInfoDto
 import me.data.remote.dto.user.SendChatRequestDto
 import me.data.remote.dto.user.SendChatResponseDto
@@ -13,6 +15,7 @@ import retrofit2.http.GET
 import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PATCH
 import retrofit2.http.PUT
 import retrofit2.http.Query
 
@@ -24,6 +27,13 @@ interface NuboUserApi {
         @Query("targetUserUid") targetUserUid: Int,
         @Query("limit") limit: Int
     ): ChatHistoryListResponseDto
+
+    // 상대방이 보낸 메시지를 현재 사용자 기준으로 읽음 처리한다.
+    @PATCH("chat/read")
+    suspend fun markChatRead(
+        @Header("Authorization") authorization: String,
+        @Body request: ChatReadRequestDto
+    ): ChatReadResponseDto
 
     // 상대방에게 메시지 보내기
     @POST("chat/save")
