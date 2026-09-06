@@ -13,6 +13,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -139,6 +141,7 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val achievementQueue by achievementViewModel.queue
     val isHomeRoute = currentRoute == Screen.Home.route
     val isDarkTheme = isSystemInDarkTheme()
+    val isImeVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     val view = LocalView.current
 
     DisposableEffect(view, isHomeRoute, isDarkTheme) {
@@ -259,7 +262,9 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                     if (!isHomeRoute) TopBar()
                 },
                 bottomBar = {
-                    if (shouldShowBottomNavigation(currentRoute)) BottomNavigationBar()
+                    if (shouldShowBottomNavigation(currentRoute, isImeVisible)) {
+                        BottomNavigationBar()
+                    }
                 },
                 snackbarHost = {
                     SnackbarHost(
@@ -341,8 +346,10 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     }
 }
 
-internal fun shouldShowBottomNavigation(currentRoute: String?): Boolean =
-    currentRoute != null && currentRoute != Screen.Home.route
+internal fun shouldShowBottomNavigation(
+    currentRoute: String?,
+    isImeVisible: Boolean = false
+): Boolean = !isImeVisible && currentRoute != null && currentRoute != Screen.Home.route
 
 internal fun shouldResumeUploadAfterLogin(
     hasCompleteSession: Boolean,

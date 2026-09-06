@@ -8,9 +8,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
@@ -94,6 +96,7 @@ fun UserChatScreen(
     val profileScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (selectedTab.intValue == MESSAGE_TAB) return Offset.Zero
                 if (source != NestedScrollSource.UserInput || available.y == 0f) return Offset.Zero
 
                 val changedDirection =
@@ -155,12 +158,18 @@ fun UserChatScreen(
         PrimaryTabRow(selectedTabIndex = selectedTab.intValue) {
             Tab(
                 selected = selectedTab.intValue == PHOTO_TAB,
-                onClick = { selectedTab.intValue = PHOTO_TAB },
+                onClick = {
+                    selectedTab.intValue = PHOTO_TAB
+                    showProfileHeader = true
+                },
                 text = { Text("사진") }
             )
             Tab(
                 selected = selectedTab.intValue == MESSAGE_TAB,
-                onClick = { selectedTab.intValue = MESSAGE_TAB },
+                onClick = {
+                    selectedTab.intValue = MESSAGE_TAB
+                    showProfileHeader = false
+                },
                 text = { Text("1:1 메시지") }
             )
         }
@@ -229,7 +238,13 @@ private fun UserMessageTab() {
         }
     }
 
-    Scaffold(bottomBar = { if (!isBlockedByMe) ChatInputBar() }) { innerPadding ->
+    Scaffold(
+        bottomBar = { if (!isBlockedByMe) ChatInputBar() },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+    ) { innerPadding ->
         val bottomPadding = innerPadding.calculateBottomPadding()
         LaunchedEffect(otherUser.uid, chatHistory.lastOrNull()?.uid, bottomPadding) {
             if (chatHistory.isNotEmpty()) {

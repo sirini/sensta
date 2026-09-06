@@ -11,6 +11,7 @@ class AppNavigationTest {
         assertFalse(shouldShowBottomNavigation(Screen.Home.route))
         assertTrue(shouldShowBottomNavigation(Screen.Explorer.route))
         assertTrue(shouldShowBottomNavigation(Screen.Profile.route))
+        assertFalse(shouldShowBottomNavigation(Screen.Profile.route, isImeVisible = true))
     }
 
     @Test
