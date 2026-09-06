@@ -1,7 +1,7 @@
 package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,6 +15,7 @@ fun FeedCover(
     path: String,
     title: String,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val mediaColor = LocalSenstaExtendedColors.current.media
@@ -25,7 +26,12 @@ fun FeedCover(
         modifier = modifier
             .fillMaxSize()
             .background(mediaColor)
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClickLabel = "게시글 상세 보기",
+                onLongClickLabel = "배경화면으로 설정",
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         contentScale = ContentScale.Crop
     )
 }

@@ -37,6 +37,7 @@ fun TopBar() {
         Screen.Notification.route -> "ACTIVITY"
         Screen.View.route -> "PHOTO STORY"
         Screen.User.route -> "PHOTOGRAPHER"
+        Screen.UserMessage.route -> "MESSAGE"
         Screen.Version.route -> "ABOUT"
         else -> "CURATED PHOTOGRAPHY"
     }

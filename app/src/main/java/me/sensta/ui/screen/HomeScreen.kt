@@ -1,11 +1,17 @@
 package me.sensta.ui.screen
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.zIndex
 import me.domain.repository.NuboResponse
+import me.sensta.ui.screen.home.HomeQuickActions
 import me.sensta.ui.screen.home.PhotoError
 import me.sensta.ui.screen.home.PhotoList
 import me.sensta.util.AppNotification
@@ -59,13 +65,21 @@ fun HomeScreen() {
         }
     }
 
-    // 사진 목록 가져오기
-    when (val photoResponse = posts) {
-        is NuboResponse.Loading -> LoadingScreen()
-        is NuboResponse.Success -> PhotoList(photoResponse.data)
-        is NuboResponse.Error -> PhotoError(
-            message = photoResponse.message,
-            onRetry = { homeViewModel.refresh(resetPaging = true) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 사진 목록 가져오기
+        when (val photoResponse = posts) {
+            is NuboResponse.Loading -> LoadingScreen()
+            is NuboResponse.Success -> PhotoList(photoResponse.data)
+            is NuboResponse.Error -> PhotoError(
+                message = photoResponse.message,
+                onRetry = { homeViewModel.refresh(resetPaging = true) }
+            )
+        }
+
+        HomeQuickActions(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .zIndex(1f)
         )
     }
 }

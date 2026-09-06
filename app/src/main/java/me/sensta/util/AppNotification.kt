@@ -32,8 +32,14 @@ object AppNotification {
 
         val pendingIntent = notificationPendingIntent(context, notificationId, event)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle(title?.takeIf { it.isNotBlank() } ?: "Sensta 새 알림")
-            .setContentText(body?.takeIf { it.isNotBlank() } ?: "새로운 활동이 있습니다")
+            .setContentTitle(
+                title?.takeIf { it.isNotBlank() }?.normalizeMessageTerminology()
+                    ?: "Sensta 새 알림"
+            )
+            .setContentText(
+                body?.takeIf { it.isNotBlank() }?.normalizeMessageTerminology()
+                    ?: "새로운 활동이 있습니다"
+            )
             .setSmallIcon(R.drawable.notification)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
@@ -131,7 +137,9 @@ object AppNotification {
             1 -> "내 댓글을 좋아합니다"
             2 -> "내 게시글에 댓글을 남겼습니다"
             3 -> "내 댓글에 답글을 남겼습니다"
-            else -> "나에게 쪽지를 보냈습니다"
+            else -> "나에게 메시지를 보냈습니다"
         }
     }
+
+    private fun String.normalizeMessageTerminology(): String = replace("쪽지", "메시지")
 }

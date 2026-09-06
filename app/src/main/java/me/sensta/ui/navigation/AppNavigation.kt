@@ -1,14 +1,20 @@
 package me.sensta.ui.navigation
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
@@ -16,6 +22,7 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
@@ -30,6 +37,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,6 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,6 +54,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import me.domain.model.auth.hasCompleteSession
 import me.sensta.ui.common.LocalScrollBehavior
 import me.sensta.ui.common.AchievementCelebrationDialog
 import me.sensta.ui.navigation.common.LocalNavController
@@ -96,6 +107,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Signup : Screen("signup", "회원가입", Icons.Default.GroupAdd)
     data object Upload : Screen("upload", "업로드", Icons.Default.AddCircleOutline)
     data object User : Screen("user", "사용자", Icons.Default.AccountBox)
+    data object UserMessage : Screen("user-message", "메시지", Icons.Default.ChatBubbleOutline)
     data object View : Screen("view", "게시글", Icons.AutoMirrored.Default.Article)
     data object Version : Screen("version", "버전", Icons.Default.Verified)
 }
@@ -125,6 +137,25 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
     val currentRoute = navBackStackEntry?.destination?.route
     val user by authViewModel.user
     val achievementQueue by achievementViewModel.queue
+    val isHomeRoute = currentRoute == Screen.Home.route
+    val isDarkTheme = isSystemInDarkTheme()
+    val view = LocalView.current
+
+    DisposableEffect(view, isHomeRoute, isDarkTheme) {
+        val window = view.context.findActivity()?.window
+        val insetsController = window?.let { WindowCompat.getInsetsController(it, view) }
+        val useDarkSystemBarIcons = !isHomeRoute && !isDarkTheme
+
+        insetsController?.isAppearanceLightStatusBars = useDarkSystemBarIcons
+        insetsController?.isAppearanceLightNavigationBars = useDarkSystemBarIcons
+
+        onDispose {
+            if (isHomeRoute) {
+                insetsController?.isAppearanceLightStatusBars = !isDarkTheme
+                insetsController?.isAppearanceLightNavigationBars = !isDarkTheme
+            }
+        }
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         authViewModel.refreshIfNeeded()
@@ -136,6 +167,13 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
             achievementViewModel.check(user.token)
         } else {
             achievementViewModel.reset()
+        }
+    }
+
+    LaunchedEffect(currentRoute, user.uid, user.token, user.refresh) {
+        val previousRoute = navController.previousBackStackEntry?.destination?.route
+        if (shouldResumeUploadAfterLogin(user.hasCompleteSession, currentRoute, previousRoute)) {
+            navController.popBackStack()
         }
     }
 
@@ -218,15 +256,20 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
 
             Scaffold(
                 topBar = {
-                    if (currentRoute != Screen.Home.route) TopBar()
+                    if (!isHomeRoute) TopBar()
                 },
-                bottomBar = { BottomNavigationBar() },
+                bottomBar = {
+                    if (shouldShowBottomNavigation(currentRoute)) BottomNavigationBar()
+                },
                 snackbarHost = {
                     SnackbarHost(
                         hostState = snackbarHostState,
-                        modifier = Modifier.imePadding()
+                        modifier = Modifier
+                            .imePadding()
+                            .then(if (isHomeRoute) Modifier.navigationBarsPadding() else Modifier)
                     )
                 },
+                contentWindowInsets = WindowInsets(0, 0, 0, 0),
             ) { innerPadding ->
                 NavHost(
                     navController = navController,
@@ -245,6 +288,9 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                     composable(Screen.Upload.route) { UploadScreen() }
                     composable(Screen.User.route) {
                         UserChatScreen(initialUserUid = initialPushEvent?.fromUserUid ?: 0)
+                    }
+                    composable(Screen.UserMessage.route) {
+                        UserChatScreen(openMessageInitially = true)
                     }
                     composable(Screen.View.route) {
                         ViewScreen(initialPostUid = initialPushEvent?.postUid ?: 0)
@@ -293,4 +339,21 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
             }
         }
     }
+}
+
+internal fun shouldShowBottomNavigation(currentRoute: String?): Boolean =
+    currentRoute != null && currentRoute != Screen.Home.route
+
+internal fun shouldResumeUploadAfterLogin(
+    hasCompleteSession: Boolean,
+    currentRoute: String?,
+    previousRoute: String?
+): Boolean = hasCompleteSession &&
+    currentRoute == Screen.Login.route &&
+    previousRoute == Screen.Upload.route
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

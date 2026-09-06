@@ -1,23 +1,27 @@
 package me.sensta.ui.screen.home.post
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,6 +64,7 @@ fun PostCardFooter(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
             .padding(horizontal = 18.dp, vertical = 16.dp)
     ) {
         Row(
@@ -74,14 +79,16 @@ fun PostCardFooter(
                 .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = Env.DOMAIN + post.writer.profile,
-                contentDescription = post.writer.name,
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
+            if (post.writer.profile.isNotBlank()) {
+                AsyncImage(
+                    model = Env.DOMAIN + post.writer.profile,
+                    contentDescription = post.writer.name,
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
             Column {
                 WriterName(
                     writer = post.writer,
@@ -104,16 +111,17 @@ fun PostCardFooter(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .padding(top = 8.dp, bottom = 4.dp)
+                .padding(top = 8.dp, bottom = 12.dp)
                 .clickable(onClick = onViewClick)
         )
 
-        Row(
+        Box(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.align(Alignment.CenterStart),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 IconButton(onClick = doLike, modifier = Modifier.size(42.dp)) {
                     Icon(
                         imageVector = if (post.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -145,7 +153,48 @@ fun PostCardFooter(
                 )
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            FilledIconButton(
+                onClick = {
+                    navController.navigate(Screen.Upload.route) {
+                        launchSingleTop = true
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(48.dp),
+                shape = CircleShape,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "사진 올리기",
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        navController.navigate(Screen.Explorer.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    modifier = Modifier.size(42.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "탐색",
+                        modifier = Modifier.size(20.dp),
+                        tint = onMedia
+                    )
+                }
                 IconButton(
                     onClick = { sharePost(context, post.uid, post.title) },
                     modifier = Modifier.size(42.dp)
@@ -157,18 +206,6 @@ fun PostCardFooter(
                         tint = onMedia
                     )
                 }
-                Icon(
-                    imageVector = Icons.Default.Visibility,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = onMedia.copy(alpha = 0.8f)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                    text = post.hit.toString(),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = onMedia.copy(alpha = 0.8f)
-                )
             }
         }
     }

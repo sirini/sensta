@@ -88,7 +88,7 @@ class NotificationViewModel @Inject constructor(
             1 -> Icons.Default.FavoriteBorder to "내 댓글을 좋아합니다"
             2 -> Icons.AutoMirrored.Default.Comment to "내 게시글에 댓글을 남겼습니다"
             3 -> Icons.Default.AddComment to "내 댓글에 답글을 남겼습니다"
-            else -> Icons.Default.ChatBubbleOutline to "나에게 쪽지를 보냈습니다"
+            else -> Icons.Default.ChatBubbleOutline to "나에게 메시지를 보냈습니다"
         }
     }
 

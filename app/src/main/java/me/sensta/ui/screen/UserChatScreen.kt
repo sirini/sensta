@@ -57,16 +57,22 @@ import me.sensta.viewmodel.uievent.ChatUiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserChatScreen(initialUserUid: Int = 0) {
+fun UserChatScreen(
+    initialUserUid: Int = 0,
+    openMessageInitially: Boolean = initialUserUid > 0
+) {
     val context = LocalContext.current
     val scrollBehavior = LocalScrollBehavior.current
     val userViewModel = LocalUserChatViewModel.current
     val userPosts by userViewModel.userPosts
     val otherUser by userViewModel.otherUser
-    val selectedTab = rememberSaveable {
-        mutableIntStateOf(if (initialUserUid > 0) MESSAGE_TAB else PHOTO_TAB)
+    val startsInMessage = shouldOpenMessageInitially(initialUserUid, openMessageInitially)
+    val selectedTab = rememberSaveable(initialUserUid, openMessageInitially) {
+        mutableIntStateOf(if (startsInMessage) MESSAGE_TAB else PHOTO_TAB)
     }
-    var showProfileHeader by rememberSaveable { mutableStateOf(true) }
+    var showProfileHeader by rememberSaveable(initialUserUid, openMessageInitially) {
+        mutableStateOf(!startsInMessage)
+    }
     val scrollAccumulator = remember { mutableFloatStateOf(0f) }
     val latestPhoto = (userPosts as? NuboResponse.Success)
         ?.data
@@ -243,3 +249,8 @@ private fun UserMessageTab() {
 private const val PHOTO_TAB = 0
 private const val MESSAGE_TAB = 1
 private const val PROFILE_HEADER_SCROLL_THRESHOLD = 42f
+
+internal fun shouldOpenMessageInitially(
+    initialUserUid: Int,
+    openMessageInitially: Boolean
+): Boolean = initialUserUid > 0 || openMessageInitially

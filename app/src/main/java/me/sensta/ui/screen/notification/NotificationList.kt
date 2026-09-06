@@ -76,18 +76,17 @@ fun NotificationList(notifications: List<NuboNotification>) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    notiViewModel.checkNotification(notification.uid)
                                     if (notification.type == NotificationType.NOTI_CHAT_MESSAGE) {
                                         userViewModel.loadOtherUserInfo(notification.fromUser)
-                                        navController.navigate(Screen.User.route) {
+                                        navController.navigate(Screen.UserMessage.route) {
                                             launchSingleTop = true
-                                            restoreState = true
                                         }
                                     } else {
                                         commonViewModel.apply {
                                             updatePagerIndex(0)
                                             updatePostUid(notification.postUid)
                                         }
-                                        notiViewModel.checkNotification(notification.uid)
                                         navController.navigate(Screen.View.route) {
                                             launchSingleTop = true
                                             restoreState = true
