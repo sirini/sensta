@@ -5,7 +5,8 @@
 - 댓글 답글·세션 복원과 피드 상단 계정/알림, 중앙 업로드·탐색, 롱터치 배경화면 동작을 반영한
   2.1.5(`versionCode 28`)의 Google Play 업데이트를 완료했다. 이후 1:1 메시지 개선을 담은
   2.1.6(`versionCode 29`)의 서명된 AAB를 Play Console에 업로드했으며 심사·배포 상태와 안정성 지표를
-  확인한다.
+  확인한다. 운영에서 확인한 Android 사진 업로드 응답 제한 문제는 2.1.7(`versionCode 30`)에서
+  교정했으며 실제 기기 재검증 뒤 Play Console에 올린다.
 
 ## 결정
 
@@ -121,6 +122,11 @@
 
 ## 검증
 
+- 2.1.7 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
+  통과했다. 업로드 전용 120초 읽기·쓰기 제한과 일반 요청의 기존 10초 제한을 회귀 테스트로 확인했다.
+  Release APK는 `me.sensta`, versionCode 30·versionName 2.1.7과 v2 서명을 확인했고 AAB는
+  `jar verified.`를 통과했다. AAB SHA-256은
+  `d5ed92213008256b3a28f3e90fe5381c2c4b56bc80bb0fba2746992ecbf02e19`이다.
 - 2.1.6 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
   통과했다. Release APK는 `me.sensta`, versionCode 29·versionName 2.1.6과 v2 서명을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
@@ -242,8 +248,19 @@
 - 읽음 처리 등 새 메시지 계약을 제공하는 운영 백엔드는 앞선 iOS 앱 테스트에서 확인했다. 심사 제출과
   프로덕션 배포 완료 여부는 이번 기록에 포함하지 않는다.
 
+## Android 사진 업로드 응답 제한 교정 (2026-09-07)
+
+- 운영 Nginx에서 Android `POST /goapi/editor/write`가 HTTP 499로 끝난 뒤에도 같은 게시물의 서버 AI
+  사진 설명 생성이 계속 완료된 기록을 확인했다. GOAPI는 게시물과 첨부를 정상 저장했지만 Android의
+  OkHttp 기본 10초 읽기 제한이 먼저 연결을 닫아 앱만 실패로 판단한 것이 원인이었다.
+- iOS의 같은 요청에 적용된 120초와 맞춰 Android도 `/editor/write` POST의 읽기·쓰기 제한만 120초로
+  늘렸다. 일반 API는 기존 제한을 유지하며 업로드를 자동 재시도하지 않아 중복 게시 위험을 늘리지 않는다.
+- 2.1.7(`versionCode 30`) 서명·축소 산출물을 만들었고 GOAPI 계약·운영 runtime 변경은 없다.
+
 ## 다음 작업
 
+- Galaxy 실제 기기에서 3장 이상 사진을 운영 업로드해 10초 이후에도 진행 화면을 유지하고 성공 화면과
+  새 게시물 UID로 마무리되는지 확인한 뒤 2.1.7 AAB를 Play Console에 업로드한다.
 - Google Play 2.1.5 배포판에서 피드의 계정·알림·업로드·탐색 배치와 홈/잠금/양쪽 배경화면 적용을
   최종 확인한다.
 - Google Play에서 2.1.6을 설치할 수 있게 되면 대화 자동 갱신·읽음 상태·해시태그 이동과 키보드 레이아웃을
@@ -263,7 +280,8 @@
 - Play 배포판에서 업로드·알림·딥 링크·안전 기능·접근성을 통합 검증한다.
 - Sensta Android, Google 로그인, Firebase, 사진·EXIF·메시지와 삭제 정책을 포함하도록 운영 개인정보처리방침 내용을 보강한다.
 - 스토어 기능 그래픽·스크린샷·설명문과 Data safety·앱 액세스·UGC 정책 응답을 지속해서 점검한다.
-- Play Console에서 `versionCode 29`의 심사·배포 상태, 비정상 종료·ANR과 API 36 정책 상태를 확인한다.
+- Play Console에서 `versionCode 29`의 심사·배포 상태와 2.1.7(`versionCode 30`) 교정판 제출 여부,
+  비정상 종료·ANR과 API 36 정책 상태를 확인한다.
 
 ## 백엔드 검토가 필요한 후순위
 

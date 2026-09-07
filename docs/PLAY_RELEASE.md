@@ -3,15 +3,28 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.1.6` (`versionCode 29`)
+- 버전: `2.1.7` (`versionCode 30`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`
+- AAB SHA-256: `d5ed92213008256b3a28f3e90fe5381c2c4b56bc80bb0fba2746992ecbf02e19`
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
+
+## 2.1.7 변경사항 노트
+
+권장 출시명은 `2.1.7 (30)`이다. 아래 문안을 Play Console의 한국어 변경사항에 사용한다.
+
+```text
+<ko-KR>
+사진 업로드가 완료된 뒤 실패로 표시되던 문제를 수정했습니다.
+
+• 사진 전송과 서버 처리 시간을 충분히 기다리도록 개선
+• 일반 화면의 빠른 네트워크 오류 안내는 그대로 유지
+</ko-KR>
+```
 
 ## 2.1.6 변경사항 노트
 
@@ -174,6 +187,10 @@ Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용�
 심사 제출과 프로덕션 배포 완료 여부는 별도로 확인한다. AAB SHA-256은
 `c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`이다.
 
+Android의 사진 업로드 응답 제한을 교정한 2.1.7(`versionCode 30`)의 서명·축소 Release AAB도
+빌드·검증했다. 실제 기기에서 운영 업로드를 재확인한 뒤 Play Console에 올린다. AAB SHA-256은
+`d5ed92213008256b3a28f3e90fe5381c2c4b56bc80bb0fba2746992ecbf02e19`이다.
+
 `versionCode 21`은 2026-08-22 16:10(KST)에 대한민국 대상 프로덕션 트랙으로 100% 게시되었다. Play
 Console에서 트랙 `활성`, `Google Play에 제공됨`, 대상 국가/지역 대한민국, 지원 Android 기기 17,678대를
 확인했다.
@@ -221,7 +238,7 @@ Data safety에는 실제 운영 서버 동작을 다시 확인한 뒤 적어도 
 
 1. [운영 서버 배포](SERVER_DEPLOYMENT.md)에 따라 Sensta 2.0 계약을 포함한 NUBO·GOAPI 릴리스를
    `sensta.me`에 먼저 반영한다.
-2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.6의 `versionCode 29`가 더 큰지 확인한다.
+2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.7의 `versionCode 30`이 더 큰지 확인한다.
 3. Firebase 운영 설정, 업로드 인증서와 위 SHA-256이 일치하는 서명된 AAB를 사용한다.
 4. [Galaxy 실제 기기 테스트](DEVICE_TESTING.md)와 Play 내부 테스트에서 핵심 시나리오와 비정상 종료·ANR을 확인한다.
 5. 회사 사진 사용자 그룹으로 비공개 테스트와 피드백 수집을 진행한다.

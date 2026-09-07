@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 import me.data.auth.UserSessionStore
 import me.data.diagnostics.NuboClientIdentityInterceptor
 import me.data.diagnostics.NuboNetworkDiagnosticsInterceptor
+import me.data.diagnostics.NuboUploadTimeoutInterceptor
 import me.data.remote.api.NuboAuthApi
 import me.data.remote.api.NuboBoardApi
 import me.data.remote.api.NuboNotificationApi
@@ -43,6 +44,7 @@ object NuboDataModule {
     @Singleton
     fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(NuboClientIdentityInterceptor(context))
+        .addInterceptor(NuboUploadTimeoutInterceptor())
         .addInterceptor(NuboNetworkDiagnosticsInterceptor())
         .build()
 
