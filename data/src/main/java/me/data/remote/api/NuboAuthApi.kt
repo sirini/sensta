@@ -2,8 +2,10 @@ package me.data.remote.api
 
 import me.data.remote.dto.auth.DeleteAccountRequestDto
 import me.data.remote.dto.auth.MobileRefreshRequestDto
+import me.data.remote.dto.auth.PasswordResetRequestDto
 import me.data.remote.dto.auth.SigninDto
 import me.data.remote.dto.auth.SignupDto
+import me.data.remote.dto.auth.SignupStatusResponseDto
 import me.data.remote.dto.auth.UpdateAccessTokenDto
 import me.data.remote.dto.auth.UpdateUserInfoDto
 import me.data.remote.dto.common.BooleanResponseDto
@@ -24,6 +26,14 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 
 interface NuboAuthApi {
+    @GET("auth/signup/status")
+    suspend fun getSignupStatus(): SignupStatusResponseDto
+
+    @POST("auth/reset-password")
+    suspend fun requestPasswordReset(
+        @Body request: PasswordResetRequestDto
+    ): ResponseNothingDto
+
     @GET("auth/user/achievements")
     suspend fun getUnannouncedAchievements(
         @Header("Authorization") authorization: String
@@ -76,8 +86,14 @@ interface NuboAuthApi {
     suspend fun signUp(
         @Field("id") email: String,
         @Field("password") password: String,
-        @Field("name") name: String
+        @Field("name") name: String,
+        @Field("invite") invite: String
     ): SignupDto
+
+    @POST("auth/logout")
+    suspend fun logout(
+        @Header("Authorization") authorization: String
+    ): ResponseNothingDto
 
     // 사용자의 정보 업데이트하기
     @Multipart

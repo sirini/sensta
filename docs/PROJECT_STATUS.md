@@ -5,8 +5,8 @@
 - 댓글 답글·세션 복원과 피드 상단 계정/알림, 중앙 업로드·탐색, 롱터치 배경화면 동작을 반영한
   2.1.5(`versionCode 28`)의 Google Play 업데이트를 완료했다. 이후 1:1 메시지 개선을 담은
   2.1.6(`versionCode 29`)의 서명된 AAB를 Play Console에 업로드했으며 심사·배포 상태와 안정성 지표를
-  확인한다. 운영에서 확인한 Android 사진 업로드 응답 제한 문제는 2.1.7(`versionCode 30`)에서
-  교정했으며 실제 기기 재검증 뒤 Play Console에 올린다.
+  확인한다. 운영에서 확인한 Android 사진 업로드 응답 제한과 iOS 대비 핵심 기능 누락은
+  2.1.7(`versionCode 30`)에서 교정했으며 실제 기기 통합 QA 뒤 Play Console에 올린다.
 
 ## 결정
 
@@ -123,10 +123,11 @@
 ## 검증
 
 - 2.1.7 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
-  통과했다. 업로드 전용 120초 읽기·쓰기 제한과 일반 요청의 기존 10초 제한을 회귀 테스트로 확인했다.
+  통과했다. 업로드 전용 120초 읽기·쓰기 제한과 일반 요청의 기존 10초 제한, 가입 정책·초대 코드,
+  비밀번호 재설정 JSON, 편집 설정·태그 추천·공개 통계와 대화 목록 계약을 회귀 테스트로 확인했다.
   Release APK는 `me.sensta`, versionCode 30·versionName 2.1.7과 v2 서명을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
-  `d5ed92213008256b3a28f3e90fe5381c2c4b56bc80bb0fba2746992ecbf02e19`이다.
+  `bcf7fd94a4adbae13156bac993facc8a0c508d249e9774968cf2150a91476f09`이다.
 - 2.1.6 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
   통과했다. Release APK는 `me.sensta`, versionCode 29·versionName 2.1.6과 v2 서명을 확인했고 AAB는
   `jar verified.`를 통과했다. AAB SHA-256은
@@ -257,10 +258,23 @@
   늘렸다. 일반 API는 기존 제한을 유지하며 업로드를 자동 재시도하지 않아 중복 게시 위험을 늘리지 않는다.
 - 2.1.7(`versionCode 30`) 서명·축소 산출물을 만들었고 GOAPI 계약·운영 runtime 변경은 없다.
 
+## Android 핵심 기능 정합성 보강 (2026-09-07)
+
+- Android 로그인 화면에서 계정 존재 여부를 노출하지 않는 비밀번호 재설정 메일 요청을 제공하고,
+  회원가입 전에 서버의 가입 모드·메일 설정을 확인해 비활성 상태와 초대 코드 모드를 처리한다.
+- 로그아웃은 기기 세션과 Google credential 상태를 먼저 지운 뒤 push 기기와 서버 refresh session을
+  가능한 범위에서 해제한다. 업로드는 access token 회전·저장을 기다린 뒤 시작해 이전 토큰과의 경합을 없앴다.
+- 사진 업로드는 `editor/config`의 게시판·분류를 사용하며 업로드와 게시글 수정에 서버 태그 추천을
+  제공한다. 고정된 분류 UID 의존성은 제거했다.
+- 프로필에 최근 1:1 메시지 목록 진입점을 추가하고 새 메시지 push 때 대화 목록을 갱신한다. 다른
+  사진가 프로필에는 서버 공개 요약의 작품·사진·받은 좋아요 수를 표시한다.
+- 공통 GOAPI 계약은 이미 운영 중이어서 서버·NUBO 웹·iOS 코드와 운영 runtime 변경은 없다.
+
 ## 다음 작업
 
-- Galaxy 실제 기기에서 3장 이상 사진을 운영 업로드해 10초 이후에도 진행 화면을 유지하고 성공 화면과
-  새 게시물 UID로 마무리되는지 확인한 뒤 2.1.7 AAB를 Play Console에 업로드한다.
+- Galaxy 실제 기기에서 3장 이상 사진 업로드의 10초 이후 진행·성공 화면, 태그 추천, 비밀번호 재설정,
+  메시지 목록·사진가 통계와 로그아웃 후 세션 복원 방지를 통합 확인한 뒤 2.1.7 AAB를 Play Console에
+  업로드한다.
 - Google Play 2.1.5 배포판에서 피드의 계정·알림·업로드·탐색 배치와 홈/잠금/양쪽 배경화면 적용을
   최종 확인한다.
 - Google Play에서 2.1.6을 설치할 수 있게 되면 대화 자동 갱신·읽음 상태·해시태그 이동과 키보드 레이아웃을

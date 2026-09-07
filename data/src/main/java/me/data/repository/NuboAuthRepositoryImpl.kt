@@ -5,11 +5,13 @@ import me.data.remote.api.NuboAuthApi
 import me.data.remote.dto.auth.toEntity
 import me.data.remote.dto.auth.MobileRefreshRequestDto
 import me.data.remote.dto.auth.DeleteAccountRequestDto
+import me.data.remote.dto.auth.PasswordResetRequestDto
 import me.data.remote.dto.common.toEntity
 import me.data.remote.dto.common.AchievementAcknowledgeRequestDto
 import me.domain.model.auth.NuboSignin
 import me.domain.model.auth.NuboSigninResult
 import me.domain.model.auth.NuboSignup
+import me.domain.model.auth.NuboSignupStatus
 import me.domain.model.auth.NuboUpdateAccessToken
 import me.domain.model.auth.NuboUpdateUserInfo
 import me.domain.model.auth.NuboUpdateUserInfoParam
@@ -26,6 +28,36 @@ class NuboAuthRepositoryImpl @Inject constructor(
     private val api: NuboAuthApi,
     private val sessionStore: UserSessionStore
 ) : NuboAuthRepository {
+
+    override suspend fun getSignupStatus(): NuboResponse<NuboSignupStatus> {
+        return try {
+            val response = api.getSignupStatus()
+            val result = response.result
+            if (!response.success || result == null) {
+                NuboResponse.Error(response.error.ifBlank { "가입 정책을 불러오지 못했습니다" })
+            } else {
+                NuboResponse.Success(result.toEntity())
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "가입 정책을 불러오지 못했습니다", cause = e)
+        }
+    }
+
+    override suspend fun requestPasswordReset(email: String): NuboResponse<NuboResponseNothing> {
+        return try {
+            NuboResponse.Success(api.requestPasswordReset(PasswordResetRequestDto(email)).toEntity())
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "비밀번호 재설정 메일을 요청하지 못했습니다", cause = e)
+        }
+    }
+
+    override suspend fun logout(token: String): NuboResponse<NuboResponseNothing> {
+        return try {
+            NuboResponse.Success(api.logout("Bearer $token").toEntity())
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "서버 로그아웃에 실패했습니다", cause = e)
+        }
+    }
 
     override suspend fun getUnannouncedAchievements(token: String): NuboResponse<List<NuboBadge>> {
         return try {
@@ -129,10 +161,11 @@ class NuboAuthRepositoryImpl @Inject constructor(
     override suspend fun signUp(
         id: String,
         password: String,
-        name: String
+        name: String,
+        invite: String
     ): NuboResponse<NuboSignup> {
         return try {
-            val response = api.signUp(id, password, name).toEntity()
+            val response = api.signUp(id, password, name, invite).toEntity()
             NuboResponse.Success(response)
         } catch (e: Exception) {
             NuboResponse.Error(message = e.localizedMessage ?: "An unexpected error occurred", cause = e)

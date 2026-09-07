@@ -8,15 +8,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.data.env.Env
 import me.domain.model.board.NuboBoardViewResponse
 import me.domain.model.board.NuboModifyPostParam
+import me.domain.model.board.NuboTagSuggestion
 import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.RemovePostUseCase
 import me.domain.usecase.board.ModifyPostUseCase
+import me.domain.usecase.board.GetTagSuggestionsUseCase
 import me.domain.usecase.view.GetPostViewUseCase
 import me.sensta.viewmodel.uievent.ViewUiEvent
 import me.sensta.sync.BoardStateSync
@@ -29,6 +33,7 @@ class PostViewViewModel @Inject constructor(
     private val getPostViewUseCase: GetPostViewUseCase,
     private val removePostUseCase: RemovePostUseCase,
     private val modifyPostUseCase: ModifyPostUseCase,
+    private val getTagSuggestionsUseCase: GetTagSuggestionsUseCase,
     private val boardStateSync: BoardStateSync
 ) : ViewModel() {
     private var _post =
@@ -38,6 +43,11 @@ class PostViewViewModel @Inject constructor(
     private val _openedPosts = mutableListOf<Int>()
     private val _uiEvent = MutableSharedFlow<ViewUiEvent>()
     val uiEvent get() = _uiEvent.asSharedFlow()
+
+    private val _tagSuggestions = mutableStateOf<List<NuboTagSuggestion>>(emptyList())
+    val tagSuggestions: State<List<NuboTagSuggestion>> get() = _tagSuggestions
+    private var tagSuggestionJob: Job? = null
+    private var tagSuggestionQuery = ""
 
     init {
         viewModelScope.launch {
@@ -151,5 +161,39 @@ class PostViewViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun updateTagSuggestionQuery(query: String, existingTags: List<String>) {
+        val normalized = query.trim().removePrefix("#").lowercase()
+        tagSuggestionQuery = normalized
+        tagSuggestionJob?.cancel()
+        if (normalized.length < 2) {
+            _tagSuggestions.value = emptyList()
+            return
+        }
+        tagSuggestionJob = viewModelScope.launch {
+            delay(TAG_SUGGESTION_DEBOUNCE_MILLIS)
+            val token = getUserInfoUseCase().first().token
+            if (token.isBlank()) return@launch
+            when (val response = getTagSuggestionsUseCase(normalized, TAG_SUGGESTION_LIMIT, token).first()) {
+                is NuboResponse.Success -> if (normalized == tagSuggestionQuery) {
+                    _tagSuggestions.value = response.data.filterNot { suggestion ->
+                        existingTags.any { it.equals(suggestion.name, ignoreCase = true) }
+                    }
+                }
+                else -> if (normalized == tagSuggestionQuery) _tagSuggestions.value = emptyList()
+            }
+        }
+    }
+
+    fun clearTagSuggestions() {
+        tagSuggestionJob?.cancel()
+        tagSuggestionQuery = ""
+        _tagSuggestions.value = emptyList()
+    }
+
+    companion object {
+        private const val TAG_SUGGESTION_LIMIT = 10
+        private const val TAG_SUGGESTION_DEBOUNCE_MILLIS = 200L
     }
 }

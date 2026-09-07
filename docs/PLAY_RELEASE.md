@@ -8,7 +8,7 @@
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `d5ed92213008256b3a28f3e90fe5381c2c4b56bc80bb0fba2746992ecbf02e19`
+- AAB SHA-256: `bcf7fd94a4adbae13156bac993facc8a0c508d249e9774968cf2150a91476f09`
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
@@ -19,10 +19,13 @@
 
 ```text
 <ko-KR>
-사진 업로드가 완료된 뒤 실패로 표시되던 문제를 수정했습니다.
+업로드 안정성과 핵심 편의 기능을 보강했습니다.
 
-• 사진 전송과 서버 처리 시간을 충분히 기다리도록 개선
-• 일반 화면의 빠른 네트워크 오류 안내는 그대로 유지
+• 업로드 전 세션 갱신과 서버별 게시판·분류 설정 반영
+• 비밀번호 재설정, 가입 정책·초대 코드와 안전한 로그아웃
+• 1:1 메시지 목록과 사진가 공개 활동 통계
+• 업로드·수정 화면의 태그 자동 완성
+• 긴 사진 처리 응답을 충분히 기다리도록 개선
 </ko-KR>
 ```
 
@@ -187,9 +190,9 @@ Windows에서는 Android Studio에 포함된 `jbr/bin/jarsigner.exe`를 사용�
 심사 제출과 프로덕션 배포 완료 여부는 별도로 확인한다. AAB SHA-256은
 `c259b44443f0907bb59cabd421c35a983de9046f952294e51c5e2a8c23d17441`이다.
 
-Android의 사진 업로드 응답 제한을 교정한 2.1.7(`versionCode 30`)의 서명·축소 Release AAB도
-빌드·검증했다. 실제 기기에서 운영 업로드를 재확인한 뒤 Play Console에 올린다. AAB SHA-256은
-`d5ed92213008256b3a28f3e90fe5381c2c4b56bc80bb0fba2746992ecbf02e19`이다.
+Android의 사진 업로드 응답 제한 교정과 iOS 핵심 기능 정합성을 반영한 2.1.7(`versionCode 30`)의
+서명·축소 Release AAB도 빌드·검증했다. 실제 기기에서 핵심 흐름을 재확인한 뒤 Play Console에 올린다.
+AAB SHA-256은 `bcf7fd94a4adbae13156bac993facc8a0c508d249e9774968cf2150a91476f09`이다.
 
 `versionCode 21`은 2026-08-22 16:10(KST)에 대한민국 대상 프로덕션 트랙으로 100% 게시되었다. Play
 Console에서 트랙 `활성`, `Google Play에 제공됨`, 대상 국가/지역 대한민국, 지원 Android 기기 17,678대를

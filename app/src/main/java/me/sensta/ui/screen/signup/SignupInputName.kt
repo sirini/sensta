@@ -29,6 +29,8 @@ fun SignupInputName() {
     val context = LocalContext.current
     val authViewModel = LocalAuthViewModel.current
     val name by authViewModel.name
+    val invite by authViewModel.invite
+    val signupStatus by authViewModel.signupStatus
     val isPolicyAccepted by authViewModel.isCommunityPolicyAccepted
 
     Column(
@@ -50,6 +52,16 @@ fun SignupInputName() {
             label = { Text(text = "이름을 입력하세요") },
             singleLine = true
         )
+
+        if (signupStatus?.requiresInvite == true) {
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = invite,
+                onValueChange = authViewModel::setInvite,
+                label = { Text(text = "초대 코드") },
+                singleLine = true
+            )
+        }
 
         Row(
             modifier = Modifier

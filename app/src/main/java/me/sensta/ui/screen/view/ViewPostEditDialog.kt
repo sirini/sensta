@@ -1,13 +1,18 @@
 package me.sensta.ui.screen.view
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,13 +24,17 @@ import androidx.core.text.parseAsHtml
 import me.domain.model.board.NuboBoardViewResult
 import me.sensta.ui.common.CommonDialog
 import me.sensta.util.NewlineTagHandler
+import me.sensta.viewmodel.local.LocalPostViewViewModel
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ViewPostEditDialog(
     result: NuboBoardViewResult,
     onDismissRequest: () -> Unit,
     onConfirm: (title: String, content: String, tags: List<String>) -> Unit
 ) {
+    val postViewViewModel = LocalPostViewViewModel.current
+    val suggestions by postViewViewModel.tagSuggestions
     val originalContent = remember(result.post.uid, result.post.content) {
         result.post.content.parseAsHtml(
             HtmlCompat.FROM_HTML_MODE_LEGACY,
@@ -44,6 +53,14 @@ fun ViewPostEditDialog(
         .map(String::trim)
         .filter(String::isNotEmpty)
         .distinct()
+    val tagQuery = tagText.substringAfterLast(',').trim()
+
+    LaunchedEffect(tagQuery, tags) {
+        postViewViewModel.updateTagSuggestionQuery(tagQuery, tags)
+    }
+    DisposableEffect(Unit) {
+        onDispose(postViewViewModel::clearTagSuggestions)
+    }
 
     CommonDialog(
         onDismissRequest = onDismissRequest,
@@ -80,9 +97,30 @@ fun ViewPostEditDialog(
                 label = { Text("태그 (쉼표로 구분)") },
                 singleLine = true
             )
+            if (suggestions.isNotEmpty()) {
+                FlowRow {
+                    suggestions.take(5).forEach { suggestion ->
+                        AssistChip(
+                            onClick = {
+                                tagText = applyTagSuggestion(tagText, suggestion.name)
+                                postViewViewModel.clearTagSuggestions()
+                            },
+                            label = { Text("#${suggestion.name} · ${suggestion.count}회") }
+                        )
+                    }
+                }
+            }
             if (showErrors) {
                 Text("제목과 내용은 각각 2자 이상 입력해 주세요")
             }
         }
     }
+}
+
+internal fun applyTagSuggestion(tagText: String, suggestion: String): String {
+    val committed = tagText.substringBeforeLast(',', missingDelimiterValue = "")
+        .split(',')
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+    return (committed + suggestion.trim()).distinct().joinToString(", ")
 }

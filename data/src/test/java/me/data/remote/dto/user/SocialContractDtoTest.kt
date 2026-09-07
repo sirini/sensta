@@ -40,6 +40,19 @@ class SocialContractDtoTest {
     }
 
     @Test
+    fun `받은 대화 목록에서 상대와 마지막 메시지를 읽는다`() {
+        val response = json.decodeFromString<ChatThreadListResponseDto>(
+            """{"success":true,"error":"","code":0,"result":[{"sender":{"uid":8,"name":"먼저 온 사진가","profile":""},"uid":80,"message":"먼저 온 메시지","timestamp":1000},{"sender":{"uid":7,"name":"사진가","profile":"/profile.webp"},"uid":91,"message":"새 사진 잘 봤어요","timestamp":2000}]}"""
+        )
+        val thread = response.toEntity().first()
+
+        assertEquals(7, thread.senderUid)
+        assertEquals("사진가", thread.senderName)
+        assertEquals(91, thread.latestMessageUid)
+        assertEquals("새 사진 잘 봤어요", thread.latestMessage)
+    }
+
+    @Test
     fun `대화 읽음 요청과 응답을 JSON 계약으로 처리한다`() {
         val body = json.parseToJsonElement(
             json.encodeToString(ChatReadRequestDto(targetUserUid = 145, throughUid = 91))

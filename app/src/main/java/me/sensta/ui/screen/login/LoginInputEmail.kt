@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -29,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import me.sensta.R
+import me.sensta.ui.navigation.Screen
 import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.viewmodel.local.LocalAuthViewModel
@@ -102,6 +104,21 @@ fun LoginInputEmail() {
                     )
                 }
             }
+        }
+
+        TextButton(
+            onClick = {
+                navController.navigate(Screen.PasswordReset.route) { launchSingleTop = true }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Default.LockReset,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("비밀번호 재설정")
         }
 
         Spacer(modifier = Modifier.height(32.dp))

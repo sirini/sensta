@@ -32,11 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import me.sensta.ui.navigation.Screen
+import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.theme.robotoSlabFontFamily
 import me.sensta.viewmodel.local.LocalAuthViewModel
 
 @Composable
 fun LoginInputPassword() {
+    val navController = LocalNavController.current
     val authViewModel = LocalAuthViewModel.current
     val pw by authViewModel.pw
     var isPwVisible by remember { mutableStateOf(false) }
@@ -104,14 +107,19 @@ fun LoginInputPassword() {
                 Text(text = "뒤로")
             }
 
-            TextButton(onClick = {}, modifier = Modifier.weight(2f)) {
+            TextButton(
+                onClick = {
+                    navController.navigate(Screen.PasswordReset.route) { launchSingleTop = true }
+                },
+                modifier = Modifier.weight(2f)
+            ) {
                 Icon(
                     imageVector = Icons.Default.LockReset,
-                    contentDescription = "Join",
+                    contentDescription = "비밀번호 재설정",
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "비밀번호 초기화")
+                Text(text = "비밀번호 재설정")
             }
         }
 

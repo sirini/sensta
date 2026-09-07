@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import java.util.Locale
 import coil.compose.AsyncImage
 import me.data.env.Env
 import me.sensta.ui.common.CommonDialog
@@ -54,6 +55,8 @@ fun OtherUserInfo(latestPhoto: String?) {
     val isLoading by userViewModel.isLoadingInfo
     val isReported by userViewModel.isReported
     val isBlockedByMe by userViewModel.isBlockedByMe
+    val publicSummary by userViewModel.publicSummary
+    val isLoadingPublicSummary by userViewModel.isLoadingPublicSummary
     val onMedia = LocalSenstaExtendedColors.current.onMedia
     val isMyProfile = my.uid > 0 && my.uid == otherUser.uid
     var showReportDialog by remember { mutableStateOf(false) }
@@ -136,6 +139,19 @@ fun OtherUserInfo(latestPhoto: String?) {
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 6.dp)
         )
 
+        if (otherUser.uid > 0) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                PublicProfileMetric("작품", publicSummary?.postCount, isLoadingPublicSummary)
+                PublicProfileMetric("사진", publicSummary?.photoCount, isLoadingPublicSummary)
+                PublicProfileMetric("받은 좋아요", publicSummary?.likeCount, isLoadingPublicSummary)
+            }
+        }
+
         AchievementShelf(
             badges = otherUser.badges,
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -194,6 +210,21 @@ fun OtherUserInfo(latestPhoto: String?) {
                     }
                 )
             }
+        )
+    }
+}
+
+@Composable
+private fun PublicProfileMetric(label: String, value: Long?, isLoading: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = if (isLoading || value == null) "—" else String.format(Locale.KOREAN, "%,d", value),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

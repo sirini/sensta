@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.data.util.Upload
 import me.domain.model.auth.NuboSigninResult
+import me.domain.model.auth.NuboSignupStatus
 import me.domain.model.auth.NuboUpdateUserInfoParam
 import me.domain.model.auth.NuboVerifyCodeParam
 import me.domain.model.auth.emptyUser
@@ -32,6 +33,9 @@ import me.domain.usecase.auth.CheckVerificationCodeUseCase
 import me.domain.usecase.auth.ClearUserInfoUseCase
 import me.domain.usecase.auth.DeleteAccountUseCase
 import me.domain.usecase.auth.GetUserInfoUseCase
+import me.domain.usecase.auth.GetSignupStatusUseCase
+import me.domain.usecase.auth.LogoutUseCase
+import me.domain.usecase.auth.RequestPasswordResetUseCase
 import me.domain.usecase.auth.SaveUserInfoUseCase
 import me.domain.usecase.auth.SignInUseCase
 import me.domain.usecase.auth.SignInWithGoogleUseCase
@@ -63,6 +67,9 @@ class AuthViewModel @Inject constructor(
     private val clearUserInfoUseCase: ClearUserInfoUseCase,
     private val deleteAccountUseCase: DeleteAccountUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val getSignupStatusUseCase: GetSignupStatusUseCase,
+    private val logoutUseCase: LogoutUseCase,
+    private val requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private val saveUserInfoUseCase: SaveUserInfoUseCase,
     private val signInUseCase: SignInUseCase,
     private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
@@ -86,6 +93,9 @@ class AuthViewModel @Inject constructor(
     private val _name = mutableStateOf("")
     val name: State<String> get() = _name
 
+    private val _invite = mutableStateOf("")
+    val invite: State<String> get() = _invite
+
     private val _user = mutableStateOf(emptyUser)
     val user: State<NuboSigninResult> get() = _user
 
@@ -97,6 +107,24 @@ class AuthViewModel @Inject constructor(
 
     private val _signupState = mutableStateOf<SignupState>(SignupState.InputEmail)
     val signupState: State<SignupState> get() = _signupState
+
+    private val _signupStatus = mutableStateOf<NuboSignupStatus?>(null)
+    val signupStatus: State<NuboSignupStatus?> get() = _signupStatus
+
+    private val _isSignupStatusLoading = mutableStateOf(false)
+    val isSignupStatusLoading: State<Boolean> get() = _isSignupStatusLoading
+
+    private val _signupStatusError = mutableStateOf<String?>(null)
+    val signupStatusError: State<String?> get() = _signupStatusError
+
+    private val _isPasswordResetLoading = mutableStateOf(false)
+    val isPasswordResetLoading: State<Boolean> get() = _isPasswordResetLoading
+
+    private val _passwordResetRequested = mutableStateOf(false)
+    val passwordResetRequested: State<Boolean> get() = _passwordResetRequested
+
+    private val _passwordResetError = mutableStateOf<String?>(null)
+    val passwordResetError: State<String?> get() = _passwordResetError
 
     private val _isCommunityPolicyAccepted = mutableStateOf(communityPolicyManager.isAccepted())
     val isCommunityPolicyAccepted: State<Boolean> get() = _isCommunityPolicyAccepted
@@ -167,6 +195,10 @@ class AuthViewModel @Inject constructor(
     // 아이디(이메일)가 존재하는지 확인 후 비밀번호 입력란으로 이동
     fun checkValidID(isSignup: Boolean = false) {
         viewModelScope.launch {
+            if (isSignup && _signupStatus.value?.emailSignupAvailable != true) {
+                _uiAuthEvent.emit(AuthUiEvent.SignupUnavailable)
+                return@launch
+            }
             if (_id.value.isEmpty() || !_isEmailValid.value) {
                 _uiAuthEvent.emit(AuthUiEvent.InvalidEmailAddress)
                 return@launch
@@ -290,12 +322,22 @@ class AuthViewModel @Inject constructor(
         _loginState.value = LoginState.InputEmail
         replaceUser(emptyUser)
         viewModelScope.launch {
+            // 네트워크 정리가 지연돼도 다음 실행에서 이전 세션을 복원하지 않는다.
+            clearUserInfoUseCase()
+            googleCredentialClient.clearCredentialState()
             val accessToken = signedOutUser.token
             if (accessToken.isNotBlank()) {
                 pushTokenManager.unregister(accessToken)
+                logoutUseCase(accessToken).collect { response ->
+                    when (response) {
+                        is NuboResponse.Error -> AppDiagnostics.report("서버 로그아웃", response)
+                        is NuboResponse.Success -> if (!response.data.success) {
+                            AppDiagnostics.report("서버 로그아웃", response.data.error)
+                        }
+                        NuboResponse.Loading -> Unit
+                    }
+                }
             }
-            googleCredentialClient.clearCredentialState()
-            clearUserInfoUseCase()
         }
     }
 
@@ -332,6 +374,9 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    // 보호된 쓰기 요청은 토큰 회전과 저장이 끝난 뒤 시작해야 한다.
+    suspend fun refreshForProtectedRequest(): Boolean = updateAccessToken()
+
     // 프로세스가 유지된 채 앱으로 돌아와도 만료 전에 세션을 갱신한다.
     fun refreshIfNeeded() {
         val currentUser = _user.value
@@ -348,6 +393,63 @@ class AuthViewModel @Inject constructor(
     // 회원가입 시 이름 입력 받기
     fun setName(name: String) {
         _name.value = name.trim()
+    }
+
+    fun setInvite(invite: String) {
+        _invite.value = invite.trim()
+    }
+
+    fun loadSignupStatus() {
+        if (_isSignupStatusLoading.value) return
+        _isSignupStatusLoading.value = true
+        viewModelScope.launch {
+            when (val response = getSignupStatusUseCase().first()) {
+                is NuboResponse.Success -> {
+                    _signupStatus.value = response.data
+                    _signupStatusError.value = null
+                }
+                is NuboResponse.Error -> {
+                    _signupStatus.value = null
+                    _signupStatusError.value = response.message
+                }
+                NuboResponse.Loading -> Unit
+            }
+            _isSignupStatusLoading.value = false
+        }
+    }
+
+    fun resetPasswordResetFlow() {
+        _passwordResetRequested.value = false
+        _passwordResetError.value = null
+    }
+
+    fun requestPasswordReset(email: String) {
+        val normalizedEmail = email.trim()
+        if (_isPasswordResetLoading.value) return
+        if (!Patterns.EMAIL_ADDRESS.matcher(normalizedEmail).matches()) {
+            _passwordResetError.value = "올바른 이메일 주소를 입력해 주세요"
+            return
+        }
+
+        _isPasswordResetLoading.value = true
+        _passwordResetError.value = null
+        viewModelScope.launch {
+            when (val response = requestPasswordResetUseCase(normalizedEmail).first()) {
+                is NuboResponse.Success -> {
+                    if (response.data.success) {
+                        _passwordResetRequested.value = true
+                    } else {
+                        _passwordResetError.value = "현재 재설정 메일을 보낼 수 없습니다. 잠시 뒤 다시 시도해 주세요"
+                    }
+                }
+                is NuboResponse.Error -> {
+                    _passwordResetError.value =
+                        "재설정 메일을 요청하지 못했습니다. 인터넷 연결을 확인해 주세요"
+                }
+                NuboResponse.Loading -> Unit
+            }
+            _isPasswordResetLoading.value = false
+        }
     }
 
     // 회원가입 전에 이용약관과 커뮤니티 운영 원칙에 동의한 상태를 보관한다.
@@ -420,7 +522,12 @@ class AuthViewModel @Inject constructor(
                 return@launch
             }
 
-            signUpUseCase(_id.value, _pw.value, _name.value).collect {
+            if (_signupStatus.value?.requiresInvite == true && _invite.value.isBlank()) {
+                _uiAuthEvent.emit(AuthUiEvent.EnterInviteCode)
+                return@launch
+            }
+
+            signUpUseCase(_id.value, _pw.value, _name.value, _invite.value).collect {
                 it.handle { resp ->
                     if (!resp.success) {
                         _uiAuthEvent.emit(AuthUiEvent.FailedToSignUp)
@@ -431,6 +538,7 @@ class AuthViewModel @Inject constructor(
                         _signupState.value = SignupState.InputCode
                         _uiAuthEvent.emit(AuthUiEvent.SentVerificationCode(_id.value))
                     } else if (resp.result.completed) {
+                        _invite.value = ""
                         _signupState.value = SignupState.SignupCompleted
                         _uiAuthEvent.emit(AuthUiEvent.SignupCompleted)
                     }

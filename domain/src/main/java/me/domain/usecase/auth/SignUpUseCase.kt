@@ -11,6 +11,7 @@ class SignUpUseCase @Inject constructor(
     operator fun invoke(
         id: String,
         password: String,
-        name: String
-    ) = flow { emit(repository.signUp(id, password, name)) }
+        name: String,
+        invite: String
+    ) = flow { emit(repository.signUp(id, password, name, invite)) }
 }

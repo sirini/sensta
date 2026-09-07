@@ -2,12 +2,15 @@ package me.domain.repository
 
 import me.domain.model.board.NuboBoardViewResponse
 import me.domain.model.board.NuboComment
+import me.domain.model.board.NuboEditorConfig
 import me.domain.model.board.NuboGetPostsParam
 import me.domain.model.board.NuboModifyCommentParam
 import me.domain.model.board.NuboModifyPostParam
 import me.domain.model.board.NuboPost
 import me.domain.model.board.NuboRecentHashtagResponse
+import me.domain.model.board.NuboPublicUserSummary
 import me.domain.model.board.NuboStudio
+import me.domain.model.board.NuboTagSuggestion
 import me.domain.model.board.NuboStudioParam
 import me.domain.model.board.NuboUpdateLikeParam
 import me.domain.model.board.NuboWriteCommentParam
@@ -18,6 +21,9 @@ import me.domain.model.home.NuboLatestPost
 
 // 게시글 관련 인터페이스
 interface NuboBoardRepository {
+    suspend fun getEditorConfig(boardId: String, token: String): NuboResponse<NuboEditorConfig>
+    suspend fun getTagSuggestions(query: String, limit: Int, token: String): NuboResponse<List<NuboTagSuggestion>>
+    suspend fun getPublicUserSummary(boardId: String, targetUserUid: Int): NuboResponse<NuboPublicUserSummary>
     suspend fun getMyStudio(param: NuboStudioParam): NuboResponse<NuboStudio>
     suspend fun getComments(postUid: Int, token: String): NuboResponse<List<NuboComment>>
     suspend fun getHomeLatestPosts(

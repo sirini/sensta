@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -46,9 +48,13 @@ fun SignupScreen() {
     val snackbar = LocalSnackbar.current
     val isLoading by authViewModel.isLoading
     val signupState by authViewModel.signupState
+    val signupStatus by authViewModel.signupStatus
+    val isSignupStatusLoading by authViewModel.isSignupStatusLoading
+    val signupStatusError by authViewModel.signupStatusError
 
     // ViewModel에서 전달된 이벤트에 맞춰 메시지 출력
     LaunchedEffect(Unit) {
+        authViewModel.loadSignupStatus()
         authViewModel.uiAuthEvent.collect { event ->
             when (event) {
                 is AuthUiEvent.AccessTokenUpdated -> {
@@ -77,6 +83,10 @@ fun SignupScreen() {
 
                 is AuthUiEvent.EnterVerificationCode -> {
                     Toast.makeText(context, "인증번호를 입력해주세요", Toast.LENGTH_SHORT).show()
+                }
+
+                is AuthUiEvent.EnterInviteCode -> {
+                    Toast.makeText(context, "초대 코드를 입력해주세요", Toast.LENGTH_SHORT).show()
                 }
 
                 is AuthUiEvent.ExpiredAccessToken -> {
@@ -119,6 +129,10 @@ fun SignupScreen() {
                     snackbar.showSnackbar("회원가입이 완료되었습니다", "확인", duration = SnackbarDuration.Short)
                 }
 
+                is AuthUiEvent.SignupUnavailable -> {
+                    Toast.makeText(context, "현재 이메일 회원가입을 이용할 수 없습니다", Toast.LENGTH_SHORT).show()
+                }
+
                 is AuthUiEvent.WrongVerificationCode -> {
                     Toast.makeText(context, "인증번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
                 }
@@ -156,7 +170,7 @@ fun SignupScreen() {
                 .padding(32.dp)
         ) {
             Column {
-                if (isLoading) {
+                if (isLoading || isSignupStatusLoading) {
                     LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,7 +178,32 @@ fun SignupScreen() {
                     )
                 }
 
-                AnimatedContent(
+                val unavailableMessage = signupAvailabilityMessage(
+                    mode = signupStatus?.mode,
+                    mailConfigured = signupStatus?.mailConfigured,
+                    loading = isSignupStatusLoading,
+                    error = signupStatusError
+                )
+                if ((signupStatus == null && signupStatusError == null) || isSignupStatusLoading) {
+                    Text(
+                        text = "가입 가능 여부를 확인하고 있습니다",
+                        modifier = Modifier.padding(24.dp)
+                    )
+                } else if (unavailableMessage != null) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("이메일 회원가입을 사용할 수 없습니다")
+                        Text(
+                            text = unavailableMessage,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                        )
+                        Button(onClick = authViewModel::loadSignupStatus) {
+                            Text("다시 확인")
+                        }
+                    }
+                } else AnimatedContent(
                     targetState = signupState,
                     transitionSpec = {
                         slideInHorizontally(
@@ -187,5 +226,23 @@ fun SignupScreen() {
                 }
             }
         }
+    }
+}
+
+internal fun signupAvailabilityMessage(
+    mode: String?,
+    mailConfigured: Boolean?,
+    loading: Boolean,
+    error: String?
+): String? {
+    if (loading) return null
+    if (error != null || mode == null) return "서버에 연결해 가입 정책을 확인해 주세요."
+    return when {
+        mode == "disabled" -> "현재 새 회원가입을 받고 있지 않습니다."
+        mode == "verified_email" && mailConfigured != true ->
+            "현재 이메일 인증 메일을 보낼 수 없습니다. Google 로그인을 이용해 주세요."
+        mode !in setOf("verified_email", "invite_only") ->
+            "현재 가입 정책을 이 앱에서 처리할 수 없습니다."
+        else -> null
     }
 }

@@ -32,9 +32,11 @@ fun TopBar() {
     val showNotificationIcon = currentRoute != Screen.Login.route
     val sectionTitle = when (currentRoute) {
         Screen.Explorer.route -> "DISCOVER"
+        Screen.Messages.route -> "DIRECT MESSAGES"
         Screen.Upload.route -> "PUBLISH"
         Screen.Profile.route -> "PROFILE"
         Screen.Notification.route -> "ACTIVITY"
+        Screen.PasswordReset.route -> "RESET PASSWORD"
         Screen.View.route -> "PHOTO STORY"
         Screen.User.route -> "PHOTOGRAPHER"
         Screen.UserMessage.route -> "MESSAGE"

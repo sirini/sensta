@@ -14,13 +14,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.domain.model.board.NuboBoardViewResponse
 import me.domain.model.board.NuboComment
+import me.domain.model.board.NuboEditorConfig
 import me.domain.model.board.NuboGetPostsParam
 import me.domain.model.board.NuboModifyCommentParam
 import me.domain.model.board.NuboModifyPostParam
 import me.domain.model.board.NuboPost
+import me.domain.model.board.NuboPublicUserSummary
 import me.domain.model.board.NuboRecentHashtagResponse
 import me.domain.model.board.NuboStudio
 import me.domain.model.board.NuboStudioParam
+import me.domain.model.board.NuboTagSuggestion
 import me.domain.model.board.NuboUpdateLikeParam
 import me.domain.model.board.NuboWriteCommentParam
 import me.domain.model.board.NuboWritePostParam
@@ -35,6 +38,57 @@ import javax.inject.Inject
 class NuboBoardRepositoryImpl @Inject constructor(
     private val api: NuboBoardApi
 ) : NuboBoardRepository {
+
+    override suspend fun getEditorConfig(
+        boardId: String,
+        token: String
+    ): NuboResponse<NuboEditorConfig> {
+        return try {
+            val response = api.getEditorConfig(token.toAuthorizationHeader(), boardId)
+            val result = response.result
+            if (!response.success || result == null || result.config.uid < 1 || result.categories.isEmpty()) {
+                NuboResponse.Error(response.error.ifBlank { "업로드 설정을 불러오지 못했습니다" })
+            } else {
+                NuboResponse.Success(result.toEntity())
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "업로드 설정을 불러오지 못했습니다", cause = e)
+        }
+    }
+
+    override suspend fun getTagSuggestions(
+        query: String,
+        limit: Int,
+        token: String
+    ): NuboResponse<List<NuboTagSuggestion>> {
+        return try {
+            val response = api.getTagSuggestions(token.toAuthorizationHeader(), query, limit)
+            if (!response.success) {
+                NuboResponse.Error(response.error.ifBlank { "태그 추천을 불러오지 못했습니다" })
+            } else {
+                NuboResponse.Success(response.result.map { it.toEntity() })
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "태그 추천을 불러오지 못했습니다", cause = e)
+        }
+    }
+
+    override suspend fun getPublicUserSummary(
+        boardId: String,
+        targetUserUid: Int
+    ): NuboResponse<NuboPublicUserSummary> {
+        return try {
+            val response = api.getPublicUserSummary(boardId, targetUserUid)
+            val result = response.result
+            if (!response.success || result == null) {
+                NuboResponse.Error(response.error.ifBlank { "사진가 통계를 불러오지 못했습니다" })
+            } else {
+                NuboResponse.Success(result.toEntity())
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "사진가 통계를 불러오지 못했습니다", cause = e)
+        }
+    }
 
     // 로그인한 사용자의 작품과 누적 성과 가져오기
     override suspend fun getMyStudio(param: NuboStudioParam): NuboResponse<NuboStudio> {

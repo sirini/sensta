@@ -58,6 +58,27 @@ class AuthContractDtoTest {
     }
 
     @Test
+    fun `회원가입 정책에서 초대 전용 모드를 읽는다`() {
+        val response = json.decodeFromString<SignupStatusResponseDto>(
+            """{"success":true,"error":"","code":0,"result":{"mode":"invite_only","mailConfigured":true,"oauthRegistrationAllowed":false}}"""
+        )
+        val status = requireNotNull(response.result).toEntity()
+
+        assertTrue(status.emailSignupAvailable)
+        assertTrue(status.requiresInvite)
+        assertFalse(status.oauthRegistrationAllowed)
+    }
+
+    @Test
+    fun `비밀번호 재설정 요청은 이메일만 JSON으로 전송한다`() {
+        val body = json.parseToJsonElement(
+            json.encodeToString(PasswordResetRequestDto(email = "photo@example.com"))
+        ).jsonObject
+
+        assertEquals("photo@example.com", body.getValue("email").jsonPrimitive.content)
+    }
+
+    @Test
     fun `모바일 토큰 갱신 응답에서 회전된 토큰 쌍을 읽는다`() {
         val response = json.decodeFromString<UpdateAccessTokenDto>(
             """

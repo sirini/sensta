@@ -272,4 +272,39 @@ class BoardContractDtoTest {
         assertFalse(response.success)
         assertEquals(0, response.result)
     }
+
+    @Test
+    fun `에디터 설정에서 게시판과 카테고리를 읽는다`() {
+        val response = json.decodeFromString<EditorConfigResponseDto>(
+            """{"success":true,"error":"","code":0,"result":{"config":{"uid":2,"useCategory":true},"categories":[{"uid":5,"name":"lounge"},{"uid":16,"name":"daily"}]}}"""
+        )
+        val config = requireNotNull(response.result).toEntity()
+
+        assertEquals(2, config.boardUid)
+        assertTrue(config.usesCategories)
+        assertEquals(listOf(5, 16), config.categories.map { it.uid })
+    }
+
+    @Test
+    fun `태그 추천의 사용 횟수를 보존한다`() {
+        val response = json.decodeFromString<TagSuggestionResponseDto>(
+            """{"success":true,"error":"","code":0,"result":[{"uid":7,"name":"서울","count":42}]}"""
+        )
+        val suggestion = response.result.single().toEntity()
+
+        assertEquals("서울", suggestion.name)
+        assertEquals(42, suggestion.count)
+    }
+
+    @Test
+    fun `공개 사진가 통계를 읽는다`() {
+        val response = json.decodeFromString<PublicUserSummaryResponseDto>(
+            """{"success":true,"error":"","code":0,"result":{"postCount":12,"photoCount":26,"likeCount":341}}"""
+        )
+        val summary = requireNotNull(response.result).toEntity()
+
+        assertEquals(12L, summary.postCount)
+        assertEquals(26L, summary.photoCount)
+        assertEquals(341L, summary.likeCount)
+    }
 }

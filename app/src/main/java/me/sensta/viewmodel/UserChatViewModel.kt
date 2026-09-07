@@ -13,13 +13,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.domain.model.board.NuboPost
+import me.domain.model.board.NuboPublicUserSummary
 import me.domain.model.common.NuboWriter
 import me.domain.model.user.NuboChatHistory
+import me.domain.model.user.NuboChatThread
 import me.domain.model.user.NuboOtherUserInfoResult
 import me.domain.repository.NuboResponse
 import me.domain.repository.handle
 import me.domain.usecase.auth.GetUserInfoUseCase
 import me.domain.usecase.board.GetPostListUseCase
+import me.domain.usecase.board.GetPublicUserSummaryUseCase
+import me.domain.usecase.user.GetChatThreadsUseCase
 import me.domain.usecase.user.GetChatHistoryUseCase
 import me.domain.usecase.user.GetOtherUserInfoUseCase
 import me.domain.usecase.user.MarkChatReadUseCase
@@ -29,6 +33,7 @@ import me.domain.usecase.user.ChangeUserBlockUseCase
 import me.domain.usecase.user.SendChatUseCase
 import me.sensta.viewmodel.uievent.ChatUiEvent
 import me.sensta.push.PushEventBus
+import me.data.env.Env
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -36,8 +41,10 @@ import javax.inject.Inject
 class UserChatViewModel @Inject constructor(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val getPostListUseCase: GetPostListUseCase,
+    private val getPublicUserSummaryUseCase: GetPublicUserSummaryUseCase,
     private val getOtherUserInfoUseCase: GetOtherUserInfoUseCase,
     private val getChatHistoryUseCase: GetChatHistoryUseCase,
+    private val getChatThreadsUseCase: GetChatThreadsUseCase,
     private val markChatReadUseCase: MarkChatReadUseCase,
     private val sendChatUseCase: SendChatUseCase,
     private val getUserSafetyStatusUseCase: GetUserSafetyStatusUseCase,
@@ -82,6 +89,19 @@ class UserChatViewModel @Inject constructor(
     private var markedIncomingThroughUid = 0
     private var isConversationVisible = false
 
+    private val _chatThreads = mutableStateOf<NuboResponse<List<NuboChatThread>>>(NuboResponse.Loading)
+    val chatThreads: State<NuboResponse<List<NuboChatThread>>> get() = _chatThreads
+
+    private val _isLoadingThreads = mutableStateOf(false)
+    val isLoadingThreads: State<Boolean> get() = _isLoadingThreads
+    private var chatThreadsJob: Job? = null
+
+    private val _publicSummary = mutableStateOf<NuboPublicUserSummary?>(null)
+    val publicSummary: State<NuboPublicUserSummary?> get() = _publicSummary
+
+    private val _isLoadingPublicSummary = mutableStateOf(false)
+    val isLoadingPublicSummary: State<Boolean> get() = _isLoadingPublicSummary
+
     private val _isLoadingInfo = mutableStateOf(false)
     val isLoadingInfo: State<Boolean> get() = _isLoadingInfo
 
@@ -100,11 +120,32 @@ class UserChatViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             pushEventBus.events.collect { event ->
-                if (event.notificationType == CHAT_NOTIFICATION_TYPE &&
-                    event.fromUserUid == _otherUser.value.uid
-                ) {
-                    loadChatHistory(showLoading = false)
+                if (event.notificationType == CHAT_NOTIFICATION_TYPE) {
+                    loadChatThreads(showLoading = false)
+                    if (event.fromUserUid == _otherUser.value.uid) {
+                        loadChatHistory(showLoading = false)
+                    }
                 }
+            }
+        }
+    }
+
+    fun loadChatThreads(showLoading: Boolean = true) {
+        if (chatThreadsJob?.isActive == true) return
+        if (showLoading) _isLoadingThreads.value = true
+        chatThreadsJob = viewModelScope.launch {
+            val token = getUserInfoUseCase().first().token
+            if (token.isBlank()) {
+                _chatThreads.value = NuboResponse.Error("로그인이 필요합니다")
+            } else {
+                getChatThreadsUseCase(CHAT_THREAD_LIMIT, token).collect { response ->
+                    _chatThreads.value = response
+                }
+            }
+        }.also { job ->
+            job.invokeOnCompletion {
+                if (showLoading) _isLoadingThreads.value = false
+                if (chatThreadsJob === job) chatThreadsJob = null
             }
         }
     }
@@ -180,6 +221,7 @@ class UserChatViewModel @Inject constructor(
             profile = user.profile,
             signature = user.signature
         )
+        loadPublicSummary(user.uid)
         loadUserPosts(user.uid, user.name)
 
         viewModelScope.launch {
@@ -199,6 +241,7 @@ class UserChatViewModel @Inject constructor(
         _isLoadingInfo.value = true
         resetUserSafetyStatus()
         _otherUser.value = _otherUser.value.copy(uid = userUid)
+        loadPublicSummary(userUid)
 
         viewModelScope.launch {
             getOtherUserInfoUseCase(userUid).collect {
@@ -282,10 +325,23 @@ class UserChatViewModel @Inject constructor(
         _isBlockedByMe.value = false
         _chatHistory.value = emptyList()
         _userPosts.value = NuboResponse.Loading
+        _publicSummary.value = null
         _isLoadingUserPosts.value = false
         userPostTargetUid = 0
         userPostWriterName = ""
         userPostRequestId++
+    }
+
+    private fun loadPublicSummary(targetUserUid: Int) {
+        if (targetUserUid < 1) return
+        _isLoadingPublicSummary.value = true
+        viewModelScope.launch {
+            getPublicUserSummaryUseCase(Env.BOARD_ID, targetUserUid).collect { response ->
+                if (_otherUser.value.uid != targetUserUid) return@collect
+                _publicSummary.value = (response as? NuboResponse.Success)?.data
+            }
+            if (_otherUser.value.uid == targetUserUid) _isLoadingPublicSummary.value = false
+        }
     }
 
     // 작성자 검색 결과를 UID로 다시 확인해 동명이인의 사진이 섞이지 않게 한다.
@@ -403,6 +459,7 @@ class UserChatViewModel @Inject constructor(
         const val MAX_CHAT_MESSAGE_LENGTH = 2_000
         private const val CHAT_NOTIFICATION_TYPE = 4
         private const val WRITER_SEARCH_OPTION = 2
+        private const val CHAT_THREAD_LIMIT = 30
     }
 }
 

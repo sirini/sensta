@@ -2,6 +2,7 @@ package me.data.remote.api
 
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.user.ChatHistoryListResponseDto
+import me.data.remote.dto.user.ChatThreadListResponseDto
 import me.data.remote.dto.user.ChatReadRequestDto
 import me.data.remote.dto.user.ChatReadResponseDto
 import me.data.remote.dto.user.OtherUserInfoDto
@@ -20,6 +21,12 @@ import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface NuboUserApi {
+    @GET("chat/list")
+    suspend fun getChatThreads(
+        @Header("Authorization") authorization: String,
+        @Query("limit") limit: Int
+    ): ChatThreadListResponseDto
+
     // 상대방과 나눈 최근 메시지들 기록 가져오기
     @GET("chat/history")
     suspend fun getChatHistory(

@@ -5,10 +5,13 @@ import me.data.remote.dto.board.BoardListResponseDto
 import me.data.remote.dto.board.BoardViewResponseDto
 import me.data.remote.dto.board.CommentLikeRequestDto
 import me.data.remote.dto.board.CommentListResponseDto
+import me.data.remote.dto.board.EditorConfigResponseDto
 import me.data.remote.dto.board.ModifyCommentRequestDto
 import me.data.remote.dto.board.RecentHashtagResponseDto
+import me.data.remote.dto.board.PublicUserSummaryResponseDto
 import me.data.remote.dto.board.RemovePostRequestDto
 import me.data.remote.dto.board.StudioResponseDto
+import me.data.remote.dto.board.TagSuggestionResponseDto
 import me.data.remote.dto.board.WriteResponseDto
 import me.data.remote.dto.common.ResponseNothingDto
 import me.data.remote.dto.home.HomeLatestResponseDto
@@ -28,6 +31,25 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface NuboBoardApi {
+    @GET("editor/config")
+    suspend fun getEditorConfig(
+        @Header("Authorization") authorization: String,
+        @Query("id") id: String
+    ): EditorConfigResponseDto
+
+    @GET("editor/suggestion/tag")
+    suspend fun getTagSuggestions(
+        @Header("Authorization") authorization: String,
+        @Query("tag") tag: String,
+        @Query("limit") limit: Int
+    ): TagSuggestionResponseDto
+
+    @GET("board/user/summary")
+    suspend fun getPublicUserSummary(
+        @Query("id") id: String,
+        @Query("targetUserUid") targetUserUid: Int
+    ): PublicUserSummaryResponseDto
+
     // 로그인한 사용자의 작품과 누적 성과 가져오기
     @GET("board/my/studio")
     suspend fun getMyStudio(

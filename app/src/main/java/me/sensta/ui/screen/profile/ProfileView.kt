@@ -66,8 +66,26 @@ fun ProfileInfoTab() {
                 .fillMaxSize()
         ) {
             Text(
-                text = "기본 정보",
+                text = "소통",
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        navController.navigate(Screen.Messages.route) { launchSingleTop = true }
+                    }
+            ) {
+                ProfileViewItem(name = "1:1 메시지", value = "대화 목록") {
+                    navController.navigate(Screen.Messages.route) { launchSingleTop = true }
+                }
+            }
+
+            Text(
+                text = "기본 정보",
+                modifier = Modifier.padding(top = 32.dp, bottom = 8.dp, start = 8.dp),
                 style = MaterialTheme.typography.bodySmall
             )
 

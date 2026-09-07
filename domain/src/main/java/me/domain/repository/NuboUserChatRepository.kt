@@ -1,6 +1,7 @@
 package me.domain.repository
 
 import me.domain.model.user.NuboChatHistoryResponse
+import me.domain.model.user.NuboChatThread
 import me.domain.model.user.NuboChatReadResult
 import me.domain.model.user.NuboOtherUserInfoResult
 import me.domain.model.user.NuboSendChatResponse
@@ -9,6 +10,7 @@ import me.domain.model.common.NuboResponseNothing
 
 // 다른 사용자의 상호작용 관련 인터페이스
 interface NuboUserChatRepository {
+    suspend fun getChatThreads(limit: Int, token: String): NuboResponse<List<NuboChatThread>>
     suspend fun getOtherUserInfo(userUid: Int): NuboResponse<NuboOtherUserInfoResult>
     suspend fun getChatHistory(
         targetUserUid: Int,

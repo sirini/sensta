@@ -21,8 +21,12 @@ fun UploadCompleted() {
     val uploadedPostUid by uploadViewModel.uploadedPostUid
 
     LaunchedEffect(Unit) {
-        authViewModel.refresh()
-        uploadViewModel.upload(context)
+        uploadViewModel.beginUploadPreparation()
+        if (authViewModel.refreshForProtectedRequest()) {
+            uploadViewModel.upload(context)
+        } else {
+            uploadViewModel.failUploadPreparation("로그인 세션이 만료되었습니다")
+        }
     }
 
     AnimatedContent(

@@ -9,6 +9,7 @@ sealed interface AuthUiEvent {
     data object DifferentPassword : AuthUiEvent
     data object EnterAllInfo : AuthUiEvent
     data object EnterVerificationCode : AuthUiEvent
+    data object EnterInviteCode : AuthUiEvent
     data object ExpiredAccessToken : AuthUiEvent
     data object FailedToSignUp : AuthUiEvent
     data object InvalidEmailAddress : AuthUiEvent
@@ -17,6 +18,7 @@ sealed interface AuthUiEvent {
     data object RemindPasswordRule : AuthUiEvent
     data class SentVerificationCode(val email: String) : AuthUiEvent
     data object SignupCompleted : AuthUiEvent
+    data object SignupUnavailable : AuthUiEvent
     data object WrongVerificationCode : AuthUiEvent
     data object CommunityPolicyRequired : AuthUiEvent
 }

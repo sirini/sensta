@@ -9,6 +9,7 @@ import me.data.remote.dto.user.UserTargetRequestDto
 import me.data.remote.dto.common.toEntity
 import me.domain.model.common.NuboResponseNothing
 import me.domain.model.user.NuboChatHistoryResponse
+import me.domain.model.user.NuboChatThread
 import me.domain.model.user.NuboChatReadResult
 import me.domain.model.user.NuboOtherUserInfoResult
 import me.domain.model.user.NuboSendChatResponse
@@ -20,6 +21,22 @@ import javax.inject.Inject
 class NuboUserChatRepositoryImpl @Inject constructor(
     private val api: NuboUserApi
 ) : NuboUserChatRepository {
+
+    override suspend fun getChatThreads(
+        limit: Int,
+        token: String
+    ): NuboResponse<List<NuboChatThread>> {
+        return try {
+            val response = api.getChatThreads("Bearer $token", limit)
+            if (!response.success) {
+                NuboResponse.Error(response.error.ifBlank { "메시지 목록을 불러오지 못했습니다" })
+            } else {
+                NuboResponse.Success(response.toEntity())
+            }
+        } catch (e: Exception) {
+            NuboResponse.Error(message = e.localizedMessage ?: "메시지 목록을 불러오지 못했습니다", cause = e)
+        }
+    }
 
     // 다른 사용자의 기본 정보 가져오기
     override suspend fun getOtherUserInfo(

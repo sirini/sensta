@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Verified
@@ -63,10 +64,12 @@ import me.sensta.ui.navigation.common.LocalNavController
 import me.sensta.ui.navigation.common.LocalSnackbar
 import me.sensta.ui.navigation.topbar.TopBar
 import me.sensta.ui.screen.ConfigScreen
+import me.sensta.ui.screen.DirectMessageListScreen
 import me.sensta.ui.screen.ExplorerScreen
 import me.sensta.ui.screen.HomeScreen
 import me.sensta.ui.screen.LoginScreen
 import me.sensta.ui.screen.NotificationScreen
+import me.sensta.ui.screen.PasswordResetScreen
 import me.sensta.ui.screen.ProfileScreen
 import me.sensta.ui.screen.SignupScreen
 import me.sensta.ui.screen.UploadScreen
@@ -104,7 +107,9 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     data object Explorer : Screen("explorer", "탐색", Icons.Default.Search)
     data object Home : Screen("home", "홈", Icons.Default.Home)
     data object Login : Screen("login", "로그인", Icons.AutoMirrored.Default.Login)
+    data object Messages : Screen("messages", "1:1 메시지", Icons.Default.ChatBubbleOutline)
     data object Notification : Screen("notification", "알림", Icons.Default.Notifications)
+    data object PasswordReset : Screen("password-reset", "비밀번호 재설정", Icons.Default.LockReset)
     data object Profile : Screen("profile", "내정보", Icons.Default.AccountCircle)
     data object Signup : Screen("signup", "회원가입", Icons.Default.GroupAdd)
     data object Upload : Screen("upload", "업로드", Icons.Default.AddCircleOutline)
@@ -287,7 +292,9 @@ fun AppNavigation(startDestination: String, initialPushEvent: PushEvent? = null)
                     composable(Screen.Explorer.route) { ExplorerScreen() }
                     composable(Screen.Home.route) { HomeScreen() }
                     composable(Screen.Login.route) { LoginScreen() }
+                    composable(Screen.Messages.route) { DirectMessageListScreen() }
                     composable(Screen.Notification.route) { NotificationScreen() }
+                    composable(Screen.PasswordReset.route) { PasswordResetScreen() }
                     composable(Screen.Profile.route) { ProfileScreen() }
                     composable(Screen.Signup.route) { SignupScreen() }
                     composable(Screen.Upload.route) { UploadScreen() }
