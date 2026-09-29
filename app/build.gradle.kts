@@ -18,8 +18,8 @@ android {
         applicationId = "me.sensta"
         minSdk = 26
         targetSdk = 36
-        versionCode = 30
-        versionName = "2.1.7"
+        versionCode = 32
+        versionName = "2.1.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -21,12 +21,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import android.widget.Toast
+import kotlinx.coroutines.launch
 import me.domain.model.board.NuboBoardViewResult
 import me.sensta.ui.common.CommonDialog
 import me.sensta.ui.common.UserReportDialog
@@ -45,6 +47,7 @@ fun ViewPostLikeButton(result: NuboBoardViewResult) {
     val postViewViewModel = LocalPostViewViewModel.current
     val userChatViewModel = LocalUserChatViewModel.current
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val userInfo by authViewModel.user
     var isReallyRemove by remember { mutableStateOf(false) }
     var isEditDialogVisible by remember { mutableStateOf(false) }
@@ -150,8 +153,18 @@ fun ViewPostLikeButton(result: NuboBoardViewResult) {
         CommonDialog(
             onDismissRequest = { isReallyRemove = false },
             onConfirm = {
-                postViewViewModel.remove(post.uid)
                 isReallyRemove = false
+                coroutineScope.launch {
+                    if (authViewModel.refreshForProtectedRequest()) {
+                        postViewViewModel.remove(post.uid)
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "로그인 세션을 갱신하지 못했습니다. 다시 시도해 주세요.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             },
             icon = Icons.Outlined.Delete,
             content = {

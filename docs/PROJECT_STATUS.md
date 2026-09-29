@@ -6,7 +6,8 @@
   2.1.5(`versionCode 28`)의 Google Play 업데이트를 완료했다. 이후 1:1 메시지 개선을 담은
   2.1.6(`versionCode 29`)의 서명된 AAB를 Play Console에 업로드했으며 심사·배포 상태와 안정성 지표를
   확인한다. 운영에서 확인한 Android 사진 업로드 응답 제한과 iOS 대비 핵심 기능 누락은
-  2.1.7(`versionCode 30`)에서 교정했으며 실제 기기 통합 QA 뒤 Play Console에 올린다.
+  2.1.7(`versionCode 30`)에서 교정했다. 게시글 삭제 전 세션 갱신을 추가한 2.1.9(`versionCode 32`)는
+  업로드 키와 Firebase 운영 설정을 연결한 뒤 실제 기기 QA와 Play Console 제출을 진행한다.
 
 ## 결정
 
@@ -122,6 +123,8 @@
 
 ## 검증
 
+- 2.1.9 `test`, `lintDebug`, `bundleRelease`를 통과했다. 현재 환경에는 업로드 서명값과
+  `google-services.json`이 없어 생성된 AAB는 서명되지 않았으며 Play 제출 전에 재빌드해야 한다.
 - 2.1.7 `./scripts/check.sh`의 전체 `test`, `lintDebug`, Debug·QA·Release APK와 Release AAB build를
   통과했다. 업로드 전용 120초 읽기·쓰기 제한과 일반 요청의 기존 10초 제한, 가입 정책·초대 코드,
   비밀번호 재설정 JSON, 편집 설정·태그 추천·공개 통계와 대화 목록 계약을 회귀 테스트로 확인했다.

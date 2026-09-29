@@ -3,15 +3,25 @@
 ## 현재 빌드 기준
 
 - 패키지: `me.sensta`
-- 버전: `2.1.7` (`versionCode 30`)
+- 버전: `2.1.9` (`versionCode 32`)
 - 최소 Android: 8(API 26)
 - 컴파일 SDK: Android 17(API 37)
 - 대상 Android: 16(API 36)
 - 결과물: `app/build/outputs/bundle/release/app-release.aab`
-- AAB SHA-256: `bcf7fd94a4adbae13156bac993facc8a0c508d249e9774968cf2150a91476f09`
+- AAB SHA-256: 빌드 및 업로드 서명 확인 후 기록
 - 권한: 인터넷, Android 13 이상의 알림
 - 자동 백업과 평문 HTTP: 비활성화
 - 릴리스 코드·리소스 축소: 활성화
+
+## 2.1.9 변경사항 노트
+
+권장 출시명은 `2.1.9 (32)`이다. 아래 문안을 Play Console의 한국어 변경사항에 사용한다.
+
+```text
+<ko-KR>
+게시글 삭제 전에 로그인 세션을 자동으로 갱신해, 오래 사용한 계정에서도 삭제가 안정적으로 처리되도록 개선했습니다.
+</ko-KR>
+```
 
 ## 2.1.7 변경사항 노트
 
@@ -241,7 +251,7 @@ Data safety에는 실제 운영 서버 동작을 다시 확인한 뒤 적어도 
 
 1. [운영 서버 배포](SERVER_DEPLOYMENT.md)에 따라 Sensta 2.0 계약을 포함한 NUBO·GOAPI 릴리스를
    `sensta.me`에 먼저 반영한다.
-2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.7의 `versionCode 30`이 더 큰지 확인한다.
+2. 기존 Play 앱의 패키지와 최신 버전 코드를 확인하고 2.1.9의 `versionCode 32`가 더 큰지 확인한다.
 3. Firebase 운영 설정, 업로드 인증서와 위 SHA-256이 일치하는 서명된 AAB를 사용한다.
 4. [Galaxy 실제 기기 테스트](DEVICE_TESTING.md)와 Play 내부 테스트에서 핵심 시나리오와 비정상 종료·ANR을 확인한다.
 5. 회사 사진 사용자 그룹으로 비공개 테스트와 피드백 수집을 진행한다.
